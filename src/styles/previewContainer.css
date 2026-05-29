@@ -1,36 +1,77 @@
 .preview-container___root {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 40px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 40px;
 }
 
 .preview-container___versus-block {
-  display: flex;
-  flex-direction: column;
-  margin: 0 50px;
-  align-items: center;
-  justify-content: center;
+    display: flex;
+    flex-direction: column;
+    margin: 0 50px;
+    align-items: center;
+    justify-content: center;
+}
+
+.preview-container___focus-card {
+    max-width: 320px;
+    padding: 16px;
+    border-radius: 16px;
+    background: rgba(0, 0, 0, 0.55);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    color: #fff;
+}
+
+.preview-container___focus-title,
+.preview-container___focus-text {
+    color: #fff;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+}
+
+.preview-container___selected-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: stretch;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.preview-container___confirm-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.preview-container___confirm-btn {
+    flex: 1;
+    padding: 8px 10px;
+    border: 0;
+    border-radius: 10px;
+    background: #ffcf5c;
+    color: #2e1600;
+    font-weight: 700;
+    cursor: pointer;
 }
 
 .preview-container___versus-img {
-  width: 130px;
+    width: 130px;
 }
 
 .preview-container___fight-btn {
-  padding: 8px 35px;
-  justify-self: right;
-  text-align: center;
-  background: #ba0303;
-  margin: 40px 0;
-  color: #f8f9f4;
-  font-size: 22px;
-  cursor: pointer;
-  font-weight: bold;
-  box-shadow: 6px 6px 7px 0px rgba(0, 0, 0, 0.75);
+    padding: 8px 35px;
+    text-align: center;
+    background: #ba0303;
+    margin: 24px 0 0;
+    color: #f8f9f4;
+    font-size: 22px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 6px 6px 7px 0px rgba(0, 0, 0, 0.75);
 }
 
 .preview-container___fight-btn.disabled {
-  opacity: 0;
+    opacity: 0;
 }
