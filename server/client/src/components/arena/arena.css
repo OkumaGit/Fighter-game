@@ -9,8 +9,11 @@
   max-height: 100vh;
   padding: 24px;
   border-radius: 20px;
+  background:
+    linear-gradient(180deg, rgba(8, 10, 18, 0.2), rgba(8, 10, 18, 0.9)),
+    radial-gradient(circle at 50% 18%, rgba(250, 204, 21, 0.18), transparent 22%),
+    linear-gradient(180deg, #0c1426 0%, #172033 36%, #0f172a 100%);
   background-size: cover;
-  background-image: url("/assets/arena.jpg");
   background-repeat: no-repeat;
   background-position: center;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
