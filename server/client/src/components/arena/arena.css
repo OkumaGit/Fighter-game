@@ -1,0 +1,197 @@
+.arena___root {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  min-height: 100vh;
+  max-height: 100vh;
+  padding: 24px;
+  border-radius: 20px;
+  background-size: cover;
+  background-image: url("/assets/arena.jpg");
+  background-repeat: no-repeat;
+  background-position: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+
+.arena___battlefield {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  width: 100%;
+  max-width: 1200px;
+  gap: 16px;
+}
+
+.arena___fighter {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  transition:
+    transform 120ms ease-out,
+    filter 120ms ease-out;
+  position: relative;
+}
+
+.arena___fighter img {
+  width: 100%;
+  max-width: 320px;
+  max-height: 360px;
+  height: auto;
+  object-fit: contain;
+  border-radius: 16px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+.arena___right-fighter {
+  transform: scaleX(-1);
+}
+
+.arena___fighter--hit {
+  animation: fighter-hit 260ms ease-out;
+  filter: drop-shadow(0 0 12px rgba(255, 255, 0, 0.9)) saturate(1.2);
+}
+
+.arena___fighter--block {
+  animation: fighter-block 220ms ease-out;
+}
+
+.arena___fighter--critical {
+  animation: fighter-critical 320ms ease-out;
+}
+
+@keyframes fighter-hit {
+  0% {
+    transform: translateX(0) scale(1);
+    filter: brightness(1) drop-shadow(0 0 0 rgba(255, 255, 0, 0));
+  }
+  18% {
+    transform: translateX(-10px) scale(1.04);
+    filter: brightness(1.25) drop-shadow(0 0 12px rgba(255, 255, 0, 0.95));
+  }
+  45% {
+    transform: translateX(8px) scale(0.98);
+    filter: brightness(1.1) drop-shadow(0 0 8px rgba(255, 100, 0, 0.9));
+  }
+  100% {
+    transform: translateX(0) scale(1);
+    filter: brightness(1) drop-shadow(0 0 0 rgba(255, 255, 0, 0));
+  }
+}
+
+@keyframes fighter-block {
+  0% {
+    transform: translateX(0);
+  }
+  40% {
+    transform: translateX(10px) scale(1.03);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes fighter-critical {
+  0% {
+    transform: translateX(0) scale(1);
+    filter: brightness(1);
+  }
+  25% {
+    transform: translateX(-14px) scale(1.08) rotate(-2deg);
+    filter: brightness(1.35) drop-shadow(0 0 18px rgba(255, 0, 0, 0.95));
+  }
+  50% {
+    transform: translateX(12px) scale(1.02) rotate(2deg);
+    filter: brightness(1.15) drop-shadow(0 0 24px rgba(255, 215, 0, 0.9));
+  }
+  100% {
+    transform: translateX(0) scale(1);
+    filter: brightness(1);
+  }
+}
+
+.arena___fight-status {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+  gap: 24px;
+}
+
+.arena___fighter-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 40%;
+}
+
+.arena___fighter-name {
+  color: white;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+
+.arena___health-indicator {
+  width: 100%;
+  height: 22px;
+  border: 2px solid rgba(255, 255, 255, 0.65);
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.16);
+}
+
+.arena___health-bar {
+  width: 100%;
+  height: 100%;
+  background-color: #ebd759;
+  transition: width 200ms ease;
+}
+
+.arena___controls {
+  width: 100%;
+  max-width: 1200px;
+  padding: 20px 24px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.2);
+  color: #fff;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.arena___control-item {
+  min-width: 200px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.arena___winner-banner {
+  margin-top: 8px;
+  padding: 14px 22px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #111;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.arena___fighter-image-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.arena___fight-status .arena___versus-sign {
+  width: 100px;
+  text-align: center;
+  font-size: 24px;
+  color: #fff;
+  font-weight: 700;
+}
