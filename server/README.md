@@ -1,8 +1,8 @@
 Markdown
 
-# JS Fighter (Full-Stack Application)
+# Arena Clash (Full-Stack Application)
 
-This repository contains the "JS Fighter" full-stack application. The project is structured into two main parts: the backend (located in the root directory) and the frontend client (located inside the `/client` folder).
+This repository contains the "Arena Clash" full-stack application. The project is structured into two main parts: the backend (located in the root directory) and the frontend client (located inside the `/client` folder).
 
 ## 🚀 Tech Stack
 

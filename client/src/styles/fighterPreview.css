@@ -1,8 +1,9 @@
 .fighter-preview___root {
     display: flex;
     flex-direction: column;
-    flex-basis: 250px;
-    padding: 12px;
+    flex: 1 1 220px;
+    min-width: 180px;
+    padding: 10px 12px;
     border-radius: 16px;
     background: rgba(0, 0, 0, 0.45);
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
@@ -11,8 +12,17 @@
 
 .fighter-preview___root h3,
 .fighter-preview___root p {
+    margin: 4px 0;
     color: #fff;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+}
+
+.fighter-preview___img {
+    width: 100%;
+    max-width: 160px;
+    height: 120px;
+    object-fit: contain;
+    margin: 0 auto 8px;
 }
 
 .fighter-preview___right {

@@ -1,32 +1,32 @@
 [
   {
     "_id": "1",
-    "name": "Ryu",
-    "source": "https://media.giphy.com/media/kdHa4JvihB2gM/giphy.gif"
+    "name": "Astra",
+    "source": "resources/fighters/astra.svg"
   },
   {
     "_id": "2",
-    "name": "Dhalsim",
-    "source": "https://i.pinimg.com/originals/c0/53/f2/c053f2bce4d2375fee8741acfb35d44d.gif"
+    "name": "Kite",
+    "source": "resources/fighters/kite.svg"
   },
   {
     "_id": "3",
-    "name": "Guile",
-    "source": "https://66.media.tumblr.com/tumblr_lq8g3548bC1qd0wh3o1_400.gif"
+    "name": "Vex",
+    "source": "resources/fighters/vex.svg"
   },
   {
     "_id": "4",
-    "name": "Zangief",
-    "source": "https://media1.giphy.com/media/nlbIvY9K0jfAA/source.gif"
+    "name": "Brute",
+    "source": "resources/fighters/brute.svg"
   },
   {
     "_id": "5",
-    "name": "Ken",
-    "source": "https://i.pinimg.com/originals/46/4b/36/464b36a7aecd988e3c51e56a823dbedc.gif"
+    "name": "Nova",
+    "source": "resources/fighters/nova.svg"
   },
   {
     "_id": "6",
-    "name": "Bison",
-    "source": "http://www.fightersgeneration.com/np5/char/ssf2hd/bison-hdstance.gif"
+    "name": "Rift",
+    "source": "resources/fighters/rift.svg"
   }
 ]

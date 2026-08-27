@@ -1,0 +1,8 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 220'>
+    <defs><linearGradient id='bg' x1='0' x2='1' y1='0' y2='1'><stop offset='0%' stop-color='#0f172a'/><stop offset='100%' stop-color='#111827'/></linearGradient></defs>
+    <rect width='220' height='220' rx='22' fill='url(#bg)'/>
+    <circle cx='110' cy='82' r='38' fill='#38bdf8' opacity='0.9'/>
+    <path d='M72 164 L98 108 L110 146 L122 108 L148 164 Z' fill='#e2e8f0' opacity='0.8'/>
+    <path d='M58 172 L88 132 L100 158 L120 132 L152 172 Z' fill='#38bdf8' opacity='0.9'/>
+    <text x='110' y='190' text-anchor='middle' font-size='18' font-weight='700' fill='#f8fafc' font-family='Arial, sans-serif'>Nova</text>
+  </svg>

@@ -4,7 +4,12 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    margin: 40px;
+    gap: 12px;
+    width: 100%;
+    max-width: 900px;
+    margin: 20px auto 0;
+    padding: 0 12px 16px;
+    box-sizing: border-box;
 }
 
 .preview-container___versus-block {
@@ -36,7 +41,9 @@
     justify-content: center;
     align-items: stretch;
     gap: 16px;
-    flex-wrap: wrap;
+    width: 100%;
+    max-width: 620px;
+    flex-wrap: nowrap;
 }
 
 .preview-container___confirm-row {

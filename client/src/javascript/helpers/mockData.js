@@ -1,83 +1,85 @@
+const fighterSource = (label, primary, accent) => `resources/fighters/${label.toLowerCase()}.svg`;
+
 export const fighters = [
     {
         _id: '1',
-        name: 'Ryu',
-        source: 'https://media.giphy.com/media/kdHa4JvihB2gM/giphy.gif'
+        name: 'Astra',
+        source: fighterSource('Astra', '#f97316', '#fed7aa')
     },
     {
         _id: '2',
-        name: 'Dhalsim',
-        source: 'https://i.pinimg.com/originals/c0/53/f2/c053f2bce4d2375fee8741acfb35d44d.gif'
+        name: 'Kite',
+        source: fighterSource('Kite', '#facc15', '#fef3c7')
     },
     {
         _id: '3',
-        name: 'Guile',
-        source: 'https://66.media.tumblr.com/tumblr_lq8g3548bC1qd0wh3o1_400.gif'
+        name: 'Vex',
+        source: fighterSource('Vex', '#22c55e', '#bbf7d0')
     },
     {
         _id: '4',
-        name: 'Zangief',
-        source: 'https://media1.giphy.com/media/nlbIvY9K0jfAA/source.gif'
+        name: 'Brute',
+        source: fighterSource('Brute', '#ef4444', '#fecaca')
     },
     {
         _id: '5',
-        name: 'Ken',
-        source: 'https://i.pinimg.com/originals/46/4b/36/464b36a7aecd988e3c51e56a823dbedc.gif'
+        name: 'Nova',
+        source: fighterSource('Nova', '#38bdf8', '#dbeafe')
     },
     {
         _id: '6',
-        name: 'Bison',
-        source: 'http://www.fightersgeneration.com/np5/char/ssf2hd/bison-hdstance.gif'
+        name: 'Rift',
+        source: fighterSource('Rift', '#a78bfa', '#ddd6fe')
     }
 ];
 
 export const fightersDetails = [
     {
         _id: '1',
-        name: 'Ryu',
+        name: 'Astra',
         health: 45,
         attack: 4,
         defense: 3,
-        source: 'https://media.giphy.com/media/kdHa4JvihB2gM/giphy.gif'
+        source: fighterSource('Astra', '#f97316', '#fed7aa')
     },
     {
         _id: '2',
-        name: 'Dhalsim',
+        name: 'Kite',
         health: 60,
         attack: 3,
         defense: 1,
-        source: 'https://i.pinimg.com/originals/c0/53/f2/c053f2bce4d2375fee8741acfb35d44d.gif'
+        source: fighterSource('Kite', '#facc15', '#fef3c7')
     },
     {
         _id: '3',
-        name: 'Guile',
+        name: 'Vex',
         health: 45,
         attack: 4,
         defense: 3,
-        source: 'https://66.media.tumblr.com/tumblr_lq8g3548bC1qd0wh3o1_400.gif'
+        source: fighterSource('Vex', '#22c55e', '#bbf7d0')
     },
     {
         _id: '4',
-        name: 'Zangief',
+        name: 'Brute',
         health: 60,
         attack: 4,
         defense: 1,
-        source: 'https://media1.giphy.com/media/nlbIvY9K0jfAA/source.gif'
+        source: fighterSource('Brute', '#ef4444', '#fecaca')
     },
     {
         _id: '5',
-        name: 'Ken',
+        name: 'Nova',
         health: 45,
         attack: 3,
         defense: 4,
-        source: 'https://i.pinimg.com/originals/46/4b/36/464b36a7aecd988e3c51e56a823dbedc.gif'
+        source: fighterSource('Nova', '#38bdf8', '#dbeafe')
     },
     {
         _id: '6',
-        name: 'Bison',
+        name: 'Rift',
         health: 45,
         attack: 5,
         defense: 4,
-        source: 'http://www.fightersgeneration.com/np5/char/ssf2hd/bison-hdstance.gif'
+        source: fighterSource('Rift', '#a78bfa', '#ddd6fe')
     }
 ];

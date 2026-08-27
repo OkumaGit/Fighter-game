@@ -3,17 +3,25 @@
     flex-direction: column;
     width: 100%;
     height: 100%;
-    background-image: url('../../resources/main-bg.jpg');
+    padding: 12px 0 20px;
+    box-sizing: border-box;
+    background-color: #0b1020;
+    background-image:
+        radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.28), transparent 24%),
+        radial-gradient(circle at 80% 15%, rgba(167, 139, 250, 0.22), transparent 26%),
+        linear-gradient(160deg, #101827 0%, #172033 38%, #0b1020 100%);
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
 }
 
 .fighters___list {
-    margin: 40px;
+    margin: 0 20px 10px;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
 .fighters___title {

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 120" role="img" aria-label="Arena Clash logo">
+  <defs>
+    <linearGradient id="g1" x1="0" x2="1">
+      <stop offset="0%" stop-color="#f97316"/>
+      <stop offset="50%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+  </defs>
+  <rect width="420" height="120" rx="18" fill="#0f172a"/>
+  <circle cx="48" cy="60" r="30" fill="url(#g1)"/>
+  <path d="M32 76 L48 40 L64 76 Z" fill="#f8fafc" opacity="0.9"/>
+  <path d="M48 46 L68 80 L52 80 L42 65 L36 80 L24 80 Z" fill="#f8fafc" opacity="0.8"/>
+  <text x="90" y="72" font-size="42" font-weight="700" fill="#f8fafc" font-family="Arial, sans-serif">ARENA</text>
+  <text x="300" y="72" font-size="42" font-weight="700" fill="url(#g1)" font-family="Arial, sans-serif">CLASH</text>
+</svg>
