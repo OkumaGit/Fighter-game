@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import "./arena.css";
+import { getFighterSource } from "../../constants/fighterAssets";
 
 const controls = {
   PlayerOneAttack: "KeyA",
@@ -10,18 +11,8 @@ const controls = {
   PlayerTwoCriticalHitCombination: ["KeyU", "KeyI", "KeyO"],
 };
 
-const defaultSources = [
-  "https://media.giphy.com/media/kdHa4JvihB2gM/giphy.gif",
-  "https://i.pinimg.com/originals/c0/53/f2/c053f2bce4d2375fee8741acfb35d44d.gif",
-];
-
 function getSource(fighter, fallbackIndex = 0) {
-  return (
-    fighter?.source ||
-    fighter?.image ||
-    fighter?.sprite ||
-    defaultSources[fallbackIndex % defaultSources.length]
-  );
+  return getFighterSource(fighter, fallbackIndex);
 }
 
 function getHitPower(fighter) {
@@ -40,7 +31,12 @@ function getDamage(attacker, defender) {
   return Math.round(hitPower - blockPower);
 }
 
-export default function Arena({ fighter1, fighter2, onFinish }) {
+export default function Arena({
+  fighter1,
+  fighter2,
+  battleBackground,
+  onFinish,
+}) {
   const [health1, setHealth1] = useState(fighter1?.health ?? 85);
   const [health2, setHealth2] = useState(fighter2?.health ?? 85);
   const [status, setStatus] = useState(
@@ -58,23 +54,6 @@ export default function Arena({ fighter1, fighter2, onFinish }) {
     lastCriticalHit: { left: 0, right: 0 },
     finished: false,
   });
-
-  useEffect(() => {
-    const initial1 = fighter1?.health ?? 85;
-    const initial2 = fighter2?.health ?? 85;
-    stateRef.current = {
-      health1: initial1,
-      health2: initial2,
-      isBlocking: { left: false, right: false },
-      criticalSequence: { left: [], right: [] },
-      lastCriticalHit: { left: 0, right: 0 },
-      finished: false,
-    };
-    setHealth1(initial1);
-    setHealth2(initial2);
-    setStatus("Use A/J to attack, D/L to block, QWE/UIO for critical hits");
-    setWinner(null);
-  }, [fighter1, fighter2]);
 
   useEffect(() => {
     if (!fighter1 || !fighter2) return;
@@ -188,7 +167,6 @@ export default function Arena({ fighter1, fighter2, onFinish }) {
 
         if (isComboReady && Date.now() - state.lastCriticalHit[side] >= 10000) {
           const attacker = side === "left" ? fighter1 : fighter2;
-          const defender = side === "left" ? fighter2 : fighter1;
           const defenderFighter =
             side === "left" ? rightFighterRef.current : leftFighterRef.current;
           const damage = 2 * (attacker.power ?? attacker.attack ?? 0);
@@ -246,7 +224,18 @@ export default function Arena({ fighter1, fighter2, onFinish }) {
   const healthPercent2 = Math.max(0, (health2 / maxHealth2) * 100);
 
   return (
-    <div className="arena___root">
+    <div className="arena___root" data-background={battleBackground?.key}>
+      {battleBackground && (
+        <img
+          className="arena___background-image"
+          src={battleBackground.src}
+          alt=""
+          aria-hidden="true"
+          onError={(event) => {
+            event.currentTarget.style.display = "none";
+          }}
+        />
+      )}
       <div className="arena___fight-status">
         <div className="arena___fighter-indicator">
           <span className="arena___fighter-name">{fighter1.name}</span>

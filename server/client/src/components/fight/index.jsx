@@ -5,6 +5,7 @@ import { startFight } from "../../services/domainRequest/fightRequest";
 import NewFighter from "../newFighter";
 import Fighter from "../fighter";
 import Arena from "../arena";
+import { getRandomBattleBackground } from "../../constants/fighterAssets";
 
 export default function Fight({ onBattleChange }) {
   const [fighters, setFighters] = useState([]);
@@ -13,6 +14,7 @@ export default function Fight({ onBattleChange }) {
   const [view, setView] = useState("select");
   const [fightResult, setFightResult] = useState(null);
   const [savingMessage, setSavingMessage] = useState("");
+  const [battleBackground, setBattleBackground] = useState(null);
 
   useEffect(() => {
     getFighters().then((data) => {
@@ -34,6 +36,7 @@ export default function Fight({ onBattleChange }) {
     : fighters;
 
   const startBattle = () => {
+    setBattleBackground(getRandomBattleBackground());
     setView("battle");
     setFightResult(null);
     setSavingMessage("");
@@ -78,6 +81,7 @@ export default function Fight({ onBattleChange }) {
         <Arena
           fighter1={fighter1}
           fighter2={fighter2}
+          battleBackground={battleBackground}
           onFinish={handleFightFinish}
         />
 

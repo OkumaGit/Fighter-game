@@ -9,6 +9,7 @@ class App {
     static async startApplication() {
         try {
             App.loadingElement.style.visibility = 'visible';
+            App.rootElement.innerHTML = '';
 
             const fighters = await fighterService.getFighters();
             const fightersElement = createFighters(fighters);

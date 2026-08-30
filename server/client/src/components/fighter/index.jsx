@@ -8,6 +8,7 @@ import {
   Typography,
   Chip,
 } from "@mui/material";
+import { getFighterSource } from "../../constants/fighterAssets";
 
 export default function Fighter({
   fightersList,
@@ -27,26 +28,86 @@ export default function Fighter({
     <Box sx={{ p: 2, flex: 1 }}>
       <FormControl fullWidth size="small">
         <InputLabel>Select Fighter</InputLabel>
-        <Select value={value} label="Select Fighter" onChange={handleChange}>
+        <Select
+          value={value}
+          label="Select Fighter"
+          onChange={handleChange}
+          displayEmpty
+          renderValue={(selected) => {
+            const fighter = fightersList.find((item) => item.id === selected);
+
+            if (!fighter) {
+              return <em>None</em>;
+            }
+
+            return (
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Box
+                  component="img"
+                  src={getFighterSource(fighter)}
+                  alt={fighter.name}
+                  sx={{
+                    width: 28,
+                    height: 28,
+                    objectFit: "contain",
+                    borderRadius: 1,
+                  }}
+                />
+                <span>{fighter.name}</span>
+              </Box>
+            );
+          }}
+        >
           <MenuItem value="">
             <em>None</em>
           </MenuItem>
           {fightersList.map((f) => (
-            <MenuItem key={f.id} value={f.id}>
-              {f.name}
+            <MenuItem
+              key={f.id}
+              value={f.id}
+              sx={{ display: "flex", alignItems: "center", gap: 1 }}
+            >
+              <Box
+                component="img"
+                src={getFighterSource(f)}
+                alt={f.name}
+                sx={{
+                  width: 32,
+                  height: 32,
+                  objectFit: "contain",
+                  borderRadius: 1,
+                  flexShrink: 0,
+                }}
+              />
+              <span>{f.name}</span>
             </MenuItem>
           ))}
         </Select>
       </FormControl>
       {selectedFighter && (
         <Box sx={{ mt: 2, display: "flex", flexDirection: "column", gap: 1 }}>
-          <Typography
-            variant="subtitle1"
-            fontWeight="bold"
-            sx={{ color: "#ffd700" }}
-          >
-            {selectedFighter.name}
-          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <Box
+              component="img"
+              src={getFighterSource(selectedFighter)}
+              alt={selectedFighter.name}
+              sx={{
+                width: 72,
+                height: 72,
+                objectFit: "contain",
+                borderRadius: 2,
+                bgcolor: "rgba(0, 0, 0, 0.18)",
+                p: 0.5,
+              }}
+            />
+            <Typography
+              variant="subtitle1"
+              fontWeight="bold"
+              sx={{ color: "#ffd700" }}
+            >
+              {selectedFighter.name}
+            </Typography>
+          </Box>
           <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
             <Chip
               label={`⚡ ${selectedFighter.power}`}

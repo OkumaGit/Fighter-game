@@ -2,6 +2,7 @@ import createElement from '../helpers/domHelper';
 import { createFighterImage } from './fighterPreview';
 import { fight } from './fight';
 import showWinnerModal from './modal/winner';
+import { getRandomBattleBackground } from '../helpers/fighterAssets';
 
 function createFighter(fighter, position) {
     const imgElement = createFighterImage(fighter);
@@ -66,6 +67,26 @@ function createArena(selectedFighters) {
 export default async function renderArena(selectedFighters) {
     const root = document.getElementById('root');
     const arena = createArena(selectedFighters);
+    const battleBackground = getRandomBattleBackground();
+
+    arena.setAttribute('data-background', battleBackground.key);
+
+    const backgroundImage = createElement({
+        tagName: 'img',
+        className: 'arena___background-image',
+        attributes: {
+            src: battleBackground.src,
+            alt: '',
+            'aria-hidden': 'true'
+        }
+    });
+
+    backgroundImage.addEventListener('error', event => {
+        const imageElement = event.currentTarget;
+        imageElement.style.display = 'none';
+    });
+
+    arena.prepend(backgroundImage);
 
     root.innerHTML = '';
     root.append(arena);

@@ -1,7 +1,10 @@
 import createElement from '../helpers/domHelper';
+import { getFighterSource } from '../helpers/fighterAssets';
 
 export function createFighterImage(fighter = {}) {
-    if (!fighter || !fighter.source) {
+    const source = getFighterSource(fighter);
+
+    if (!fighter || !source) {
         const placeholder = createElement({
             tagName: 'div',
             className: 'fighter-preview___placeholder',
@@ -10,7 +13,7 @@ export function createFighterImage(fighter = {}) {
         return placeholder;
     }
 
-    const { source = '', name = 'Fighter' } = fighter;
+    const { name = 'Fighter' } = fighter;
     const attributes = {
         src: source,
         title: name,
