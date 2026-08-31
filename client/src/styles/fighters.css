@@ -6,10 +6,8 @@
     padding: 12px 0 20px;
     box-sizing: border-box;
     background-color: #0b1020;
-    background-image:
-        radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.28), transparent 24%),
-        radial-gradient(circle at 80% 15%, rgba(167, 139, 250, 0.22), transparent 26%),
-        linear-gradient(160deg, #101827 0%, #172033 38%, #0b1020 100%);
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)),
+        url(resources/backgrounds/arena-bg.png) center / cover no-repeat;
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
