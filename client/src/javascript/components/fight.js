@@ -1,4 +1,5 @@
 import controls from '../../constants/controls';
+import { applyAttack, applyCriticalHit, createBattleState } from '../game/battleEngine';
 
 function updateHealthBar(position, health, maxHealth) {
     const element = document.getElementById(`${position}-fighter-indicator`);
@@ -9,48 +10,18 @@ function updateHealthBar(position, health, maxHealth) {
     element.style.width = `${percentage}%`;
 }
 
-export function getHitPower(fighter) {
-    return fighter.attack * (Math.random() + 1);
-}
-
-export function getBlockPower(fighter) {
-    return fighter.defense * (Math.random() + 1);
-}
-
-export function getDamage(attacker, defender) {
-    const hitPower = getHitPower(attacker);
-    const blockPower = getBlockPower(defender);
-
-    if (blockPower >= hitPower) {
-        return 0;
-    }
-
-    return hitPower - blockPower;
-}
-
 export async function fight(firstFighter, secondFighter) {
-    const leftFighter = {
-        ...firstFighter,
-        health: firstFighter.health ?? 45,
-        maxHealth: firstFighter.health ?? 45
-    };
-    const rightFighter = {
-        ...secondFighter,
-        health: secondFighter.health ?? 45,
-        maxHealth: secondFighter.health ?? 45
-    };
+    const state = createBattleState(firstFighter, secondFighter);
     const lastCriticalHit = { left: 0, right: 0 };
     const criticalSequence = { left: [], right: [] };
     const isBlocking = { left: false, right: false };
 
-    updateHealthBar('left', leftFighter.health, leftFighter.maxHealth);
-    updateHealthBar('right', rightFighter.health, rightFighter.maxHealth);
+    updateHealthBar('left', state.left.health, state.left.maxHealth);
+    updateHealthBar('right', state.right.health, state.right.maxHealth);
 
     return new Promise(resolve => {
         function finishFight(winner) {
-            // eslint-disable-next-line no-use-before-define
             document.removeEventListener('keydown', handleKeyDown);
-            // eslint-disable-next-line no-use-before-define
             document.removeEventListener('keyup', handleKeyUp);
             resolve(winner);
         }
@@ -85,27 +56,27 @@ export async function fight(firstFighter, secondFighter) {
             }
 
             if (isPlayerOneAttack || isPlayerTwoAttack) {
-                const attacker = isPlayerOneAttack ? leftFighter : rightFighter;
-                const defender = isPlayerOneAttack ? rightFighter : leftFighter;
+                const attackerSide = isPlayerOneAttack ? 'left' : 'right';
+                const defenderSide = attackerSide === 'left' ? 'right' : 'left';
 
                 if ((isPlayerOneAttack && isBlocking.right) || (isPlayerTwoAttack && isBlocking.left)) {
                     return;
                 }
 
-                const damage = getDamage(attacker, defender);
+                const result = applyAttack(state, attackerSide);
+                state.left = result.state.left;
+                state.right = result.state.right;
 
-                defender.health = Math.max(0, defender.health - damage);
-                updateHealthBar(isPlayerOneAttack ? 'right' : 'left', defender.health, defender.maxHealth);
+                updateHealthBar(defenderSide, state[defenderSide].health, state[defenderSide].maxHealth);
 
-                const defenderPosition = isPlayerOneAttack ? 'right' : 'left';
-                const defenderElement = document.querySelector(`.arena___fighter[data-position="${defenderPosition}"]`);
+                const defenderElement = document.querySelector(`.arena___fighter[data-position="${defenderSide}"]`);
 
                 defenderElement?.classList.remove('arena___fighter--hit', 'arena___fighter--block');
                 defenderElement?.classList.add('arena___fighter--hit');
                 setTimeout(() => defenderElement?.classList.remove('arena___fighter--hit'), 260);
 
-                if (defender.health <= 0) {
-                    finishFight(attacker);
+                if (result.winner) {
+                    finishFight(result.winner);
                 }
             }
 
@@ -129,14 +100,14 @@ export async function fight(firstFighter, secondFighter) {
                     criticalSequence[side].slice(-combo.length).every((value, index) => value === combo[index]);
 
                 if (isComboReady && Date.now() - lastCriticalHit[side] >= 10000) {
-                    const attacker = side === 'left' ? leftFighter : rightFighter;
-                    const defender = side === 'left' ? rightFighter : leftFighter;
+                    const criticalResult = applyCriticalHit(state, side);
+                    const defenderSide = side === 'left' ? 'right' : 'left';
+                    state.left = criticalResult.state.left;
+                    state.right = criticalResult.state.right;
 
-                    defender.health = Math.max(0, defender.health - 2 * attacker.attack);
-                    updateHealthBar(side === 'left' ? 'right' : 'left', defender.health, defender.maxHealth);
-                    const criticalElement = document.querySelector(
-                        `.arena___fighter[data-position="${side === 'left' ? 'left' : 'right'}"]`
-                    );
+                    updateHealthBar(defenderSide, state[defenderSide].health, state[defenderSide].maxHealth);
+
+                    const criticalElement = document.querySelector(`.arena___fighter[data-position="${side}"]`);
 
                     criticalElement?.classList.remove('arena___fighter--critical');
                     criticalElement?.classList.add('arena___fighter--critical');
@@ -144,8 +115,8 @@ export async function fight(firstFighter, secondFighter) {
                     lastCriticalHit[side] = Date.now();
                     criticalSequence[side] = [];
 
-                    if (defender.health <= 0) {
-                        finishFight(attacker);
+                    if (criticalResult.winner) {
+                        finishFight(criticalResult.winner);
                     }
                 }
             }
