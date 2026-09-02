@@ -1,20 +1,23 @@
 import createElement from '../helpers/domHelper';
-import { createFighterImage } from './fighterPreview';
-import { fight } from './fight';
+import { createBattleFighterImage } from './fighterPreview';
+import fight from './fight';
 import showWinnerModal from './modal/winner';
 import { getRandomBattleBackground } from '../helpers/fighterAssets';
 
 function createFighter(fighter, position) {
-    const imgElement = createFighterImage(fighter);
+    const fighterVisual = createBattleFighterImage(fighter);
     const positionClassName = position === 'right' ? 'arena___right-fighter' : 'arena___left-fighter';
+    const isSpriteFighter = fighterVisual.classList.contains('arena___fighter-sprite');
     const fighterElement = createElement({
         tagName: 'div',
         className: `arena___fighter ${positionClassName}`
     });
 
     fighterElement.setAttribute('data-position', position);
+    fighterElement.setAttribute('data-sprite', String(isSpriteFighter));
+    fighterElement.dataset.pose = isSpriteFighter ? 'idle' : 'static';
 
-    fighterElement.append(imgElement);
+    fighterElement.append(fighterVisual);
     return fighterElement;
 }
 

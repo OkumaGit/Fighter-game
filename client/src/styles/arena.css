@@ -55,11 +55,59 @@
 .arena___battlefield {
     display: flex;
     justify-content: space-around;
+    align-items: flex-end;
     margin-bottom: 60px;
 }
 
 .arena___right-fighter img {
     transform: scaleX(-1);
+}
+
+.arena___fighter[data-sprite='true'] {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: calc(var(--sprite-cell-width, 128px) * 2.6);
+    height: calc(var(--sprite-cell-height, 204px) * 2.6);
+}
+
+.arena___fighter-sprite {
+    width: var(--sprite-cell-width, 128px);
+    height: var(--sprite-cell-height, 204px);
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    background-size: var(--sprite-sheet-width, 764px) var(--sprite-sheet-height, 1024px);
+    transform-origin: center bottom;
+    image-rendering: auto;
+}
+
+.arena___left-fighter .arena___fighter-sprite {
+    transform: scale(2.6);
+}
+
+.arena___right-fighter .arena___fighter-sprite {
+    transform: scaleX(-1) scale(2.6);
+}
+
+.arena___fighter[data-pose='idle'] .arena___fighter-sprite {
+    animation: fighter-sprite-idle 1200ms steps(6) infinite;
+}
+
+.arena___fighter[data-pose='block'] .arena___fighter-sprite {
+    animation: fighter-sprite-block 220ms steps(5) forwards;
+}
+
+.arena___fighter[data-pose='punch'] .arena___fighter-sprite {
+    animation: fighter-sprite-punch 280ms steps(4) forwards;
+}
+
+.arena___fighter[data-pose='kick'] .arena___fighter-sprite {
+    animation: fighter-sprite-kick 280ms steps(3) forwards;
+}
+
+.arena___fighter[data-pose='victory'] .arena___fighter-sprite {
+    animation: fighter-sprite-victory 1400ms steps(5) infinite;
 }
 
 .arena___fighter .fighter-preview___img {
@@ -83,6 +131,51 @@
 
 .arena___fighter--critical {
     animation: fighter-critical 320ms ease-out;
+}
+
+@keyframes fighter-sprite-idle {
+    from {
+        background-position: 0 0;
+    }
+    to {
+        background-position: -640px 0;
+    }
+}
+
+@keyframes fighter-sprite-block {
+    from {
+        background-position: 0 -204px;
+    }
+    to {
+        background-position: -512px -204px;
+    }
+}
+
+@keyframes fighter-sprite-punch {
+    from {
+        background-position: 0 -408px;
+    }
+    to {
+        background-position: -384px -408px;
+    }
+}
+
+@keyframes fighter-sprite-kick {
+    from {
+        background-position: 0 -612px;
+    }
+    to {
+        background-position: -256px -612px;
+    }
+}
+
+@keyframes fighter-sprite-victory {
+    from {
+        background-position: 0 -816px;
+    }
+    to {
+        background-position: -512px -816px;
+    }
 }
 
 @keyframes fighter-hit {

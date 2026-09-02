@@ -10,7 +10,41 @@ function updateHealthBar(position, health, maxHealth) {
     element.style.width = `${percentage}%`;
 }
 
-export async function fight(firstFighter, secondFighter) {
+const poseTimers = {
+    left: null,
+    right: null
+};
+
+function getFighterElement(position) {
+    return document.querySelector(`.arena___fighter[data-position="${position}"]`);
+}
+
+function setFighterPose(position, pose) {
+    const fighterElement = getFighterElement(position);
+
+    if (!fighterElement || fighterElement.getAttribute('data-sprite') !== 'true') return;
+
+    fighterElement.dataset.pose = pose;
+}
+
+function clearPoseTimer(position) {
+    if (poseTimers[position]) {
+        window.clearTimeout(poseTimers[position]);
+        poseTimers[position] = null;
+    }
+}
+
+function setTransientPose(position, pose, duration, fallbackPose = 'idle') {
+    clearPoseTimer(position);
+    setFighterPose(position, pose);
+
+    poseTimers[position] = window.setTimeout(() => {
+        setFighterPose(position, fallbackPose);
+        poseTimers[position] = null;
+    }, duration);
+}
+
+export default async function fight(firstFighter, secondFighter) {
     const state = createBattleState(firstFighter, secondFighter);
     const lastCriticalHit = { left: 0, right: 0 };
     const criticalSequence = { left: [], right: [] };
@@ -18,15 +52,22 @@ export async function fight(firstFighter, secondFighter) {
 
     updateHealthBar('left', state.left.health, state.left.maxHealth);
     updateHealthBar('right', state.right.health, state.right.maxHealth);
+    setFighterPose('left', 'idle');
+    setFighterPose('right', 'idle');
 
     return new Promise(resolve => {
-        function finishFight(winner) {
+        let handleKeyDown = () => {};
+        let handleKeyUp = () => {};
+
+        const finishFight = winner => {
             document.removeEventListener('keydown', handleKeyDown);
             document.removeEventListener('keyup', handleKeyUp);
+            clearPoseTimer('left');
+            clearPoseTimer('right');
             resolve(winner);
-        }
+        };
 
-        function handleKeyDown(event) {
+        handleKeyDown = event => {
             const pressedCode = event.code || `Key${String(event.key || '').toUpperCase()}`;
             const pressedKey = String(event.key || '').toUpperCase();
             const key = pressedCode;
@@ -37,31 +78,34 @@ export async function fight(firstFighter, secondFighter) {
 
             if (isPlayerOneBlock) {
                 isBlocking.left = true;
-                const blockElement = document.querySelector('.arena___fighter[data-position="left"]');
+                const blockElement = getFighterElement('left');
 
                 blockElement?.classList.remove('arena___fighter--hit', 'arena___fighter--block');
                 blockElement?.classList.add('arena___fighter--block');
-                setTimeout(() => blockElement?.classList.remove('arena___fighter--block'), 220);
+                setFighterPose('left', 'block');
                 return;
             }
 
             if (isPlayerTwoBlock) {
                 isBlocking.right = true;
-                const blockElement = document.querySelector('.arena___fighter[data-position="right"]');
+                const blockElement = getFighterElement('right');
 
                 blockElement?.classList.remove('arena___fighter--hit', 'arena___fighter--block');
                 blockElement?.classList.add('arena___fighter--block');
-                setTimeout(() => blockElement?.classList.remove('arena___fighter--block'), 220);
+                setFighterPose('right', 'block');
                 return;
             }
 
             if (isPlayerOneAttack || isPlayerTwoAttack) {
                 const attackerSide = isPlayerOneAttack ? 'left' : 'right';
                 const defenderSide = attackerSide === 'left' ? 'right' : 'left';
+                const attackerPose = attackerSide === 'left' ? 'punch' : 'kick';
 
                 if ((isPlayerOneAttack && isBlocking.right) || (isPlayerTwoAttack && isBlocking.left)) {
                     return;
                 }
+
+                setTransientPose(attackerSide, attackerPose, 280);
 
                 const result = applyAttack(state, attackerSide);
                 state.left = result.state.left;
@@ -76,6 +120,8 @@ export async function fight(firstFighter, secondFighter) {
                 setTimeout(() => defenderElement?.classList.remove('arena___fighter--hit'), 260);
 
                 if (result.winner) {
+                    clearPoseTimer(attackerSide);
+                    setFighterPose(attackerSide, 'victory');
                     finishFight(result.winner);
                 }
             }
@@ -105,9 +151,11 @@ export async function fight(firstFighter, secondFighter) {
                     state.left = criticalResult.state.left;
                     state.right = criticalResult.state.right;
 
+                    setTransientPose(side, side === 'left' ? 'punch' : 'kick', 320);
+
                     updateHealthBar(defenderSide, state[defenderSide].health, state[defenderSide].maxHealth);
 
-                    const criticalElement = document.querySelector(`.arena___fighter[data-position="${side}"]`);
+                    const criticalElement = getFighterElement(side);
 
                     criticalElement?.classList.remove('arena___fighter--critical');
                     criticalElement?.classList.add('arena___fighter--critical');
@@ -116,23 +164,27 @@ export async function fight(firstFighter, secondFighter) {
                     criticalSequence[side] = [];
 
                     if (criticalResult.winner) {
+                        clearPoseTimer(side);
+                        setFighterPose(side, 'victory');
                         finishFight(criticalResult.winner);
                     }
                 }
             }
-        }
+        };
 
-        function handleKeyUp(event) {
+        handleKeyUp = event => {
             const pressedCode = event.code || `Key${String(event.key || '').toUpperCase()}`;
 
             if (pressedCode === controls.PlayerOneBlock || String(event.key || '').toUpperCase() === 'D') {
                 isBlocking.left = false;
+                setFighterPose('left', 'idle');
             }
 
             if (pressedCode === controls.PlayerTwoBlock || String(event.key || '').toUpperCase() === 'L') {
                 isBlocking.right = false;
+                setFighterPose('right', 'idle');
             }
-        }
+        };
 
         document.addEventListener('keydown', handleKeyDown);
         document.addEventListener('keyup', handleKeyUp);
