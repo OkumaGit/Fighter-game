@@ -7,20 +7,14 @@ const fighterPortraits = {
     Rift: 'resources/fighters/fighter-1.png'
 };
 
-const fighterBattleSprites = {
-    'resources/fighters/fighter-1.png': {
-        source: 'resources/fighters/fighter-1-sprite.png',
-        sheetWidth: 764,
-        sheetHeight: 1024,
-        cellWidth: 128,
-        cellHeight: 204,
-        poses: {
-            idle: { row: 0, frames: 6, duration: 1200, loop: true },
-            block: { row: 1, frames: 5, duration: 220, loop: false },
-            punch: { row: 2, frames: 4, duration: 280, loop: false },
-            kick: { row: 3, frames: 3, duration: 280, loop: false },
-            victory: { row: 4, frames: 5, duration: 1400, loop: true }
-        }
+const astraBattleSprite = {
+    basePath: 'resources/fighters/fighter_1_sprite',
+    poses: {
+        idle: { folder: 'Idle', prefix: 'Idle', frames: 5, duration: 1200, loop: true },
+        jab: { folder: 'Jab', prefix: 'Jab', frames: 5, duration: 360, loop: false },
+        kick: { folder: 'Kick', prefix: 'Kick', frames: 5, duration: 420, loop: false },
+        block: { folder: 'Block', prefix: 'Block', frames: 4, duration: 260, loop: false },
+        jump: { folder: 'Jump', prefix: 'Jump', frames: 5, duration: 420, loop: false }
     }
 };
 
@@ -36,10 +30,13 @@ export function getFighterSource(fighter = {}) {
     );
 }
 
-export function getBattleSpriteConfig(fighter = {}) {
-    const source = getFighterSource(fighter);
+export function getBattleSpriteConfig() {
+    return astraBattleSprite;
+}
 
-    return fighterBattleSprites[source] || null;
+export function getBattleFrameSource(pose, frame) {
+    const animation = astraBattleSprite.poses[pose] || astraBattleSprite.poses.idle;
+    return `${astraBattleSprite.basePath}/${animation.folder}/${animation.prefix}_${frame + 1}.png`;
 }
 
 export function getRandomBattleBackground() {

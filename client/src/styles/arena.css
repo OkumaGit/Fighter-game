@@ -53,10 +53,32 @@
 }
 
 .arena___battlefield {
+    position: relative;
+    flex: 1;
+    width: 100%;
+    min-height: 0;
     display: flex;
-    justify-content: space-around;
-    align-items: flex-end;
-    margin-bottom: 60px;
+    justify-content: center;
+    align-items: stretch;
+    margin-bottom: 20px;
+}
+
+.arena___canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 360px;
+    min-width: 0;
+    z-index: 1;
+}
+
+.arena___fighter[data-position] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0;
 }
 
 .arena___right-fighter img {
@@ -131,6 +153,42 @@
 
 .arena___fighter--critical {
     animation: fighter-critical 320ms ease-out;
+}
+
+.arena___hotkeys-button {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    z-index: 3;
+    padding: 9px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 5px;
+    color: #f8fafc;
+    background: rgba(15, 23, 42, 0.82);
+    cursor: pointer;
+}
+
+.arena___hotkeys-panel {
+    position: absolute;
+    top: 66px;
+    right: 24px;
+    z-index: 3;
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 7px 14px;
+    min-width: 250px;
+    padding: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 5px;
+    color: #f8fafc;
+    background: rgba(15, 23, 42, 0.94);
+    font-size: 13px;
+}
+
+.arena___hotkeys-panel strong {
+    grid-column: 1 / -1;
+    margin-top: 4px;
+    color: #facc15;
 }
 
 @keyframes fighter-sprite-idle {
