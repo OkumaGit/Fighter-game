@@ -1,11 +1,9 @@
 import createElement from '../helpers/domHelper';
-import { createFighterImage } from './fighterPreview';
-import { fight } from './fight';
+import fight from './fight';
 import showWinnerModal from './modal/winner';
 import { getRandomBattleBackground } from '../helpers/fighterAssets';
 
-function createFighter(fighter, position) {
-    const imgElement = createFighterImage(fighter);
+function createFighter(position) {
     const positionClassName = position === 'right' ? 'arena___right-fighter' : 'arena___left-fighter';
     const fighterElement = createElement({
         tagName: 'div',
@@ -13,17 +11,22 @@ function createFighter(fighter, position) {
     });
 
     fighterElement.setAttribute('data-position', position);
-
-    fighterElement.append(imgElement);
+    fighterElement.dataset.pose = 'idle';
     return fighterElement;
 }
 
-function createFighters(firstFighter, secondFighter) {
+function createFighters() {
     const battleField = createElement({ tagName: 'div', className: `arena___battlefield` });
-    const firstFighterElement = createFighter(firstFighter, 'left');
-    const secondFighterElement = createFighter(secondFighter, 'right');
+    const firstFighterElement = createFighter('left');
+    const secondFighterElement = createFighter('right');
 
-    battleField.append(firstFighterElement, secondFighterElement);
+    const canvas = createElement({
+        tagName: 'canvas',
+        className: 'arena___canvas',
+        attributes: { width: '1200', height: '560', 'aria-label': 'Battlefield' }
+    });
+
+    battleField.append(canvas, firstFighterElement, secondFighterElement);
     return battleField;
 }
 
@@ -58,9 +61,30 @@ function createHealthIndicators(leftFighter, rightFighter) {
 function createArena(selectedFighters) {
     const arena = createElement({ tagName: 'div', className: 'arena___root' });
     const healthIndicators = createHealthIndicators(...selectedFighters);
-    const fighters = createFighters(...selectedFighters);
+    const fighters = createFighters();
 
-    arena.append(healthIndicators, fighters);
+    const hotkeysButton = createElement({
+        tagName: 'button',
+        className: 'arena___hotkeys-button',
+        attributes: { type: 'button', 'aria-expanded': 'false', 'aria-controls': 'arena-hotkeys' },
+        innerText: 'Controls'
+    });
+    const hotkeysPanel = createElement({
+        tagName: 'section',
+        className: 'arena___hotkeys-panel',
+        attributes: { id: 'arena-hotkeys', hidden: 'true' }
+    });
+    hotkeysPanel.innerHTML = `
+        <strong>Player 1</strong><span>A / D move</span><span>S block</span><span>J jab</span><span>K kick</span><span>Space jump</span>
+        <strong>Player 2</strong><span>Left / Right move</span><span>Down block</span><span>Numpad 1 jab</span><span>Numpad 2 kick</span><span>Up jump</span>
+    `;
+    hotkeysButton.addEventListener('click', () => {
+        const isOpen = hotkeysPanel.hasAttribute('hidden');
+        hotkeysPanel.toggleAttribute('hidden', !isOpen);
+        hotkeysButton.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    arena.append(healthIndicators, fighters, hotkeysButton, hotkeysPanel);
     return arena;
 }
 

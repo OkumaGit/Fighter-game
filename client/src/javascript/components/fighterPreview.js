@@ -1,5 +1,5 @@
 import createElement from '../helpers/domHelper';
-import { getFighterSource } from '../helpers/fighterAssets';
+import { getBattleSpriteConfig, getFighterSource } from '../helpers/fighterAssets';
 
 export function createFighterImage(fighter = {}) {
     const source = getFighterSource(fighter);
@@ -26,6 +26,34 @@ export function createFighterImage(fighter = {}) {
     });
 
     return imgElement;
+}
+
+export function createBattleFighterImage(fighter = {}) {
+    const battleSprite = getBattleSpriteConfig(fighter);
+
+    if (!battleSprite) {
+        return createFighterImage(fighter);
+    }
+
+    const { name = 'Fighter' } = fighter;
+    const spriteElement = createElement({
+        tagName: 'div',
+        className: 'arena___fighter-sprite',
+        attributes: {
+            role: 'img',
+            'aria-label': name,
+            title: name
+        }
+    });
+
+    spriteElement.dataset.pose = 'idle';
+    spriteElement.style.backgroundImage = `url(${battleSprite.source})`;
+    spriteElement.style.setProperty('--sprite-sheet-width', `${battleSprite.sheetWidth}px`);
+    spriteElement.style.setProperty('--sprite-sheet-height', `${battleSprite.sheetHeight}px`);
+    spriteElement.style.setProperty('--sprite-cell-width', `${battleSprite.cellWidth}px`);
+    spriteElement.style.setProperty('--sprite-cell-height', `${battleSprite.cellHeight}px`);
+
+    return spriteElement;
 }
 
 export function createFighterPreview(fighter = {}, position = 'left') {
