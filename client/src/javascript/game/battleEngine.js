@@ -59,16 +59,22 @@ export function createBattleState(firstFighter, secondFighter) {
 
 /* eslint-disable no-param-reassign */
 export function updateAttackBox(fighter) {
-    const { attackBox } = fighter;
-    attackBox.position.x = fighter.facingLeft
-        ? fighter.position.x - attackBox.width + attackBox.offset.x
-        : fighter.position.x + attackBox.offset.x;
-    attackBox.position.y = fighter.position.y + attackBox.offset.y;
-    const bodyOffset = fighter.bodyBox.offset || { x: 0, y: 0 };
+    const { attackBox, bodyBox } = fighter;
+    const bodyOffset = bodyBox.offset || { x: 0, y: 0 };
+
     fighter.bodyBox.position = {
         x: fighter.position.x + bodyOffset.x,
         y: fighter.position.y + bodyOffset.y
     };
+
+    if (fighter.facingLeft) {
+        attackBox.position.x = fighter.bodyBox.position.x - attackBox.width + attackBox.offset.x;
+    } else {
+        attackBox.position.x = fighter.bodyBox.position.x + fighter.bodyBox.width - attackBox.offset.x;
+    }
+
+    attackBox.position.y = fighter.position.y + attackBox.offset.y;
+
     return fighter;
 }
 /* eslint-enable no-param-reassign */
@@ -77,8 +83,8 @@ export function startAttack(fighter, type) {
     if (fighter.isAttacking || fighter.health <= 0) return fighter;
 
     const attackConfig = {
-        jab: { damage: 10, activeHitFrame: 2 },
-        kick: { damage: 18, activeHitFrame: 3 }
+        jab: { damage: 10, activeHitFrame: 3 },
+        kick: { damage: 18, activeHitFrame: 5 }
     }[type];
 
     if (!attackConfig) return fighter;

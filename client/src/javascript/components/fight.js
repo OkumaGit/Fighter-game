@@ -19,19 +19,62 @@ const bodyHeight = 280;
 const bodyOffsetX = 46;
 const bodyOffsetY = 28;
 
-function getFrame(pose, frame) {
-    const key = `${pose}:${frame}`;
+function getFrame(fighter, pose, frame) {
+    const fighterId = fighter._id ?? fighter.id ?? '1';
+    const key = `${fighterId}:${pose}:${frame}`;
     if (!frameCache.has(key)) {
         const image = new Image();
-        image.src = getBattleFrameSource(pose, frame);
+        image.src = getBattleFrameSource(fighter, pose, frame);
         frameCache.set(key, image);
     }
     return frameCache.get(key);
 }
 
+async function preloadFighterSprites(fighters) {
+    const promises = [];
+
+    fighters.forEach(fighter => {
+        const config = getBattleSpriteConfig(fighter);
+        Object.entries(config.poses).forEach(([pose, poseConfig]) => {
+            for (let i = 0; i < poseConfig.frames; i += 1) {
+                const fighterId = fighter._id ?? fighter.id ?? '1';
+                const src = getBattleFrameSource(fighter, pose, i);
+                const key = `${fighterId}:${pose}:${i}`;
+
+                if (!frameCache.has(key)) {
+                    const img = new Image();
+                    const promise = new Promise(resolve => {
+                        img.onload = resolve;
+                        img.onerror = resolve;
+                    });
+                    img.src = src;
+                    frameCache.set(key, img);
+                    promises.push(promise);
+                }
+            }
+        });
+    });
+
+    await Promise.all(promises);
+}
+
 function updateHealthBar(position, fighter) {
     const element = document.getElementById(`${position}-fighter-indicator`);
-    if (element) element.style.width = `${Math.max(0, fighter.health)}%`;
+    if (element) {
+        const healthPercent = Math.max(0, fighter.health);
+        element.style.width = `${healthPercent}%`;
+        const percentText = document.getElementById(`${position}-health-percent`);
+        if (percentText) {
+            percentText.innerText = `${Math.round(healthPercent)}%`;
+            if (healthPercent <= 25) {
+                percentText.style.color = '#ef4444';
+            } else if (healthPercent <= 50) {
+                percentText.style.color = '#f59e0b';
+            } else {
+                percentText.style.color = '#22c55e';
+            }
+        }
+    }
 }
 
 function setStatus(position, className) {
@@ -43,16 +86,27 @@ function setStatus(position, className) {
 
 function drawFighter(context, fighter) {
     const pose = fighter.state === 'hit' ? 'idle' : fighter.state;
-    const image = getFrame(pose, fighter.currentFrame);
+    const image = getFrame(fighter, pose, fighter.currentFrame);
     if (!image.complete || image.naturalWidth === 0) return;
 
     context.save();
+    context.imageSmoothingEnabled = true;
     if (fighter.facingLeft) {
         context.translate(fighter.position.x + fighterWidth, fighter.position.y);
         context.scale(-1, 1);
-        context.drawImage(image, 0, 0, fighterWidth, fighterHeight);
+        context.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight, 0, 0, fighterWidth, fighterHeight);
     } else {
-        context.drawImage(image, fighter.position.x, fighter.position.y, fighterWidth, fighterHeight);
+        context.drawImage(
+            image,
+            0,
+            0,
+            image.naturalWidth,
+            image.naturalHeight,
+            fighter.position.x,
+            fighter.position.y,
+            fighterWidth,
+            fighterHeight
+        );
     }
     context.restore();
 }
@@ -111,7 +165,9 @@ function moveFighter(fighter, direction, elapsed, canvasWidth, groundY) {
 }
 
 export default async function fight(firstFighter, secondFighter) {
+    await preloadFighterSprites([firstFighter, secondFighter]);
     const state = createBattleState(firstFighter, secondFighter);
+
     const canvas = document.querySelector('.arena___canvas');
     const context = canvas.getContext('2d');
     const pressedKeys = new Set();

@@ -185,6 +185,10 @@
     font-size: 13px;
 }
 
+.arena___hotkeys-panel[hidden] {
+    display: none;
+}
+
 .arena___hotkeys-panel strong {
     grid-column: 1 / -1;
     margin-top: 4px;
@@ -288,38 +292,147 @@
 
 .arena___fight-status {
     display: flex;
-    margin: 30px;
-    justify-content: center;
-}
-
-.arena___fighter-name {
-    color: black;
-    -webkit-text-fill-color: white;
-    -webkit-text-stroke-width: 1px;
-    font-size: 26px;
-    font-family: 'Arial Black';
-    font-weight: 700;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    max-width: 1166px;
+    margin: 0 auto;
+    padding: 22px 24px 10px;
+    box-sizing: border-box;
 }
 
 .arena___fighter-indicator {
-    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+    max-width: 480px;
+    margin: 0;
+}
+
+.arena___fighter-header {
     display: flex;
     align-items: center;
-    flex-direction: column;
-    margin: 0 30px;
+    gap: 8px;
+    width: 100%;
+}
+
+.arena___fighter-indicator--left .arena___fighter-header {
+    justify-content: flex-start;
+}
+
+.arena___fighter-indicator--right .arena___fighter-header {
+    justify-content: flex-end;
+}
+
+.arena___fighter-name {
+    font-family: 'Russo One', sans-serif;
+    font-size: 20px;
+    line-height: 20px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #ffffff;
+    -webkit-text-fill-color: initial;
+    -webkit-text-stroke-width: 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+.arena___health-percent {
+    font-family: 'Oswald', sans-serif;
+    font-size: 12px;
+    line-height: 18px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: #22c55e;
+    transition: color 200ms ease;
 }
 
 .arena___health-indicator {
+    position: relative;
     width: 100%;
-    height: 25px;
-    border: 2px solid;
-    border-radius: 5px;
-    margin: 0 10px;
+    height: 20px;
+    background-color: rgba(0, 0, 0, 0.75);
+    border: 0.8px solid rgba(255, 255, 255, 0.18);
+    border-radius: 3px;
+    box-shadow: 0px 0px 0px 1px rgba(0, 0, 0, 0.8), inset 0px 2px 6px 0px rgba(0, 0, 0, 0.7);
+    margin: 0;
     overflow: hidden;
+    box-sizing: border-box;
 }
 
 .arena___health-bar {
     height: 100%;
     width: 100%;
-    background-color: #ebd759;
+    border-radius: 2px;
+    box-shadow: 0px 0px 8px 0px rgba(34, 197, 94, 0.6), inset 0px -1px 0px 0px rgba(0, 0, 0, 0.3),
+        inset 0px 1px 0px 0px rgba(255, 255, 255, 0.3);
+    transition: width 150ms ease-out;
+}
+
+.arena___health-bar--left {
+    background: linear-gradient(90deg, #16a34a 0%, #4ade80 60%, #86efac 100%);
+    transform-origin: left center;
+}
+
+.arena___health-bar--right {
+    background: linear-gradient(270deg, #16a34a 0%, #4ade80 60%, #86efac 100%);
+    margin-left: auto;
+    transform-origin: right center;
+}
+
+.arena___health-shine {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 50%);
+    border-radius: 2px;
+    pointer-events: none;
+}
+
+.arena___health-ticks {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: space-evenly;
+    pointer-events: none;
+}
+
+.arena___health-tick {
+    width: 1px;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.arena___sub-bar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+    height: 1px;
+    opacity: 0.5;
+    margin-top: 1px;
+}
+
+.arena___sub-bar-fill {
+    width: 60px;
+    height: 1px;
+    background-color: rgba(255, 200, 60, 0.6);
+}
+
+.arena___sub-bar-track {
+    flex: 1;
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.arena___versus-sign {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 16px 0;
+    font-family: 'Russo One', sans-serif;
+    font-size: 15px;
+    line-height: 15px;
+    letter-spacing: 0.1em;
+    color: rgba(251, 191, 36, 0.8);
+    text-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
 }

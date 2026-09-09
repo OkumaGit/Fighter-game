@@ -32,18 +32,54 @@ function createFighters() {
 
 function createHealthIndicator(fighter, position) {
     const { name } = fighter;
-    const container = createElement({ tagName: 'div', className: 'arena___fighter-indicator' });
-    const fighterName = createElement({ tagName: 'span', className: 'arena___fighter-name' });
-    const indicator = createElement({ tagName: 'div', className: 'arena___health-indicator' });
-    const bar = createElement({
+    const container = createElement({
         tagName: 'div',
-        className: 'arena___health-bar',
-        attributes: { id: `${position}-fighter-indicator` }
+        className: `arena___fighter-indicator arena___fighter-indicator--${position}`
+    });
+    const headerRow = createElement({ tagName: 'div', className: 'arena___fighter-header' });
+    const fighterName = createElement({ tagName: 'span', className: 'arena___fighter-name' });
+    const healthPercent = createElement({
+        tagName: 'span',
+        className: 'arena___health-percent',
+        attributes: { id: `${position}-health-percent` }
     });
 
     fighterName.innerText = name;
-    indicator.append(bar);
-    container.append(fighterName, indicator);
+    healthPercent.innerText = '100%';
+
+    if (position === 'right') {
+        headerRow.append(healthPercent, fighterName);
+    } else {
+        headerRow.append(fighterName, healthPercent);
+    }
+
+    const indicator = createElement({ tagName: 'div', className: 'arena___health-indicator' });
+    const bar = createElement({
+        tagName: 'div',
+        className: `arena___health-bar arena___health-bar--${position}`,
+        attributes: { id: `${position}-fighter-indicator` }
+    });
+    const shine = createElement({ tagName: 'div', className: 'arena___health-shine' });
+    const ticks = createElement({ tagName: 'div', className: 'arena___health-ticks' });
+    ticks.innerHTML =
+        '<span class="arena___health-tick"></span><span class="arena___health-tick"></span><span class="arena___health-tick"></span>';
+
+    indicator.append(bar, shine, ticks);
+
+    const subBar = createElement({
+        tagName: 'div',
+        className: `arena___sub-bar arena___sub-bar--${position}`
+    });
+    const subBarFill = createElement({ tagName: 'div', className: 'arena___sub-bar-fill' });
+    const subBarTrack = createElement({ tagName: 'div', className: 'arena___sub-bar-track' });
+
+    if (position === 'right') {
+        subBar.append(subBarTrack, subBarFill);
+    } else {
+        subBar.append(subBarFill, subBarTrack);
+    }
+
+    container.append(headerRow, indicator, subBar);
 
     return container;
 }
@@ -51,6 +87,7 @@ function createHealthIndicator(fighter, position) {
 function createHealthIndicators(leftFighter, rightFighter) {
     const healthIndicators = createElement({ tagName: 'div', className: 'arena___fight-status' });
     const versusSign = createElement({ tagName: 'div', className: 'arena___versus-sign' });
+    versusSign.innerText = 'VS';
     const leftFighterIndicator = createHealthIndicator(leftFighter, 'left');
     const rightFighterIndicator = createHealthIndicator(rightFighter, 'right');
 
@@ -66,9 +103,14 @@ function createArena(selectedFighters) {
     const hotkeysButton = createElement({
         tagName: 'button',
         className: 'arena___hotkeys-button',
-        attributes: { type: 'button', 'aria-expanded': 'false', 'aria-controls': 'arena-hotkeys' },
-        innerText: 'Controls'
+        attributes: {
+            type: 'button',
+            'aria-label': 'Show hotkeys',
+            'aria-expanded': 'false',
+            'aria-controls': 'arena-hotkeys'
+        }
     });
+    hotkeysButton.textContent = '?';
     const hotkeysPanel = createElement({
         tagName: 'section',
         className: 'arena___hotkeys-panel',
@@ -82,6 +124,7 @@ function createArena(selectedFighters) {
         const isOpen = hotkeysPanel.hasAttribute('hidden');
         hotkeysPanel.toggleAttribute('hidden', !isOpen);
         hotkeysButton.setAttribute('aria-expanded', String(isOpen));
+        hotkeysButton.setAttribute('aria-label', isOpen ? 'Hide hotkeys' : 'Show hotkeys');
     });
 
     arena.append(healthIndicators, fighters, hotkeysButton, hotkeysPanel);

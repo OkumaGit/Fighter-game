@@ -3,6 +3,7 @@
 Обновить визуал legacy-клиента `client`: заменить персонажей, фоны и связанные графические ассеты на оригинальный набор в духе аркадного файтинга. Не использовать названия франшиз, существующих персонажей, логотипы, узнаваемые костюмы, силуэты, UI или копирование конкретных изображений.
 
 **Scope and constraints**
+
 - Первый клиент: `client` (Vanilla JS), не `server/client` (React).
 - Первый проверочный набор: один персонаж и фон экрана выбора.
 - Итоговый набор: 6 бойцов, фон выбора, фон арены, оригинальный логотип и VS-графика.
@@ -12,6 +13,7 @@
 - Имена пилота: `fighter-01.png` и `main-bg.jpg`. Если генератор не поддерживает прозрачность, удалить фон отдельным background-removal инструментом и проверить края.
 
 **First iteration**
+
 1. Сгенерировать персонажа `fighter-01.png` и `main-bg.jpg` по промтам ниже.
 2. Положить файлы в `client/resources/`.
 3. Подключить локальный источник персонажа через существующее поле `source` в `client/resources/api/fighters.json` и `client/src/javascript/helpers/mockData.js`, только если текущие данные используют внешний URL.
@@ -37,15 +39,17 @@ existing franchise, copyrighted character, celebrity likeness, game logo, brand 
 ```
 
 **Integration points**
+
 - `client/resources/` — generated images.
 - `client/resources/api/fighters.json` — fighter records and `source` values.
 - `client/src/javascript/helpers/mockData.js` — mock fighter records when `useMockAPI` remains enabled.
 - `client/src/javascript/components/fightersView.js` and `fighterPreview.js` — existing `fighter.source` rendering contract.
-- `client/src/styles/fighters.css` — `main-bg.jpg` background.
+- `client/src/styles/fighters.css` - `main-bg.jpg` background.
 - `client/src/styles/arena.css` — later `arena.jpg` background.
-- `client/index.html` — existing loading logo, to be replaced only after the first visual style is approved.
+- `client/index.html` - existing loading logo, to be replaced only after the first visual style is approved.
 
 **Verification**
+
 1. Run `npm run build --prefix client`.
 2. Run `npm run lint --prefix client`.
 3. Run the Vite client on port `7800` and inspect the selection screen at desktop and mobile widths.

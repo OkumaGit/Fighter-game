@@ -46,6 +46,14 @@
     overflow: hidden;
 }
 
+.fighter___fighter-image {
+    display: block;
+    width: 69px;
+    height: 92px;
+    max-width: 100%;
+    object-fit: cover;
+}
+
 .fighters___fighter:hover,
 .fighters___fighter--selected {
     background: #cbe4f8;
