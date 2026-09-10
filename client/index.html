@@ -15,7 +15,17 @@
         <noscript>You need to enable JavaScript to run this application.</noscript>
         <div id="root"></div>
         <div id="loading-backdrop">
-            <img src="resources/logo.png" alt="Arena Clash logo" />
+            <div class="loader___content">
+                <img class="loader___logo" src="/resources/logo.png" alt="Arena Clash logo" />
+                <div class="loader___bar-container">
+                    <div class="loader___bar" id="loading-progress-bar"></div>
+                </div>
+                <div class="loader___status-wrap">
+                    <span class="loader___status-icon">⚡</span>
+                    <span class="loader___status" id="loading-status-text">We are looking for the best fighters...</span>
+                    <span class="loader___cursor"></span>
+                </div>
+            </div>
         </div>
         <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
         <script type="module" src="./src/index.js"></script>

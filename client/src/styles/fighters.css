@@ -7,7 +7,7 @@
     box-sizing: border-box;
     background-color: #0b1020;
     background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)),
-        url(resources/backgrounds/arena-bg.png) center / cover no-repeat;
+        url('/resources/backgrounds/arena-bg.jpg') center / cover no-repeat;
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;

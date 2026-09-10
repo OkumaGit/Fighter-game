@@ -1,10 +1,10 @@
 const fighterPortraits = {
-    Astra: 'resources/fighters/fighter-1.png',
-    Kite: 'resources/fighters/fighter-2.png',
-    Vex: 'resources/fighters/fighter-3.png',
-    Brute: 'resources/fighters/fighter-4.png',
-    Nova: 'resources/fighters/fighter-5.png',
-    Rift: 'resources/fighters/fighter-6.png'
+    Astra: '/resources/fighters/fighter-1.png',
+    Kite: '/resources/fighters/fighter-2.png',
+    Vex: '/resources/fighters/fighter-3.png',
+    Brute: '/resources/fighters/fighter-4.png',
+    Nova: '/resources/fighters/fighter-5.png',
+    Rift: '/resources/fighters/fighter-6.png'
 };
 
 const battleSpritePoses = {
@@ -16,12 +16,12 @@ const battleSpritePoses = {
 };
 
 const battleSpritePaths = {
-    '1': 'resources/fighters/fighter_1_sprite',
-    '2': 'resources/fighters/fighter_2_sprite',
-    '3': 'resources/fighters/fighter_3_sprite',
-    '4': 'resources/fighters/fighter_4_sprite',
-    '5': 'resources/fighters/fighter_5_sprite',
-    '6': 'resources/fighters/fighter_6_sprite'
+    '1': '/resources/fighters/fighter_1_sprite',
+    '2': '/resources/fighters/fighter_2_sprite',
+    '3': '/resources/fighters/fighter_3_sprite',
+    '4': '/resources/fighters/fighter_4_sprite',
+    '5': '/resources/fighters/fighter_5_sprite',
+    '6': '/resources/fighters/fighter_6_sprite'
 };
 
 const defaultBattleSprite = {
@@ -32,9 +32,9 @@ const defaultBattleSprite = {
 };
 
 const battleBackgrounds = [
-    { key: 'steampunk', src: 'resources/backgrounds/background-1.jpg' },
-    { key: 'crystal', src: 'resources/backgrounds/background-2.jpg' },
-    { key: 'lantern', src: 'resources/backgrounds/background-3.jpg' }
+    { key: 'steampunk', src: '/resources/backgrounds/background-1.jpg' },
+    { key: 'crystal', src: '/resources/backgrounds/background-2.jpg' },
+    { key: 'lantern', src: '/resources/backgrounds/background-3.jpg' }
 ];
 
 export function getFighterSource(fighter = {}) {

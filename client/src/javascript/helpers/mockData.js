@@ -1,14 +1,14 @@
 const fighterSource = label => {
     const assets = {
-        Astra: 'resources/fighters/fighter-1.png',
-        Kite: 'resources/fighters/fighter-2.png',
-        Vex: 'resources/fighters/fighter-3.png',
-        Brute: 'resources/fighters/fighter-4.png',
-        Nova: 'resources/fighters/fighter-5.png',
-        Rift: 'resources/fighters/fighter-6.png'
+        Astra: '/resources/fighters/fighter-1.png',
+        Kite: '/resources/fighters/fighter-2.png',
+        Vex: '/resources/fighters/fighter-3.png',
+        Brute: '/resources/fighters/fighter-4.png',
+        Nova: '/resources/fighters/fighter-5.png',
+        Rift: '/resources/fighters/fighter-6.png'
     };
 
-    return assets[label] || 'resources/fighters/fighter-1.png';
+    return assets[label] || '/resources/fighters/fighter-1.png';
 };
 
 export const fighters = [
