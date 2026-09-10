@@ -25,7 +25,10 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "client/dist")));
 // Serve raw resources (sprites, audio, backgrounds)
 app.use("/resources", express.static(path.join(__dirname, "client/resources")));
-app.use("/assets/resources", express.static(path.join(__dirname, "client/resources")));
+app.use(
+  "/assets/resources",
+  express.static(path.join(__dirname, "client/resources")),
+);
 
 // In-memory active room storage
 const rooms = new Map();
