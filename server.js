@@ -185,6 +185,6 @@ app.get("*", (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`[Arena Clash Server] Running on http://localhost:${PORT}`);
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`[Arena Clash Server] Running on http://0.0.0.0:${PORT}`);
 });

@@ -9,7 +9,7 @@
     "build": "npm run build --prefix client",
     "start": "node server.js",
     "dev": "concurrently \"node server.js\" \"npm run dev --prefix client\"",
-    "install:all": "npm install && npm install --prefix client",
+    "install:all": "npm install && npm install --prefix client --include=dev",
     "start:server": "npm run start --prefix server",
     "start:client": "npm run dev --prefix client"
   },
