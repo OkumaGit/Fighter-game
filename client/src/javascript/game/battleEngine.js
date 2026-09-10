@@ -80,7 +80,7 @@ export function updateAttackBox(fighter) {
 /* eslint-enable no-param-reassign */
 
 export function startAttack(fighter, type) {
-    if (fighter.isAttacking || fighter.health <= 0) return fighter;
+    if (fighter.isAttacking || fighter.state === 'hit' || fighter.health <= 0) return fighter;
 
     const attackConfig = {
         jab: { damage: 10, activeHitFrame: 3 },
@@ -97,12 +97,13 @@ export function startAttack(fighter, type) {
         damage: attackConfig.damage,
         activeHitFrame: attackConfig.activeHitFrame,
         currentFrame: 0,
+        framesElapsed: 0,
         state: type
     };
 }
 
 export function setBlocking(fighter, isBlocking) {
-    if (fighter.isAttacking || fighter.health <= 0) return fighter;
+    if (fighter.isAttacking || fighter.state === 'hit' || fighter.health <= 0) return fighter;
 
     return {
         ...fighter,
@@ -119,9 +120,13 @@ export function takeDamage(fighter, amount, attackerPositionX = fighter.position
     return {
         ...fighter,
         health: Math.max(0, fighter.health - damage),
-        velocity: { ...fighter.velocity, x: direction * (blocked ? 4 : 7) },
+        velocity: { ...fighter.velocity, x: direction * (blocked ? 3 : 6) },
         isBlocking: false,
+        isAttacking: false,
+        attackType: null,
+        attackHit: false,
         state: 'hit',
+        hitTimer: 200,
         damageTaken: damage,
         wasBlocking: blocked
     };

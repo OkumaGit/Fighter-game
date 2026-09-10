@@ -1,0 +1,249 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3000 1020" width="3000" height="1020">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b1020"/>
+      <stop offset="50%" stop-color="#141c33"/>
+      <stop offset="100%" stop-color="#070a14"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffd25f"/>
+      <stop offset="50%" stop-color="#ffb82e"/>
+      <stop offset="100%" stop-color="#e09612"/>
+    </linearGradient>
+    <linearGradient id="botBadgeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#ec4899"/>
+    </linearGradient>
+    <linearGradient id="healthGradLeft" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#22c55e"/>
+    </linearGradient>
+    <linearGradient id="healthGradRight" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#22c55e"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+    <linearGradient id="fightBtnGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#dc2626"/>
+      <stop offset="100%" stop-color="#991b1b"/>
+    </linearGradient>
+    <linearGradient id="cardGradNormal" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffebc2"/>
+      <stop offset="100%" stop-color="#ffd599"/>
+    </linearGradient>
+    <linearGradient id="cardGradSelected" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#dbeafe"/>
+      <stop offset="100%" stop-color="#bfdbfe"/>
+    </linearGradient>
+
+    <!-- Filters -->
+    <filter id="goldGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <filter id="botGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <style>
+    .title { font-family: 'Inter', system-ui, sans-serif; font-weight: 800; }
+    .label { font-family: 'Inter', system-ui, sans-serif; font-weight: 600; }
+    .mono { font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+  </style>
+
+  <!-- ============================================================== -->
+  <!-- FRAME 1: CHARACTER SELECTION SCREEN (PvE / PvP MODES)          -->
+  <!-- ============================================================== -->
+  <g id="Frame-1-Character-Selection-PvE">
+    <!-- Screen background -->
+    <rect x="40" y="40" width="1420" height="940" rx="20" fill="url(#bgGrad)" stroke="#1e293b" stroke-width="3"/>
+    
+    <!-- Title Header -->
+    <text x="750" y="105" text-anchor="middle" fill="#94a3b8" font-size="14" class="mono" letter-spacing="4">ARENA CLASH / FIGHTER SELECT</text>
+
+    <!-- Mode Switcher Pill -->
+    <g id="Mode-Switcher-Bar" transform="translate(560, 125)">
+      <rect width="380" height="48" rx="24" fill="#0f172a" stroke="#334155" stroke-width="1.5" opacity="0.95"/>
+      <!-- PvP tab -->
+      <rect x="5" y="4" width="170" height="40" rx="20" fill="transparent"/>
+      <text x="90" y="29" text-anchor="middle" fill="#94a3b8" font-size="14" class="label">👥 Player vs Player</text>
+      <!-- PvE tab (ACTIVE) -->
+      <rect x="185" y="4" width="190" height="40" rx="20" fill="url(#goldGrad)" filter="url(#goldGlow)"/>
+      <text x="280" y="29" text-anchor="middle" fill="#1a1200" font-size="14" class="label" font-weight="800">🤖 Player vs AI [ACTIVE]</text>
+    </g>
+
+    <!-- Main Title -->
+    <text x="750" y="225" text-anchor="middle" fill="#ffffff" font-size="28" class="title" filter="url(#cardShadow)">Ready to fight (vs AI)</text>
+
+    <!-- Selected Fighters Preview Row -->
+    <g id="Selected-Row" transform="translate(460, 255)">
+      <!-- Player 1 Card Preview -->
+      <g id="Preview-Player-1" transform="translate(0, 0)">
+        <rect width="260" height="150" rx="16" fill="#0f172a" stroke="#2563eb" stroke-width="2" opacity="0.9" filter="url(#cardShadow)"/>
+        <rect x="12" y="12" width="60" height="24" rx="12" fill="#2563eb"/>
+        <text x="42" y="28" text-anchor="middle" fill="#ffffff" font-size="11" class="mono">YOU (P1)</text>
+        <text x="130" y="65" text-anchor="middle" fill="#ffffff" font-size="20" class="title">Astra</text>
+        <text x="130" y="95" text-anchor="middle" fill="#38bdf8" font-size="13" class="label">Health 100 · Attack 10 · Defense 10</text>
+        <circle cx="130" cy="125" r="4" fill="#10b981"/>
+        <text x="142" y="129" fill="#10b981" font-size="11" class="mono">CONFIRMED</text>
+      </g>
+
+      <!-- VS Badge -->
+      <g id="VS-Indicator" transform="translate(275, 45)">
+        <polygon points="40,0 65,25 40,50 15,25" fill="#f59e0b" filter="url(#goldGlow)"/>
+        <text x="40" y="32" text-anchor="middle" fill="#1a1200" font-size="14" class="title" font-weight="900">VS</text>
+      </g>
+
+      <!-- Player 2 (AI Bot) Card Preview -->
+      <g id="Preview-Player-2-Bot" transform="translate(320, 0)">
+        <rect width="260" height="150" rx="16" fill="#0f172a" stroke="#ec4899" stroke-width="2" opacity="0.9" filter="url(#cardShadow)"/>
+        <rect x="12" y="12" width="80" height="24" rx="12" fill="url(#botBadgeGrad)" filter="url(#botGlow)"/>
+        <text x="52" y="28" text-anchor="middle" fill="#ffffff" font-size="11" class="mono">BOT (CPU)</text>
+        <text x="130" y="65" text-anchor="middle" fill="#ffffff" font-size="20" class="title">Kite [BOT]</text>
+        <text x="130" y="95" text-anchor="middle" fill="#f472b6" font-size="13" class="label">Health 100 · Attack 10 · Defense 10</text>
+        <circle cx="130" cy="125" r="4" fill="#ec4899"/>
+        <text x="142" y="129" fill="#ec4899" font-size="11" class="mono">AUTONOMOUS</text>
+      </g>
+    </g>
+
+    <!-- Fight Button -->
+    <g id="Fight-Button" transform="translate(670, 435)">
+      <rect width="160" height="52" rx="12" fill="url(#fightBtnGrad)" filter="url(#cardShadow)"/>
+      <text x="80" y="33" text-anchor="middle" fill="#ffffff" font-size="22" class="title" letter-spacing="2">FIGHT</text>
+    </g>
+
+    <!-- Character Grid List -->
+    <g id="Fighter-Grid" transform="translate(190, 520)">
+      <!-- Card 1: Astra (P1) -->
+      <g id="Card-Astra" transform="translate(0, 0)">
+        <rect width="160" height="180" rx="16" fill="url(#cardGradSelected)" stroke="#2563eb" stroke-width="4" filter="url(#cardShadow)"/>
+        <rect x="10" y="10" width="36" height="22" rx="11" fill="#1e293b"/>
+        <text x="28" y="25" text-anchor="middle" fill="#ffffff" font-size="11" class="mono">P1</text>
+        <circle cx="80" cy="90" r="40" fill="#3b82f6" opacity="0.2"/>
+        <text x="80" y="98" text-anchor="middle" fill="#1e3a8a" font-size="16" class="title">Astra</text>
+        <rect x="25" y="145" width="110" height="22" rx="11" fill="#2563eb"/>
+        <text x="80" y="160" text-anchor="middle" fill="#ffffff" font-size="11" class="label">SELECTED</text>
+      </g>
+
+      <!-- Card 2: Kite (BOT) -->
+      <g id="Card-Kite-Bot" transform="translate(190, 0)">
+        <rect width="160" height="180" rx="16" fill="url(#cardGradSelected)" stroke="#ec4899" stroke-width="4" filter="url(#cardShadow)"/>
+        <rect x="10" y="10" width="46" height="22" rx="11" fill="url(#botBadgeGrad)" filter="url(#botGlow)"/>
+        <text x="33" y="25" text-anchor="middle" fill="#ffffff" font-size="11" class="mono">BOT</text>
+        <circle cx="80" cy="90" r="40" fill="#ec4899" opacity="0.2"/>
+        <text x="80" y="98" text-anchor="middle" fill="#831843" font-size="16" class="title">Kite</text>
+        <rect x="25" y="145" width="110" height="22" rx="11" fill="url(#botBadgeGrad)"/>
+        <text x="80" y="160" text-anchor="middle" fill="#ffffff" font-size="11" class="label">CPU BOT</text>
+      </g>
+
+      <!-- Card 3: Vex -->
+      <g id="Card-Vex" transform="translate(380, 0)">
+        <rect width="160" height="180" rx="16" fill="url(#cardGradNormal)" stroke="#ca9650" stroke-width="3" filter="url(#cardShadow)"/>
+        <circle cx="80" cy="90" r="40" fill="#d97706" opacity="0.2"/>
+        <text x="80" y="98" text-anchor="middle" fill="#78350f" font-size="16" class="title">Vex</text>
+      </g>
+
+      <!-- Card 4: Brute -->
+      <g id="Card-Brute" transform="translate(570, 0)">
+        <rect width="160" height="180" rx="16" fill="url(#cardGradNormal)" stroke="#ca9650" stroke-width="3" filter="url(#cardShadow)"/>
+        <circle cx="80" cy="90" r="40" fill="#d97706" opacity="0.2"/>
+        <text x="80" y="98" text-anchor="middle" fill="#78350f" font-size="16" class="title">Brute</text>
+      </g>
+
+      <!-- Card 5: Nova -->
+      <g id="Card-Nova" transform="translate(760, 0)">
+        <rect width="160" height="180" rx="16" fill="url(#cardGradNormal)" stroke="#ca9650" stroke-width="3" filter="url(#cardShadow)"/>
+        <circle cx="80" cy="90" r="40" fill="#d97706" opacity="0.2"/>
+        <text x="80" y="98" text-anchor="middle" fill="#78350f" font-size="16" class="title">Nova</text>
+      </g>
+
+      <!-- Card 6: Rift -->
+      <g id="Card-Rift" transform="translate(950, 0)">
+        <rect width="160" height="180" rx="16" fill="url(#cardGradNormal)" stroke="#ca9650" stroke-width="3" filter="url(#cardShadow)"/>
+        <circle cx="80" cy="90" r="40" fill="#d97706" opacity="0.2"/>
+        <text x="80" y="98" text-anchor="middle" fill="#78350f" font-size="16" class="title">Rift</text>
+      </g>
+    </g>
+
+    <!-- Bottom Guidance Note -->
+    <text x="750" y="760" text-anchor="middle" fill="#64748b" font-size="13" class="label">Single Player Mode: Player 1 controls with Keyboard (A, D, S, J, K, Space) · Player 2 driven by AI Bot</text>
+  </g>
+
+
+  <!-- ============================================================== -->
+  <!-- FRAME 2: BATTLE ARENA (PLAYER VS BOT [CPU])                    -->
+  <!-- ============================================================== -->
+  <g id="Frame-2-Battle-Arena-PvE" transform="translate(1500, 0)">
+    <!-- Arena background -->
+    <rect x="40" y="40" width="1420" height="940" rx="20" fill="url(#bgGrad)" stroke="#1e293b" stroke-width="3"/>
+
+    <!-- Battle Header Status / Health Bars -->
+    <g id="Health-HUD" transform="translate(110, 80)">
+      <!-- Left Health (Astra - P1) -->
+      <g id="HUD-Player-1" transform="translate(0, 0)">
+        <text x="0" y="24" fill="#f8fafc" font-size="22" class="title">Astra</text>
+        <text x="500" y="24" text-anchor="end" fill="#22c55e" font-size="20" class="mono">100%</text>
+        <!-- Bar frame -->
+        <rect x="0" y="36" width="500" height="24" rx="4" fill="#0f172a" stroke="#334155" stroke-width="2"/>
+        <rect x="2" y="38" width="496" height="20" rx="2" fill="url(#healthGradLeft)"/>
+      </g>
+
+      <!-- Center VS Badge -->
+      <g id="Arena-VS" transform="translate(615, 20)">
+        <polygon points="35,0 60,25 35,50 10,25" fill="#f59e0b" filter="url(#goldGlow)"/>
+        <text x="35" y="32" text-anchor="middle" fill="#1a1200" font-size="14" class="title" font-weight="900">VS</text>
+      </g>
+
+      <!-- Right Health (Kite - BOT) -->
+      <g id="HUD-Player-2-Bot" transform="translate(770, 0)">
+        <text x="0" y="24" fill="#22c55e" font-size="20" class="mono">100%</text>
+        <text x="440" y="24" text-anchor="end" fill="#f8fafc" font-size="22" class="title">Kite</text>
+        <!-- BOT badge tag -->
+        <rect x="448" y="6" width="52" height="22" rx="11" fill="url(#botBadgeGrad)" filter="url(#botGlow)"/>
+        <text x="474" y="21" text-anchor="middle" fill="#ffffff" font-size="11" class="mono">BOT</text>
+        <!-- Bar frame -->
+        <rect x="0" y="36" width="500" height="24" rx="4" fill="#0f172a" stroke="#334155" stroke-width="2"/>
+        <rect x="2" y="38" width="496" height="20" rx="2" fill="url(#healthGradRight)"/>
+      </g>
+    </g>
+
+    <!-- Battlefield Canvas Area -->
+    <g id="Battle-Field" transform="translate(110, 180)">
+      <!-- Stage frame -->
+      <rect width="1280" height="600" rx="12" fill="#050811" stroke="#1e293b" stroke-width="2"/>
+      
+      <!-- Floor line -->
+      <line x1="0" y1="480" x2="1280" y2="480" stroke="#334155" stroke-width="3"/>
+
+      <!-- Fighter 1 (Astra - Left) -->
+      <g id="Fighter-Sprite-1" transform="translate(220, 180)">
+        <rect width="160" height="290" rx="8" fill="#3b82f6" opacity="0.15" stroke="#3b82f6" stroke-dasharray="6,4"/>
+        <circle cx="80" cy="70" r="35" fill="#3b82f6" opacity="0.4"/>
+        <text x="80" y="160" text-anchor="middle" fill="#60a5fa" font-size="18" class="title">Player 1</text>
+        <text x="80" y="185" text-anchor="middle" fill="#93c5fd" font-size="12" class="mono">User Keyboard</text>
+      </g>
+
+      <!-- Fighter 2 (Kite - Right - Bot) -->
+      <g id="Fighter-Sprite-2-Bot" transform="translate(900, 180)">
+        <rect width="160" height="290" rx="8" fill="#ec4899" opacity="0.15" stroke="#ec4899" stroke-dasharray="6,4"/>
+        <circle cx="80" cy="70" r="35" fill="#ec4899" opacity="0.4"/>
+        <text x="80" y="160" text-anchor="middle" fill="#f472b6" font-size="18" class="title">Computer (AI)</text>
+        <text x="80" y="185" text-anchor="middle" fill="#fbcfe8" font-size="12" class="mono">Bot Controller</text>
+      </g>
+    </g>
+
+    <!-- Hotkeys Help Overlay -->
+    <g id="Hotkeys-Overlay" transform="translate(110, 810)">
+      <rect width="1280" height="70" rx="10" fill="#0f172a" stroke="#334155" stroke-width="1.5" opacity="0.95"/>
+      <text x="30" y="40" fill="#f59e0b" font-size="14" class="title">HOTKEYS</text>
+      <text x="130" y="40" fill="#cbd5e1" font-size="13" class="label">P1: <tspan fill="#38bdf8">A / D</tspan> Move · <tspan fill="#38bdf8">S</tspan> Block · <tspan fill="#38bdf8">J</tspan> Jab · <tspan fill="#38bdf8">K</tspan> Kick · <tspan fill="#38bdf8">Space</tspan> Jump</text>
+      <line x1="680" y1="15" x2="680" y2="55" stroke="#334155" stroke-width="1.5"/>
+      <text x="710" y="40" fill="#ec4899" font-size="13" class="label">Computer (AI): <tspan fill="#f472b6">Controlled automatically by AI Bot</tspan></text>
+    </g>
+  </g>
+</svg>

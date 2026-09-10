@@ -1,8 +1,7 @@
 import createElement from '../../helpers/domHelper';
 import { createFighterImage } from '../fighterPreview';
-import App from '../../app';
 
-export default function showWinnerModal(fighter) {
+export default function showWinnerModal(fighter, onRestart) {
     const root = document.getElementById('root');
 
     const layer = createElement({ tagName: 'div', className: 'modal-layer' });
@@ -68,7 +67,11 @@ export default function showWinnerModal(fighter) {
     newFightButton.innerText = 'New Fight';
     newFightButton.addEventListener('click', () => {
         closeModal();
-        App.startApplication();
+        if (typeof onRestart === 'function') {
+            onRestart();
+        } else {
+            window.dispatchEvent(new CustomEvent('new-fight'));
+        }
     });
 
     bodyElement.append(nameElement, imageContainer, newFightButton);
