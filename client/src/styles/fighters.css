@@ -82,3 +82,10 @@
 .fighters___fighter-badge--visible {
     display: inline-flex;
 }
+
+.fighters___fighter-badge--bot {
+    background: linear-gradient(135deg, #7928ca, #ff0080);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 10px rgba(255, 0, 128, 0.6);
+}

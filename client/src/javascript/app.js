@@ -24,4 +24,8 @@ class App {
     }
 }
 
+window.addEventListener('new-fight', () => {
+    App.startApplication();
+});
+
 export default App;
