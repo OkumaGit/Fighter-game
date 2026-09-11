@@ -23,11 +23,11 @@
     }
 }
 
-.modal-root.winner-modal {
+.modal-root {
     position: relative;
     display: flex;
     flex-direction: column;
-    width: 340px;
+    width: 360px;
     max-width: 90vw;
     background: linear-gradient(160deg, #0f172a 0%, #1e293b 60%, #0f1a2e 100%);
     border: 0.8px solid rgba(251, 191, 36, 0.35);
@@ -36,6 +36,11 @@
         0px 0px 0px 1px rgba(0, 0, 0, 0.8);
     overflow: hidden;
     animation: modal-zoom-in 250ms cubic-bezier(0.16, 1, 0.3, 1);
+    color: #ffffff;
+}
+
+.modal-root.winner-modal {
+    width: 340px;
 }
 
 @keyframes modal-zoom-in {

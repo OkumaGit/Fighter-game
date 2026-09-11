@@ -1,6 +1,6 @@
 import createElement from '../helpers/domHelper';
 import renderArena from './arena';
-import { createFighterPreview } from './fighterPreview';
+import { createFighterPanel } from './fighterPreview';
 import { getFighterInfo } from '../game/arcadeManager';
 import socketService from '../services/socketService';
 import showOnlineLobbyModal from './modal/onlineLobbyModal';
@@ -48,7 +48,7 @@ function createModeSelector(gameMode, onSelectMode) {
         className: `preview-container___mode-btn ${gameMode === 'pvp' ? 'preview-container___mode-btn--active' : ''}`,
         attributes: { type: 'button' }
     });
-    pvpBtn.innerText = '👥 Player vs Player';
+    pvpBtn.innerText = '👥 2 Players';
     pvpBtn.addEventListener('click', () => onSelectMode('pvp'));
 
     const pveBtn = createElement({
@@ -56,7 +56,7 @@ function createModeSelector(gameMode, onSelectMode) {
         className: `preview-container___mode-btn ${gameMode === 'pve' ? 'preview-container___mode-btn--active' : ''}`,
         attributes: { type: 'button' }
     });
-    pveBtn.innerText = '🤖 Player vs AI';
+    pveBtn.innerText = '🤖 vs AI';
     pveBtn.addEventListener('click', () => onSelectMode('pve'));
 
     const towerBtn = createElement({
@@ -125,11 +125,12 @@ function createDifficultySelector(difficulty, onSelectDifficulty) {
     return container;
 }
 
-function updateFighterCards(selectedFighters, currentFighter, gameMode = 'pvp', onlineRole = 'host') {
+function updateFighterCards(selectedFighters, hoveredFighter, gameMode = 'pvp', onlineRole = 'host') {
     document.querySelectorAll('.fighters___fighter').forEach(card => {
         const fighterId = card.getAttribute('data-fighter-id');
-        const isSelected = selectedFighters.some(fighter => fighter && fighter._id === fighterId);
-        const isCurrent = currentFighter && currentFighter._id === fighterId;
+        const isP1 = selectedFighters[0] && selectedFighters[0]._id === fighterId;
+        const isP2 = selectedFighters[1] && selectedFighters[1]._id === fighterId;
+        const isHovered = hoveredFighter && hoveredFighter._id === fighterId;
 
         let slot1Label = 'P1';
         let slot2Label = 'P2';
@@ -148,23 +149,25 @@ function updateFighterCards(selectedFighters, currentFighter, gameMode = 'pvp', 
             }
         }
 
-        let slot = '';
-        if (selectedFighters[0] && selectedFighters[0]._id === fighterId) {
-            slot = slot1Label;
-        } else if (selectedFighters[1] && selectedFighters[1]._id === fighterId) {
-            slot = slot2Label;
-        } else if (currentFighter && currentFighter._id === fighterId) {
-            if (gameMode === 'tower') {
-                slot = 'CHAMPION';
-            } else if (selectedFighters[0]) {
-                slot = slot2Label;
-            } else {
-                slot = slot1Label;
+        let badgeText = '';
+        let isBotBadge = false;
+
+        if (isP1) {
+            badgeText = slot1Label;
+        } else if (isP2) {
+            badgeText = slot2Label;
+            isBotBadge = slot2Label === 'BOT' || slot2Label === 'STAGE 1';
+        } else if (isHovered && !selectedFighters.every(Boolean)) {
+            if (!selectedFighters[0]) {
+                badgeText = slot1Label;
+            } else if (!selectedFighters[1]) {
+                badgeText = slot2Label;
+                isBotBadge = slot2Label === 'BOT' || slot2Label === 'STAGE 1';
             }
         }
 
-        card.classList.toggle('fighters___fighter--selected', isCurrent || isSelected);
-        card.classList.toggle('fighters___fighter--confirmed', isSelected);
+        card.classList.toggle('fighters___fighter--selected', Boolean(isP1 || isP2 || isHovered));
+        card.classList.toggle('fighters___fighter--confirmed', Boolean(isP1 || isP2));
 
         let badge = card.querySelector('.fighters___fighter-badge');
         if (!badge) {
@@ -172,15 +175,15 @@ function updateFighterCards(selectedFighters, currentFighter, gameMode = 'pvp', 
             card.appendChild(badge);
         }
 
-        badge.innerText = slot;
-        badge.classList.toggle('fighters___fighter-badge--visible', Boolean(slot));
-        badge.classList.toggle('fighters___fighter-badge--bot', slot === 'BOT' || slot === 'STAGE 1');
+        badge.innerText = badgeText;
+        badge.classList.toggle('fighters___fighter-badge--visible', Boolean(badgeText));
+        badge.classList.toggle('fighters___fighter-badge--bot', isBotBadge);
     });
 }
 
 function renderSelectedFighters({
     selectedFighters,
-    currentFighter = null,
+    hoveredFighter = null,
     gameMode = 'pvp',
     difficulty = 'MEDIUM',
     onlineRoomCode = null,
@@ -192,180 +195,200 @@ function renderSelectedFighters({
     onPickRandomBot,
     onConfirmOnlineReady
 }) {
-    const fightersPreview = document.querySelector('.preview-container___root');
-    if (!fightersPreview) return;
+    const headerContainer = document.getElementById('fighters-header') || document.querySelector('.fighters___header');
+    const slotP1 = document.getElementById('slot-p1');
+    const slotP2 = document.getElementById('slot-p2');
+    const turnIndicator = document.getElementById('turn-indicator');
+    const actionSlot = document.getElementById('action-slot');
 
-    fightersPreview.innerHTML = '';
+    // 1. Render Header Slot (Mode Tabs, Subcontrols, Badges, Title)
+    if (headerContainer) {
+        headerContainer.innerHTML = '';
+        const modeSelector = createModeSelector(gameMode, onSelectMode);
+        headerContainer.appendChild(modeSelector);
 
-    const modeSelector = createModeSelector(gameMode, onSelectMode);
-    fightersPreview.append(modeSelector);
+        if (gameMode === 'pve' && typeof onSelectDifficulty === 'function') {
+            const subControls = createElement({
+                tagName: 'div',
+                className: 'preview-container___subcontrols'
+            });
+            const difficultySelector = createDifficultySelector(difficulty, onSelectDifficulty);
+            subControls.appendChild(difficultySelector);
 
-    if (gameMode === 'pve' && typeof onSelectDifficulty === 'function') {
-        const difficultySelector = createDifficultySelector(difficulty, onSelectDifficulty);
-        fightersPreview.append(difficultySelector);
+            if (selectedFighters[0] && !selectedFighters[1] && typeof onPickRandomBot === 'function') {
+                const randomBotBtn = createElement({
+                    tagName: 'button',
+                    className: 'preview-container___random-btn',
+                    attributes: { type: 'button' }
+                });
+                randomBotBtn.innerText = '🎲 Random Opponent';
+                randomBotBtn.addEventListener('click', onPickRandomBot);
+                subControls.appendChild(randomBotBtn);
+            }
+            headerContainer.appendChild(subControls);
+        } else if (gameMode === 'tower') {
+            const towerPill = createElement({
+                tagName: 'div',
+                className: 'preview-container___tower-badge'
+            });
+            towerPill.innerText = '🏛️ 6-STAGE ARCADE LADDER · SCALING AI DIFFICULTY';
+            headerContainer.appendChild(towerPill);
+        } else if (gameMode === 'online') {
+            const roleText = onlineRole === 'host' ? 'Player 1 (Host)' : 'Player 2 (Guest)';
+            const onlinePill = createElement({
+                tagName: 'div',
+                className: 'preview-container___online-badge'
+            });
+            onlinePill.innerText = `🌐 ROOM ${onlineRoomCode || '-----'} · YOU ARE ${roleText.toUpperCase()}`;
+            headerContainer.appendChild(onlinePill);
+        }
+
+        const title = createElement({ tagName: 'h2', className: 'fighters___title' });
+        if (gameMode === 'tower') {
+            title.innerText = 'CHOOSE YOUR CHAMPION';
+        } else if (gameMode === 'online') {
+            title.innerText = `ONLINE MATCH: ROOM ${onlineRoomCode || '...'}`;
+        } else if (selectedFighters.every(Boolean)) {
+            title.innerText = gameMode === 'pve' ? `READY TO FIGHT (VS AI · ${difficulty})` : 'READY TO FIGHT';
+        } else if (selectedFighters[0] && !selectedFighters[1]) {
+            title.innerText = gameMode === 'pve' ? 'CHOOSE COMPUTER OPPONENT' : 'CHOOSE SECOND FIGHTER';
+        } else {
+            title.innerText = gameMode === 'pve' ? 'CHOOSE YOUR FIGHTER' : 'CHOOSE FIRST FIGHTER';
+        }
+        headerContainer.appendChild(title);
     }
 
-    const title = createElement({ tagName: 'h2', className: 'fighters___title' });
+    // Determine Candidate Fighters for side panels (selected or hovered)
+    let p1Candidate = selectedFighters[0];
+    let p2Candidate = selectedFighters[1];
 
-    if (gameMode === 'tower') {
-        title.innerText = 'Choose your Champion';
-        const towerPill = createElement({
-            tagName: 'div',
-            className: 'preview-container___tower-badge'
-        });
-        towerPill.innerText = '🏛️ 6-STAGE ARCADE LADDER · SCALING AI DIFFICULTY';
-        fightersPreview.append(towerPill);
-    } else if (gameMode === 'online') {
-        const roleText = onlineRole === 'host' ? 'Player 1 (Host)' : 'Player 2 (Guest)';
-        title.innerText = `Online Match: Room ${onlineRoomCode}`;
-        const onlinePill = createElement({
-            tagName: 'div',
-            className: 'preview-container___online-badge'
-        });
-        onlinePill.innerText = `🌐 CONNECTED · YOU ARE ${roleText.toUpperCase()}`;
-        fightersPreview.append(onlinePill);
-    } else if (selectedFighters.every(Boolean)) {
-        title.innerText = gameMode === 'pve' ? `Ready to fight (vs AI · ${difficulty})` : 'Ready to fight';
-    } else if (selectedFighters[0] && !selectedFighters[1]) {
-        title.innerText = gameMode === 'pve' ? 'Choose computer opponent' : 'Choose second fighter';
-    } else {
-        title.innerText = gameMode === 'pve' ? 'Choose your fighter' : 'Choose first fighter';
+    if (gameMode === 'online') {
+        if (onlineRole === 'host' && !selectedFighters[0]) {
+            p1Candidate = hoveredFighter;
+        } else if (onlineRole === 'guest' && !selectedFighters[1]) {
+            p2Candidate = hoveredFighter;
+        }
+    } else if (gameMode === 'tower') {
+        if (!selectedFighters[0]) {
+            p1Candidate = hoveredFighter;
+        }
+    } else if (!selectedFighters[0]) {
+        p1Candidate = hoveredFighter;
+    } else if (!selectedFighters[1]) {
+        p2Candidate = hoveredFighter;
     }
-    fightersPreview.append(title);
 
-    if (gameMode === 'pve' && selectedFighters[0] && !selectedFighters[1] && typeof onPickRandomBot === 'function') {
-        const randomBotBtn = createElement({
+    // 2. Render Left Panel (Slot P1)
+    if (slotP1) {
+        let p1Tag = 'PLAYER 1';
+        if (gameMode === 'tower') {
+            p1Tag = 'CHAMPION';
+        } else if (gameMode === 'online') {
+            const readyStr = isLocalReady && onlineRole === 'host' ? ' [READY]' : '';
+            const oppReadyStr = isOpponentReady && onlineRole === 'guest' ? ' [READY]' : '';
+            p1Tag = onlineRole === 'host' ? `YOU${readyStr}` : `OPPONENT${oppReadyStr}`;
+        }
+        const p1Panel = createFighterPanel(p1Candidate, 'left', p1Tag);
+        slotP1.innerHTML = '';
+        slotP1.appendChild(p1Panel);
+    }
+
+    // 3. Render Right Panel (Slot P2)
+    if (slotP2) {
+        let p2Tag = 'PLAYER 2';
+        if (gameMode === 'pve') {
+            p2Tag = `BOT [${difficulty}]`;
+        } else if (gameMode === 'tower') {
+            p2Tag = 'STAGE 1 · EASY';
+        } else if (gameMode === 'online') {
+            const readyStr = isLocalReady && onlineRole === 'guest' ? ' [READY]' : '';
+            const oppReadyStr = isOpponentReady && onlineRole === 'host' ? ' [READY]' : '';
+            p2Tag = onlineRole === 'guest' ? `YOU${readyStr}` : `OPPONENT${oppReadyStr}`;
+        }
+        const p2Panel = createFighterPanel(p2Candidate, 'right', p2Tag);
+        slotP2.innerHTML = '';
+        slotP2.appendChild(p2Panel);
+    }
+
+    // 4. Render Turn Indicator
+    if (turnIndicator) {
+        if (gameMode === 'tower') {
+            turnIndicator.innerText = selectedFighters[0] ? '▸ READY TO ENTER THE TOWER' : '▸ CHOOSE YOUR CHAMPION';
+        } else if (gameMode === 'online') {
+            if (isLocalReady && isOpponentReady) {
+                turnIndicator.innerText = '▸ STARTING MATCH...';
+            } else if (isLocalReady) {
+                turnIndicator.innerText = '▸ YOU ARE READY — WAITING FOR OPPONENT...';
+            } else {
+                const hasChosen = onlineRole === 'host' ? selectedFighters[0] : selectedFighters[1];
+                turnIndicator.innerText = hasChosen ? '▸ CLICK CONFIRM FIGHTER TO READY UP' : '▸ CHOOSE YOUR FIGHTER';
+            }
+        } else if (selectedFighters.every(Boolean)) {
+            turnIndicator.innerText = '▸ READY FOR BATTLE';
+        } else if (selectedFighters[0] && !selectedFighters[1]) {
+            turnIndicator.innerText = gameMode === 'pve' ? '▸ CHOOSE COMPUTER OPPONENT' : '▸ PLAYER 2 — CHOOSE';
+        } else {
+            turnIndicator.innerText = gameMode === 'pve' ? '▸ CHOOSE YOUR FIGHTER' : '▸ PLAYER 1 — CHOOSE';
+        }
+    }
+
+    // 5. Render Action Button in Bottom Bar
+    if (actionSlot) {
+        actionSlot.innerHTML = '';
+        const fightBtn = createElement({
             tagName: 'button',
-            className: 'preview-container___random-btn',
+            className: 'fighters___fight-btn',
             attributes: { type: 'button' }
         });
-        randomBotBtn.innerText = '🎲 Random Opponent';
-        randomBotBtn.addEventListener('click', onPickRandomBot);
-        fightersPreview.append(randomBotBtn);
-    }
 
-    const showBothSelected = selectedFighters[0] && selectedFighters[1];
-    if (showBothSelected || (gameMode === 'online' && (selectedFighters[0] || selectedFighters[1]))) {
-        const topRow = createElement({ tagName: 'div', className: 'preview-container___selected-row' });
-        const player1 = selectedFighters[0]
-            ? createFighterPreview(selectedFighters[0], 'left')
-            : createElement({ tagName: 'div', className: 'preview-container___placeholder-slot' });
-
-        const player2 = selectedFighters[1]
-            ? createFighterPreview(selectedFighters[1], 'right')
-            : createElement({ tagName: 'div', className: 'preview-container___placeholder-slot' });
-
-        if (!selectedFighters[0]) {
-            player1.innerText = 'Waiting for P1...';
-        }
-        if (!selectedFighters[1]) {
-            player2.innerText = 'Waiting for P2...';
-        }
-
-        if (gameMode === 'pve') {
-            const p2Title = player2.querySelector('h3');
-            if (p2Title) {
-                p2Title.innerText = `${selectedFighters[1].name} [BOT · ${difficulty}]`;
+        if (gameMode === 'online') {
+            const localFighter = onlineRole === 'host' ? selectedFighters[0] : selectedFighters[1];
+            if (!localFighter) {
+                fightBtn.innerText = 'SELECT FIGHTER';
+                fightBtn.disabled = true;
+                fightBtn.classList.add('fighters___fight-btn--disabled');
+            } else if (isLocalReady) {
+                fightBtn.innerText = '✓ READY (WAITING...)';
+                fightBtn.disabled = true;
+                fightBtn.classList.add('fighters___fight-btn--ready');
+            } else {
+                fightBtn.innerText = 'CONFIRM FIGHTER ⚔️';
+                fightBtn.addEventListener('click', onConfirmOnlineReady);
             }
         } else if (gameMode === 'tower') {
-            const p1Title = player1.querySelector('h3');
-            if (p1Title) {
-                p1Title.innerText = `${selectedFighters[0].name} [CHAMPION]`;
-            }
-            const p2Title = player2.querySelector('h3');
-            if (p2Title) {
-                p2Title.innerText = `${selectedFighters[1].name} [STAGE 1 · EASY]`;
-            }
-        } else if (gameMode === 'online') {
-            const p1Title = player1.querySelector('h3');
-            const p2Title = player2.querySelector('h3');
-            const p1ReadyText = isOpponentReady && onlineRole === 'guest' ? ' ✓ READY' : '';
-            const p2ReadyText = isOpponentReady && onlineRole === 'host' ? ' ✓ READY' : '';
-            const localReadyText = isLocalReady ? ' ✓ READY' : '';
-
-            if (p1Title && selectedFighters[0]) {
-                const label = onlineRole === 'host' ? `[YOU${localReadyText}]` : `[OPPONENT${p1ReadyText}]`;
-                p1Title.innerText = `${selectedFighters[0].name} ${label}`;
-            }
-            if (p2Title && selectedFighters[1]) {
-                const label = onlineRole === 'guest' ? `[YOU${localReadyText}]` : `[OPPONENT${p2ReadyText}]`;
-                p2Title.innerText = `${selectedFighters[1].name} ${label}`;
-            }
-        }
-
-        topRow.append(player1, player2);
-        fightersPreview.append(topRow);
-    }
-
-    if (currentFighter) {
-        const focusCard = createElement({ tagName: 'div', className: 'preview-container___focus-card' });
-        const focusTitle = createElement({ tagName: 'h3', className: 'preview-container___focus-title' });
-        const focusText = createElement({ tagName: 'p', className: 'preview-container___focus-text' });
-
-        const focusPrefix = gameMode === 'tower' ? 'Champion candidate: ' : 'Selected: ';
-        focusTitle.innerText = `${focusPrefix}${currentFighter.name}`;
-        focusText.innerText = `Health ${currentFighter.health ?? '—'} · Attack ${
-            currentFighter.attack ?? '—'
-        } · Defense ${currentFighter.defense ?? '—'}`;
-
-        focusCard.append(focusTitle, focusText);
-        fightersPreview.append(focusCard);
-    }
-
-    // Fight / Ready Action Button
-    if (gameMode === 'online') {
-        const localFighter = onlineRole === 'host' ? selectedFighters[0] : selectedFighters[1];
-        if (localFighter) {
-            const readyBtn = createElement({
-                tagName: 'button',
-                className: 'preview-container___fight-btn preview-container___fight-btn--online',
-                attributes: { type: 'button' }
-            });
-
-            if (isLocalReady) {
-                readyBtn.innerText = '✓ Ready! (Waiting for opponent...)';
-                readyBtn.classList.add('preview-container___fight-btn--ready');
-                readyBtn.disabled = true;
+            if (selectedFighters[0]) {
+                fightBtn.innerText = 'ENTER THE TOWER ⚔️';
+                fightBtn.addEventListener('click', () => {
+                    startFight(selectedFighters, { isTower: true, champion: selectedFighters[0] });
+                });
             } else {
-                readyBtn.innerText = 'Confirm Fighter ⚔️';
-                readyBtn.addEventListener('click', onConfirmOnlineReady);
+                fightBtn.innerText = 'CHOOSE CHAMPION';
+                fightBtn.disabled = true;
+                fightBtn.classList.add('fighters___fight-btn--disabled');
             }
-            fightersPreview.append(readyBtn);
-        }
-    } else {
-        const canStartFight = selectedFighters.every(Boolean);
-        if (canStartFight) {
-            const fightButton = createElement({
-                tagName: 'button',
-                className: 'preview-container___fight-btn'
-            });
-
-            if (gameMode === 'tower') {
-                fightButton.innerText = 'Enter the Tower ⚔️';
-                fightButton.classList.add('preview-container___fight-btn--tower');
-                fightButton.addEventListener(
-                    'click',
-                    () => startFight(selectedFighters, { isTower: true, champion: selectedFighters[0] }),
-                    false
-                );
+        } else {
+            const canFight = selectedFighters.every(Boolean);
+            fightBtn.innerText = 'FIGHT';
+            if (canFight) {
+                fightBtn.addEventListener('click', () => {
+                    startFight(selectedFighters, { isPvE: gameMode === 'pve', difficulty });
+                });
             } else {
-                fightButton.innerText = 'Fight';
-                fightButton.addEventListener(
-                    'click',
-                    () => startFight(selectedFighters, { isPvE: gameMode === 'pve', difficulty }),
-                    false
-                );
+                fightBtn.disabled = true;
+                fightBtn.classList.add('fighters___fight-btn--disabled');
             }
-            fightersPreview.append(fightButton);
         }
+        actionSlot.appendChild(fightBtn);
     }
 
-    updateFighterCards(selectedFighters, currentFighter, gameMode, onlineRole);
+    // 6. Update Character Cards Grid
+    updateFighterCards(selectedFighters, hoveredFighter, gameMode, onlineRole);
 }
 
 export function createFightersSelector() {
     let selectedFighters = [null, null];
-    let currentFighter = null;
+    let hoveredFighter = null;
+    let currentHoverId = null;
     let gameMode = 'pvp';
     let difficulty = 'MEDIUM';
     let onlineRoomCode = null;
@@ -373,10 +396,12 @@ export function createFightersSelector() {
     let isLocalReady = false;
     let isOpponentReady = false;
 
-    const renderSelection = () => {
+    let renderSelection = () => {};
+
+    renderSelection = () => {
         renderSelectedFighters({
             selectedFighters,
-            currentFighter,
+            hoveredFighter,
             gameMode,
             difficulty,
             onlineRoomCode,
@@ -391,7 +416,7 @@ export function createFightersSelector() {
                             onlineRoomCode = roomCode;
                             onlineRole = role;
                             selectedFighters = [null, null];
-                            currentFighter = null;
+                            hoveredFighter = null;
                             isLocalReady = false;
                             isOpponentReady = false;
 
@@ -446,7 +471,7 @@ export function createFightersSelector() {
 
                 if (gameMode !== newMode) {
                     gameMode = newMode;
-                    currentFighter = null;
+                    hoveredFighter = null;
                     selectedFighters = [null, null];
                     renderSelection();
                 }
@@ -467,7 +492,7 @@ export function createFightersSelector() {
                 const botFighter = await getFighterInfo(randomId);
                 if (botFighter) {
                     selectedFighters = [selectedFighters[0], botFighter];
-                    currentFighter = null;
+                    hoveredFighter = null;
                     renderSelection();
                 }
             },
@@ -489,7 +514,7 @@ export function createFightersSelector() {
                     onlineRoomCode = roomCode;
                     onlineRole = role;
                     selectedFighters = [null, null];
-                    currentFighter = null;
+                    hoveredFighter = null;
                     isLocalReady = false;
                     isOpponentReady = false;
 
@@ -541,12 +566,12 @@ export function createFightersSelector() {
         renderSelection();
     });
 
-    return async (event, fighterId) => {
+    const selectFighter = async (event, fighterId) => {
         const fighter = await getFighterInfo(fighterId);
         if (!fighter) return;
 
         if (gameMode === 'online') {
-            if (isLocalReady) return; // Cannot alter selection after readying up
+            if (isLocalReady) return;
 
             if (onlineRole === 'host') {
                 selectedFighters = [fighter, selectedFighters[1]];
@@ -555,38 +580,81 @@ export function createFightersSelector() {
                 selectedFighters = [selectedFighters[0], fighter];
                 socketService.selectFighter(onlineRoomCode, fighter, 'guest');
             }
-            currentFighter = null;
+            hoveredFighter = null;
             renderSelection();
             return;
         }
 
-        const isSameFighter = currentFighter && currentFighter._id === fighter._id;
-
         if (gameMode === 'tower') {
-            if (isSameFighter) {
-                const stage1Opponent = await getFighterInfo('1');
-                selectedFighters = [fighter, stage1Opponent];
-                currentFighter = null;
+            if (selectedFighters[0] && selectedFighters[0]._id === fighter._id) {
+                selectedFighters = [null, null];
+                hoveredFighter = null;
                 renderSelection();
                 return;
             }
-            currentFighter = fighter;
+            const stage1Opponent = await getFighterInfo('1');
+            selectedFighters = [fighter, stage1Opponent];
+            hoveredFighter = null;
             renderSelection();
             return;
         }
 
-        const nextSlot = selectedFighters[0] ? 1 : 0;
-
-        if (isSameFighter) {
-            if (selectedFighters[nextSlot] && selectedFighters[nextSlot]._id === fighter._id) return;
-            selectedFighters = [...selectedFighters];
-            selectedFighters[nextSlot] = fighter;
-            currentFighter = null;
+        // PvP and PvE Modes
+        if (!selectedFighters[0]) {
+            selectedFighters = [fighter, null];
+            hoveredFighter = null;
             renderSelection();
             return;
         }
 
-        currentFighter = fighter;
+        if (selectedFighters[0]._id === fighter._id && !selectedFighters[1]) {
+            selectedFighters = [null, null];
+            hoveredFighter = null;
+            renderSelection();
+            return;
+        }
+
+        if (!selectedFighters[1]) {
+            selectedFighters = [selectedFighters[0], fighter];
+            hoveredFighter = null;
+            renderSelection();
+            return;
+        }
+
+        if (selectedFighters[1]._id === fighter._id) {
+            selectedFighters = [selectedFighters[0], null];
+            hoveredFighter = null;
+            renderSelection();
+            return;
+        }
+
+        // Both selected: replace slot 2 (or if clicking P1's card, reset P1)
+        if (selectedFighters[0]._id === fighter._id) {
+            selectedFighters = [null, selectedFighters[1]];
+        } else {
+            selectedFighters = [selectedFighters[0], fighter];
+        }
+        hoveredFighter = null;
         renderSelection();
     };
+
+    selectFighter.onHover = async fighterId => {
+        currentHoverId = fighterId;
+        if (gameMode !== 'online' && selectedFighters.every(Boolean)) return;
+        const fighter = await getFighterInfo(fighterId);
+        if (currentHoverId === fighterId) {
+            hoveredFighter = fighter;
+            renderSelection();
+        }
+    };
+
+    selectFighter.onLeave = fighterId => {
+        if (currentHoverId === fighterId) {
+            currentHoverId = null;
+            hoveredFighter = null;
+            renderSelection();
+        }
+    };
+
+    return selectFighter;
 }

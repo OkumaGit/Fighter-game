@@ -1,82 +1,169 @@
 .fighters___root {
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
     width: 100%;
     height: 100%;
-    padding: 12px 0 20px;
+    padding: 16px 24px 20px;
     box-sizing: border-box;
     background-color: #0b1020;
-    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)),
+    background: radial-gradient(circle at 50% 30%, rgba(15, 23, 42, 0.4) 0%, rgba(7, 10, 19, 0.94) 85%),
         url('/resources/backgrounds/arena-bg.jpg') center / cover no-repeat;
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
+    user-select: none;
+    overflow: hidden;
 }
 
-.fighters___list {
-    margin: 0 20px 10px;
+.fighters___header {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
     gap: 8px;
-    flex-wrap: wrap;
+    width: 100%;
+    max-width: 960px;
 }
 
 .fighters___title {
-    margin: 0 0 10px;
-    color: #fff;
+    margin: 4px 0 0;
+    font-family: 'Russo One', sans-serif;
+    font-size: 28px;
+    line-height: 1.1;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #f8fafc;
     text-align: center;
-    font-size: 2rem;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.85), 0 0 16px rgba(0, 0, 0, 0.65);
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9), 0 0 24px rgba(245, 158, 11, 0.35);
+}
+
+.fighters___showdown {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    width: 100%;
+    max-width: 960px;
+    flex: 1;
+    min-height: 0;
+}
+
+.fighters___panel-slot {
+    width: 190px;
+    min-width: 190px;
+    display: flex;
+    justify-content: center;
+}
+
+.fighters___center-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.fighters___turn-indicator {
+    font-family: 'Oswald', 'Russo One', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #f59e0b;
+    text-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+    height: 16px;
+    line-height: 16px;
+}
+
+.fighters___list {
+    display: grid;
+    grid-template-columns: repeat(3, 88px);
+    grid-template-rows: repeat(2, 120px);
+    gap: 10px;
+    margin: 0;
+    padding: 0;
 }
 
 .fighters___fighter {
     position: relative;
-    height: 150px;
-    max-width: 150px;
-    flex: 1;
+    width: 88px;
+    height: 120px;
+    box-sizing: border-box;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
+    justify-content: space-between;
+    padding: 8px 4px 6px;
     cursor: pointer;
-    background: #ffdfa7;
-    margin: 10px;
-    border: 5px solid #ca9650;
-    border-radius: 16px;
+    background: rgba(10, 16, 28, 0.72);
+    border: 1.2px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
     overflow: hidden;
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.fighters___fighter:hover {
+    transform: translateY(-2px);
+    border-color: rgba(251, 191, 36, 0.6);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5), 0 0 14px rgba(251, 191, 36, 0.25);
+}
+
+.fighters___fighter--selected {
+    border: 2.4px solid #fbbf24;
+    box-shadow: 0 0 16px rgba(251, 191, 36, 0.45), inset 0 0 8px rgba(251, 191, 36, 0.2);
+    transform: translateY(-2px);
+}
+
+.fighters___fighter--confirmed {
+    border-color: #fbbf24;
 }
 
 .fighter___fighter-image {
     display: block;
-    width: 69px;
-    height: 92px;
-    max-width: 100%;
-    object-fit: cover;
+    width: 60px;
+    height: 76px;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.7));
+    pointer-events: none;
 }
 
-.fighters___fighter:hover,
-.fighters___fighter--selected {
-    background: #cbe4f8;
-    border-color: #267abf;
-    box-shadow: 0 0 0 3px rgba(38, 122, 191, 0.35);
+.fighters___fighter-name {
+    font-family: 'Russo One', sans-serif;
+    font-size: 10px;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #94a3b8;
+    text-align: center;
+    max-width: 80px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 0.15s ease;
+    pointer-events: none;
 }
 
-.fighters___fighter--confirmed {
-    border-color: #f6c74f;
+.fighters___fighter--selected .fighters___fighter-name {
+    color: #fbbf24;
 }
 
 .fighters___fighter-badge {
     position: absolute;
-    top: 6px;
-    left: 6px;
+    top: 4px;
+    left: 4px;
     display: none;
-    padding: 4px 8px;
-    border-radius: 999px;
-    background: rgba(0, 0, 0, 0.75);
-    color: #fff;
-    font-size: 0.85rem;
+    padding: 2px 5px;
+    border-radius: 3px;
+    background: #f59e0b;
+    color: #1a0e00;
+    font-family: 'Russo One', sans-serif;
+    font-size: 8px;
     font-weight: 700;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
+    line-height: 1;
+    text-transform: uppercase;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+    pointer-events: none;
 }
 
 .fighters___fighter-badge--visible {
@@ -84,8 +171,93 @@
 }
 
 .fighters___fighter-badge--bot {
-    background: linear-gradient(135deg, #7928ca, #ff0080);
+    background: #6366f1;
     color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    box-shadow: 0 0 10px rgba(255, 0, 128, 0.6);
+    box-shadow: 0 0 8px rgba(99, 102, 241, 0.6);
+}
+
+.fighters___bottom-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    max-width: 540px;
+    margin-top: auto;
+}
+
+.fighters___vs-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    gap: 16px;
+}
+
+.fighters___vs-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        rgba(251, 191, 36, 0) 0%,
+        rgba(251, 191, 36, 0.3) 50%,
+        rgba(251, 191, 36, 0) 100%
+    );
+}
+
+.fighters___vs-text {
+    font-family: 'Russo One', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    color: rgba(251, 191, 36, 0.7);
+}
+
+.fighters___action-slot {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.fighters___fight-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 13px 64px;
+    background: linear-gradient(180deg, #dc2626 0%, #b91c1c 60%, #991b1b 100%);
+    border: 0.8px solid rgba(0, 0, 0, 0.4);
+    border-radius: 5px;
+    box-shadow: 0 4px 14px rgba(185, 28, 28, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    font-family: 'Russo One', sans-serif;
+    font-size: 20px;
+    line-height: 1;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #ffffff;
+    cursor: pointer;
+    transition: transform 0.12s ease, filter 0.12s ease, box-shadow 0.12s ease;
+}
+
+.fighters___fight-btn:hover:not(:disabled) {
+    filter: brightness(1.15);
+    box-shadow: 0 6px 20px rgba(220, 38, 38, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.fighters___fight-btn:active:not(:disabled) {
+    transform: translateY(1px);
+    filter: brightness(0.95);
+}
+
+.fighters___fight-btn--disabled,
+.fighters___fight-btn:disabled {
+    opacity: 0.42;
+    cursor: not-allowed;
+    filter: grayscale(0.5);
+    box-shadow: none;
+}
+
+.fighters___fight-btn--ready {
+    background: linear-gradient(180deg, #059669 0%, #047857 100%);
+    box-shadow: 0 4px 14px rgba(5, 150, 105, 0.5);
+    opacity: 0.9;
 }

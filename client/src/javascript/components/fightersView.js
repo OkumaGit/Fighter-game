@@ -40,12 +40,19 @@ function createImage(fighter) {
 function createFighter(fighter, selectFighter) {
     const fighterElement = createElement({ tagName: 'div', className: 'fighters___fighter' });
     const imageElement = createImage(fighter);
+    const nameElement = createElement({ tagName: 'div', className: 'fighters___fighter-name' });
+    nameElement.innerText = fighter.name;
     const badge = createElement({ tagName: 'span', className: 'fighters___fighter-badge' });
-    const onClick = event => selectFighter(event, fighter._id);
 
     fighterElement.setAttribute('data-fighter-id', fighter._id);
-    fighterElement.append(imageElement, badge);
-    fighterElement.addEventListener('click', onClick, false);
+    fighterElement.append(imageElement, nameElement, badge);
+
+    fighterElement.addEventListener('click', event => selectFighter(event, fighter._id), false);
+
+    if (typeof selectFighter.onHover === 'function') {
+        fighterElement.addEventListener('mouseenter', () => selectFighter.onHover(fighter._id));
+        fighterElement.addEventListener('mouseleave', () => selectFighter.onLeave(fighter._id));
+    }
 
     return fighterElement;
 }
@@ -53,15 +60,60 @@ function createFighter(fighter, selectFighter) {
 export default function createFighters(fighters) {
     const selectFighter = createFightersSelector();
     const container = createElement({ tagName: 'div', className: 'fighters___root' });
-    const preview = createElement({ tagName: 'div', className: 'preview-container___root' });
-    const title = createElement({ tagName: 'h2', className: 'fighters___title' });
+
+    // Top Header: mode switch, main title, difficulty / random opponent / badges
+    const header = createElement({
+        tagName: 'div',
+        className: 'fighters___header',
+        attributes: { id: 'fighters-header' }
+    });
+
+    // Main 3-Column Showdown Area
+    const showdown = createElement({ tagName: 'div', className: 'fighters___showdown' });
+    const p1PanelSlot = createElement({
+        tagName: 'div',
+        className: 'fighters___panel-slot fighters___panel-slot--left',
+        attributes: { id: 'slot-p1' }
+    });
+
+    const centerColumn = createElement({ tagName: 'div', className: 'fighters___center-column' });
+    const turnIndicator = createElement({
+        tagName: 'div',
+        className: 'fighters___turn-indicator',
+        attributes: { id: 'turn-indicator' }
+    });
+    turnIndicator.innerText = '▸ PLAYER 1 — CHOOSE';
+
     const fightersList = createElement({ tagName: 'div', className: 'fighters___list' });
     const fighterElements = fighters.map(fighter => createFighter(fighter, selectFighter));
-
-    title.innerText = 'Choose first fighter';
-    preview.appendChild(title);
     fightersList.append(...fighterElements);
-    container.append(preview, fightersList);
+    centerColumn.append(turnIndicator, fightersList);
+
+    const p2PanelSlot = createElement({
+        tagName: 'div',
+        className: 'fighters___panel-slot fighters___panel-slot--right',
+        attributes: { id: 'slot-p2' }
+    });
+
+    showdown.append(p1PanelSlot, centerColumn, p2PanelSlot);
+
+    // Bottom Action Bar: VS divider + FIGHT button
+    const bottomBar = createElement({ tagName: 'div', className: 'fighters___bottom-bar' });
+    const vsDivider = createElement({ tagName: 'div', className: 'fighters___vs-divider' });
+    const vsLineLeft = createElement({ tagName: 'span', className: 'fighters___vs-line' });
+    const vsText = createElement({ tagName: 'span', className: 'fighters___vs-text' });
+    vsText.innerText = 'VS';
+    const vsLineRight = createElement({ tagName: 'span', className: 'fighters___vs-line' });
+    vsDivider.append(vsLineLeft, vsText, vsLineRight);
+
+    const actionSlot = createElement({
+        tagName: 'div',
+        className: 'fighters___action-slot',
+        attributes: { id: 'action-slot' }
+    });
+    bottomBar.append(vsDivider, actionSlot);
+
+    container.append(header, showdown, bottomBar);
 
     return container;
 }
