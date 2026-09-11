@@ -356,19 +356,16 @@ function renderSelectedFighters({
                 fightBtn.disabled = true;
                 fightBtn.classList.add('fighters___fight-btn--disabled');
             } else if (isLocalReady) {
-                fightBtn.append(
-                    createIcon('check'),
-                    createElement({ tagName: 'span', innerText: 'READY (WAITING...)' })
-                );
+                fightBtn.innerText = 'READY (WAITING...)';
                 fightBtn.disabled = true;
                 fightBtn.classList.add('fighters___fight-btn--ready');
             } else {
-                fightBtn.append(createIcon('check'), createElement({ tagName: 'span', innerText: 'CONFIRM FIGHTER' }));
+                fightBtn.innerText = 'CONFIRM FIGHTER';
                 fightBtn.addEventListener('click', onConfirmOnlineReady);
             }
         } else if (gameMode === 'tower') {
             if (selectedFighters[0]) {
-                fightBtn.append(createIcon('tower'), createElement({ tagName: 'span', innerText: 'ENTER THE TOWER' }));
+                fightBtn.innerText = 'ENTER THE TOWER';
                 fightBtn.addEventListener('click', () => {
                     startFight(selectedFighters, { isTower: true, champion: selectedFighters[0] });
                 });
@@ -379,7 +376,7 @@ function renderSelectedFighters({
             }
         } else {
             const canFight = selectedFighters.every(Boolean);
-            fightBtn.append(createIcon('swords'), createElement({ tagName: 'span', innerText: 'FIGHT' }));
+            fightBtn.innerText = 'FIGHT';
             if (canFight) {
                 fightBtn.addEventListener('click', () => {
                     startFight(selectedFighters, { isPvE: gameMode === 'pve', difficulty });
