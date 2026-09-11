@@ -275,6 +275,10 @@
     letter-spacing: 0.08em;
     color: #fbbf24;
     text-shadow: 0 0 16px rgba(251, 191, 36, 0.5);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 .tower-modal___title--defeat {
@@ -374,9 +378,17 @@
 
 .tower-ladder___stage-diff {
     font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .tower-ladder___status-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
     font-size: 14px;
 }
 
@@ -502,6 +514,10 @@
 
 .online-modal___tab-btn {
     flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
     padding: 8px 12px;
     background: transparent;
     border: none;
@@ -576,6 +592,10 @@
 
 .online-modal___action-btn {
     flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
     padding: 8px 14px;
     border-radius: 6px;
     background: rgba(255, 255, 255, 0.08);

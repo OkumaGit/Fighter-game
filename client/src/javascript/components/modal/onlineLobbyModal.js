@@ -1,5 +1,6 @@
 import createElement from '../../helpers/domHelper';
 import socketService from '../../services/socketService';
+import { createIcon } from '../../helpers/icons';
 
 export default function showOnlineLobbyModal({ onRoomReady, onCancel }) {
     const root = document.getElementById('root');
@@ -37,14 +38,14 @@ export default function showOnlineLobbyModal({ onRoomReady, onCancel }) {
         className: 'online-modal___tab-btn online-modal___tab-btn--active',
         attributes: { type: 'button' }
     });
-    hostTabBtn.innerText = '👑 Host Match';
+    hostTabBtn.append(createIcon('crown'), createElement({ tagName: 'span', innerText: 'Host Match' }));
 
     const joinTabBtn = createElement({
         tagName: 'button',
         className: 'online-modal___tab-btn',
         attributes: { type: 'button' }
     });
-    joinTabBtn.innerText = '🎮 Join Match';
+    joinTabBtn.append(createIcon('gamepad'), createElement({ tagName: 'span', innerText: 'Join Match' }));
     tabContainer.append(hostTabBtn, joinTabBtn);
 
     // Host Panel
@@ -77,14 +78,14 @@ export default function showOnlineLobbyModal({ onRoomReady, onCancel }) {
         className: 'online-modal___action-btn',
         attributes: { type: 'button' }
     });
-    copyCodeBtn.innerText = '📋 Copy Code';
+    copyCodeBtn.append(createIcon('copy'), createElement({ tagName: 'span', innerText: 'Copy Code' }));
 
     const copyLinkBtn = createElement({
         tagName: 'button',
         className: 'online-modal___action-btn',
         attributes: { type: 'button' }
     });
-    copyLinkBtn.innerText = '🔗 Copy Invite Link';
+    copyLinkBtn.append(createIcon('link'), createElement({ tagName: 'span', innerText: 'Copy Invite Link' }));
     copyBtnRow.append(copyCodeBtn, copyLinkBtn);
 
     const waitingSpinner = createElement({ tagName: 'div', className: 'online-modal___waiting' });
@@ -121,7 +122,7 @@ export default function showOnlineLobbyModal({ onRoomReady, onCancel }) {
         className: 'winner-modal___action-btn online-modal___btn online-modal___btn--join',
         attributes: { type: 'button' }
     });
-    joinBtn.innerText = 'Join Match ⚔️';
+    joinBtn.append(createIcon('swords'), createElement({ tagName: 'span', innerText: 'Join Match' }));
     joinInputGroup.append(codeInput, joinBtn);
 
     const errorMsg = createElement({
@@ -213,9 +214,11 @@ export default function showOnlineLobbyModal({ onRoomReady, onCancel }) {
         if (!currentCode) return;
         try {
             await navigator.clipboard.writeText(currentCode);
-            copyCodeBtn.innerText = '✓ Copied!';
+            copyCodeBtn.innerHTML = '';
+            copyCodeBtn.append(createIcon('check'), createElement({ tagName: 'span', innerText: 'Copied!' }));
             setTimeout(() => {
-                copyCodeBtn.innerText = '📋 Copy Code';
+                copyCodeBtn.innerHTML = '';
+                copyCodeBtn.append(createIcon('copy'), createElement({ tagName: 'span', innerText: 'Copy Code' }));
             }, 1800);
         } catch (err) {
             console.error('Failed to copy', err);
@@ -227,9 +230,14 @@ export default function showOnlineLobbyModal({ onRoomReady, onCancel }) {
         const link = `${window.location.origin}${window.location.pathname}?room=${currentCode}`;
         try {
             await navigator.clipboard.writeText(link);
-            copyLinkBtn.innerText = '✓ Link Copied!';
+            copyLinkBtn.innerHTML = '';
+            copyLinkBtn.append(createIcon('check'), createElement({ tagName: 'span', innerText: 'Link Copied!' }));
             setTimeout(() => {
-                copyLinkBtn.innerText = '🔗 Copy Invite Link';
+                copyLinkBtn.innerHTML = '';
+                copyLinkBtn.append(
+                    createIcon('link'),
+                    createElement({ tagName: 'span', innerText: 'Copy Invite Link' })
+                );
             }, 1800);
         } catch (err) {
             console.error('Failed to copy', err);
@@ -270,7 +278,8 @@ export default function showOnlineLobbyModal({ onRoomReady, onCancel }) {
         errorMsg.innerText = message;
         errorMsg.style.display = 'block';
         joinBtn.disabled = false;
-        joinBtn.innerText = 'Join Match ⚔️';
+        joinBtn.innerHTML = '';
+        joinBtn.append(createIcon('swords'), createElement({ tagName: 'span', innerText: 'Join Match' }));
         createBtn.disabled = false;
         createBtn.innerText = 'Generate Room Code ⚡';
     });

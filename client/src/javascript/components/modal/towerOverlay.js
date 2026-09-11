@@ -1,6 +1,7 @@
 import createElement from '../../helpers/domHelper';
 import { createFighterImage } from '../fighterPreview';
 import { TOWER_STAGE_PROFILES } from '../../game/arcadeManager';
+import { createIcon } from '../../helpers/icons';
 
 function createTowerLadderWidget(currentStageIndex) {
     const ladderContainer = createElement({
@@ -46,18 +47,22 @@ function createTowerLadderWidget(currentStageIndex) {
             tagName: 'span',
             className: 'tower-ladder___stage-diff'
         });
-        diffBadge.innerText = profile.isBoss ? '👑 BOSS' : profile.difficultyName;
+        if (profile.isBoss) {
+            diffBadge.append(createIcon('crown'), createElement({ tagName: 'span', innerText: 'BOSS' }));
+        } else {
+            diffBadge.innerText = profile.difficultyName;
+        }
 
         const statusIcon = createElement({
             tagName: 'span',
             className: 'tower-ladder___status-icon'
         });
         if (i < currentStageIndex) {
-            statusIcon.innerText = '✓';
+            statusIcon.appendChild(createIcon('check'));
         } else if (i === currentStageIndex) {
-            statusIcon.innerText = '⚔️';
+            statusIcon.appendChild(createIcon('swords'));
         } else {
-            statusIcon.innerText = '🔒';
+            statusIcon.appendChild(createIcon('lock'));
         }
 
         rung.append(stageNumber, diffBadge, statusIcon);
@@ -109,7 +114,10 @@ export function showStageClearedModal({ stageIndex, currentOpponent, nextOpponen
         className: 'winner-modal___action-btn tower-modal___btn',
         attributes: { type: 'button' }
     });
-    continueBtn.innerText = `Fight Stage ${stageIndex + 2} ⚔️`;
+    continueBtn.append(
+        createIcon('swords'),
+        createElement({ tagName: 'span', innerText: `Fight Stage ${stageIndex + 2}` })
+    );
 
     const handleContinue = () => {
         layer.remove();
@@ -199,7 +207,11 @@ export function showTowerChampionModal({ champion, onMainMenu }) {
 
     const header = createElement({ tagName: 'div', className: 'modal-header tower-modal___header' });
     const title = createElement({ tagName: 'h2', className: 'tower-modal___title tower-modal___title--champion' });
-    title.innerText = '👑 TOWER CHAMPION 👑';
+    title.append(
+        createIcon('crown'),
+        createElement({ tagName: 'span', innerText: 'TOWER CHAMPION' }),
+        createIcon('crown')
+    );
 
     const subtitle = createElement({ tagName: 'p', className: 'tower-modal___subtitle' });
     subtitle.innerText = 'All 6 stages conquered! You reign supreme in Arena Clash!';
@@ -221,7 +233,7 @@ export function showTowerChampionModal({ champion, onMainMenu }) {
         className: 'winner-modal___action-btn tower-modal___btn tower-modal___btn--champion',
         attributes: { type: 'button' }
     });
-    menuBtn.innerText = '🏆 Return to Main Menu';
+    menuBtn.append(createIcon('crown'), createElement({ tagName: 'span', innerText: 'Return to Main Menu' }));
     menuBtn.addEventListener('click', () => {
         layer.remove();
         if (typeof onMainMenu === 'function') onMainMenu();

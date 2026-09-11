@@ -4,6 +4,7 @@ import { createFighterPanel } from './fighterPreview';
 import { getFighterInfo } from '../game/arcadeManager';
 import socketService from '../services/socketService';
 import showOnlineLobbyModal from './modal/onlineLobbyModal';
+import { createIcon } from '../helpers/icons';
 
 export { getFighterInfo };
 
@@ -43,43 +44,30 @@ function createModeSelector(gameMode, onSelectMode) {
         className: 'preview-container___mode-switch'
     });
 
-    const pvpBtn = createElement({
-        tagName: 'button',
-        className: `preview-container___mode-btn ${gameMode === 'pvp' ? 'preview-container___mode-btn--active' : ''}`,
-        attributes: { type: 'button' }
-    });
-    pvpBtn.innerText = '👥 2 Players';
-    pvpBtn.addEventListener('click', () => onSelectMode('pvp'));
+    const modes = [
+        { id: 'pvp', icon: 'pvp', label: 'Player vs Player' },
+        { id: 'pve', icon: 'pve', label: 'Player vs AI' },
+        { id: 'tower', icon: 'tower', label: 'Tower Mode' },
+        { id: 'online', icon: 'online', label: 'Online 1v1' }
+    ];
 
-    const pveBtn = createElement({
-        tagName: 'button',
-        className: `preview-container___mode-btn ${gameMode === 'pve' ? 'preview-container___mode-btn--active' : ''}`,
-        attributes: { type: 'button' }
+    modes.forEach(({ id, icon, label }) => {
+        const isActive = gameMode === id;
+        const btn = createElement({
+            tagName: 'button',
+            className: `preview-container___mode-btn ${isActive ? 'preview-container___mode-btn--active' : ''}${
+                id === 'tower' && isActive ? ' preview-container___mode-btn--tower' : ''
+            }${id === 'online' && isActive ? ' preview-container___mode-btn--online' : ''}`,
+            attributes: { type: 'button' }
+        });
+        const iconElem = createIcon(icon);
+        const textElem = createElement({ tagName: 'span', className: 'preview-container___mode-text' });
+        textElem.innerText = label;
+        btn.append(iconElem, textElem);
+        btn.addEventListener('click', () => onSelectMode(id));
+        container.appendChild(btn);
     });
-    pveBtn.innerText = '🤖 vs AI';
-    pveBtn.addEventListener('click', () => onSelectMode('pve'));
 
-    const towerBtn = createElement({
-        tagName: 'button',
-        className: `preview-container___mode-btn ${
-            gameMode === 'tower' ? 'preview-container___mode-btn--active preview-container___mode-btn--tower' : ''
-        }`,
-        attributes: { type: 'button' }
-    });
-    towerBtn.innerText = '⚔️ Tower Mode';
-    towerBtn.addEventListener('click', () => onSelectMode('tower'));
-
-    const onlineBtn = createElement({
-        tagName: 'button',
-        className: `preview-container___mode-btn ${
-            gameMode === 'online' ? 'preview-container___mode-btn--active preview-container___mode-btn--online' : ''
-        }`,
-        attributes: { type: 'button' }
-    });
-    onlineBtn.innerText = '🌐 Online 1v1';
-    onlineBtn.addEventListener('click', () => onSelectMode('online'));
-
-    container.append(pvpBtn, pveBtn, towerBtn, onlineBtn);
     return container;
 }
 
@@ -101,12 +89,12 @@ function createDifficultySelector(difficulty, onSelectDifficulty) {
     });
 
     const difficulties = [
-        { id: 'EASY', label: '🟢 Easy' },
-        { id: 'MEDIUM', label: '🟡 Medium' },
-        { id: 'HARD', label: '🔴 Hard' }
+        { id: 'EASY', label: 'Easy', color: '#10b981' },
+        { id: 'MEDIUM', label: 'Medium', color: '#f59e0b' },
+        { id: 'HARD', label: 'Hard', color: '#ef4444' }
     ];
 
-    difficulties.forEach(({ id, label: btnLabel }) => {
+    difficulties.forEach(({ id, label: btnLabel, color }) => {
         const isActive = difficulty === id;
         const activeModifier = isActive
             ? ` preview-container___difficulty-btn--active preview-container___difficulty-btn--${id.toLowerCase()}`
@@ -116,7 +104,15 @@ function createDifficultySelector(difficulty, onSelectDifficulty) {
             className: `preview-container___difficulty-btn${activeModifier}`,
             attributes: { type: 'button' }
         });
-        btn.innerText = btnLabel;
+        const dot = createElement({
+            tagName: 'span',
+            className: 'preview-container___difficulty-dot',
+            attributes: {
+                style: `display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: ${color}; margin-right: 5px;`
+            }
+        });
+        const text = createElement({ tagName: 'span', innerText: btnLabel });
+        btn.append(dot, text);
         btn.addEventListener('click', () => onSelectDifficulty(id));
         buttonsContainer.appendChild(btn);
     });
@@ -221,7 +217,9 @@ function renderSelectedFighters({
                     className: 'preview-container___random-btn',
                     attributes: { type: 'button' }
                 });
-                randomBotBtn.innerText = '🎲 Random Opponent';
+                const diceIcon = createIcon('dice');
+                const btnText = createElement({ tagName: 'span', innerText: 'Random Opponent' });
+                randomBotBtn.append(diceIcon, btnText);
                 randomBotBtn.addEventListener('click', onPickRandomBot);
                 subControls.appendChild(randomBotBtn);
             }
@@ -231,7 +229,12 @@ function renderSelectedFighters({
                 tagName: 'div',
                 className: 'preview-container___tower-badge'
             });
-            towerPill.innerText = '🏛️ 6-STAGE ARCADE LADDER · SCALING AI DIFFICULTY';
+            const towerIcon = createIcon('tower');
+            const pillText = createElement({
+                tagName: 'span',
+                innerText: '6-STAGE ARCADE LADDER · SCALING AI DIFFICULTY'
+            });
+            towerPill.append(towerIcon, pillText);
             headerContainer.appendChild(towerPill);
         } else if (gameMode === 'online') {
             const roleText = onlineRole === 'host' ? 'Player 1 (Host)' : 'Player 2 (Guest)';
@@ -239,7 +242,12 @@ function renderSelectedFighters({
                 tagName: 'div',
                 className: 'preview-container___online-badge'
             });
-            onlinePill.innerText = `🌐 ROOM ${onlineRoomCode || '-----'} · YOU ARE ${roleText.toUpperCase()}`;
+            const onlineIcon = createIcon('online');
+            const pillText = createElement({
+                tagName: 'span',
+                innerText: `ROOM ${onlineRoomCode || '-----'} · YOU ARE ${roleText.toUpperCase()}`
+            });
+            onlinePill.append(onlineIcon, pillText);
             headerContainer.appendChild(onlinePill);
         }
 
@@ -348,16 +356,19 @@ function renderSelectedFighters({
                 fightBtn.disabled = true;
                 fightBtn.classList.add('fighters___fight-btn--disabled');
             } else if (isLocalReady) {
-                fightBtn.innerText = '✓ READY (WAITING...)';
+                fightBtn.append(
+                    createIcon('check'),
+                    createElement({ tagName: 'span', innerText: 'READY (WAITING...)' })
+                );
                 fightBtn.disabled = true;
                 fightBtn.classList.add('fighters___fight-btn--ready');
             } else {
-                fightBtn.innerText = 'CONFIRM FIGHTER ⚔️';
+                fightBtn.append(createIcon('check'), createElement({ tagName: 'span', innerText: 'CONFIRM FIGHTER' }));
                 fightBtn.addEventListener('click', onConfirmOnlineReady);
             }
         } else if (gameMode === 'tower') {
             if (selectedFighters[0]) {
-                fightBtn.innerText = 'ENTER THE TOWER ⚔️';
+                fightBtn.append(createIcon('tower'), createElement({ tagName: 'span', innerText: 'ENTER THE TOWER' }));
                 fightBtn.addEventListener('click', () => {
                     startFight(selectedFighters, { isTower: true, champion: selectedFighters[0] });
                 });
@@ -368,7 +379,7 @@ function renderSelectedFighters({
             }
         } else {
             const canFight = selectedFighters.every(Boolean);
-            fightBtn.innerText = 'FIGHT';
+            fightBtn.append(createIcon('swords'), createElement({ tagName: 'span', innerText: 'FIGHT' }));
             if (canFight) {
                 fightBtn.addEventListener('click', () => {
                     startFight(selectedFighters, { isPvE: gameMode === 'pve', difficulty });

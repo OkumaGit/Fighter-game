@@ -12,18 +12,27 @@
 }
 
 .preview-container___mode-btn {
-    padding: 7px 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
     border: none;
     border-radius: 999px;
     background: transparent;
     color: #94a3b8;
-    font-family: 'Russo One', sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    font-family: 'Oswald', 'Russo One', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 18px;
+    letter-spacing: 0.05em;
     cursor: pointer;
     transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.preview-container___mode-btn .app-icon {
+    width: 14px;
+    height: 14px;
 }
 
 .preview-container___mode-btn:hover {
@@ -34,7 +43,8 @@
 .preview-container___mode-btn--active {
     background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
     color: #1a0e00;
-    box-shadow: 0 2px 12px rgba(245, 158, 11, 0.45);
+    box-shadow: 0px 2px 10px rgba(245, 158, 11, 0.5), inset 0px 1px 0px rgba(255, 255, 255, 0.2);
+    font-weight: 700;
 }
 
 /* Subcontrols row (Difficulty + Random button) */
@@ -47,6 +57,9 @@
 }
 
 .preview-container___random-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     padding: 6px 14px;
     border: 1px solid rgba(251, 191, 36, 0.45);
     border-radius: 999px;
@@ -156,6 +169,7 @@
 .preview-container___tower-badge {
     display: inline-flex;
     align-items: center;
+    gap: 6px;
     padding: 5px 14px;
     background: linear-gradient(135deg, rgba(217, 119, 6, 0.2), rgba(185, 28, 28, 0.3));
     border: 1px solid rgba(245, 158, 11, 0.5);
@@ -179,6 +193,7 @@
 .preview-container___online-badge {
     display: inline-flex;
     align-items: center;
+    gap: 6px;
     padding: 5px 14px;
     background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(59, 130, 246, 0.3));
     border: 1px solid rgba(6, 182, 212, 0.5);
