@@ -47,9 +47,7 @@
   - update classes
   - animate elements
   - react to keyboard input
-  - render sprite-sheet states such as idle, block, hit, critical, and victory
 - They should call the game engine and use its results to render state.
-- Sprite animation is presentation only; the battle engine should not decide frame coordinates or visual poses.
 
 ### 4. Service layer
 
@@ -78,13 +76,11 @@
 
 - Use CSS for positioning, animation, and visual state.
 - Do not create gameplay logic inside CSS or inline scripts.
-- Sprite sheets belong to the UI layer: use background-position / frame stepping for pose animation, not raw combat calculations.
 - Use semantic CSS classes such as:
   - arena\_\_\_fighter
   - arena\_\_\_fighter--hit
   - arena\_\_\_fighter--block
   - arena\_\_\_fighter--critical
-  - arena\_\_\_fighter-sprite
 
 ## Refactoring expectations
 

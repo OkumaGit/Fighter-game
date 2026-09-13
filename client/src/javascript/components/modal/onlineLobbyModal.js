@@ -58,7 +58,7 @@ export default function showOnlineLobbyModal({ onRoomReady, onCancel }) {
         className: 'winner-modal___action-btn online-modal___btn online-modal___btn--create',
         attributes: { type: 'button' }
     });
-    createBtn.innerText = 'Generate Room Code';
+    createBtn.innerText = 'Generate Room Code ⚡';
 
     const hostCodeSection = createElement({
         tagName: 'div',
@@ -122,7 +122,7 @@ export default function showOnlineLobbyModal({ onRoomReady, onCancel }) {
         className: 'winner-modal___action-btn online-modal___btn online-modal___btn--join',
         attributes: { type: 'button' }
     });
-    joinBtn.innerText = 'Join Match';
+    joinBtn.append(createIcon('swords'), createElement({ tagName: 'span', innerText: 'Join Match' }));
     joinInputGroup.append(codeInput, joinBtn);
 
     const errorMsg = createElement({
