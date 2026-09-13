@@ -4,6 +4,16 @@ import showWinnerModal from './modal/winner';
 import { getRandomBattleBackground } from '../helpers/fighterAssets';
 import { getStageProfile, getStageOpponentId, getFighterInfo } from '../game/arcadeManager';
 import { showStageClearedModal, showTowerDefeatModal, showTowerChampionModal } from './modal/towerOverlay';
+import {
+    createRoundMedallions,
+    updateRoundMedallions,
+    createSuperBar,
+    updateSuperBar,
+    updateTimerDisplay,
+    showMatchAnnouncement
+} from './arenaUI';
+
+export { updateRoundMedallions, updateSuperBar, updateTimerDisplay, showMatchAnnouncement };
 
 function createFighter(position) {
     const positionClassName = position === 'right' ? 'arena___right-fighter' : 'arena___left-fighter';
@@ -105,7 +115,10 @@ function createHealthIndicator(fighter, position, options = {}) {
         subBar.append(subBarFill, subBarTrack);
     }
 
-    container.append(headerRow, indicator, subBar);
+    const superBar = createSuperBar(position);
+    const medallions = createRoundMedallions(position);
+
+    container.append(headerRow, indicator, subBar, superBar, medallions);
 
     return container;
 }
@@ -113,6 +126,14 @@ function createHealthIndicator(fighter, position, options = {}) {
 function createHealthIndicators(leftFighter, rightFighter, options = {}) {
     const healthIndicators = createElement({ tagName: 'div', className: 'arena___fight-status' });
     const centerBlock = createElement({ tagName: 'div', className: 'arena___center-status' });
+    const timerElement = createElement({
+        tagName: 'div',
+        className: 'arena___fight-timer',
+        attributes: { id: 'arena-fight-timer' }
+    });
+    timerElement.innerText = '99';
+    centerBlock.appendChild(timerElement);
+
     const versusSign = createElement({ tagName: 'div', className: 'arena___versus-sign' });
     versusSign.innerText = 'VS';
     centerBlock.appendChild(versusSign);
@@ -166,15 +187,16 @@ function createArena(selectedFighters, options = {}) {
     });
 
     let player2Controls =
-        '<strong>Player 2</strong><span>Left / Right move</span><span>Down block</span><span>Numpad 1 jab</span><span>Numpad 2 kick</span><span>Up jump</span>';
+        '<strong>Player 2</strong><span>Arrows move (double-tap dash)</span><span>Down crouch / block</span><span>Numpad 1 jab</span><span>Numpad 2 kick</span><span>Numpad 3 special</span><span>Up jump</span><span>Down+Jab uppercut</span><span>Forward+Jab throw</span>';
     if (options.isOnline) {
         player2Controls = '<strong>Remote Opponent</strong><span>Synced in real-time over WebSockets</span>';
     } else if (options.isPvE || options.isTower) {
-        player2Controls = '<strong>Computer (AI)</strong><span>Controlled automatically by AI Bot</span>';
+        player2Controls =
+            '<strong>Computer (AI)</strong><span>Controlled automatically by AI Bot (combos, duck, special)</span>';
     }
 
     hotkeysPanel.innerHTML = `
-        <strong>Player 1</strong><span>A / D move</span><span>S block</span><span>J jab</span><span>K kick</span><span>Space jump</span>
+        <strong>Player 1</strong><span>A / D move (double-tap dash)</span><span>S crouch / block</span><span>J jab / combos</span><span>K kick</span><span>U special move</span><span>Space jump</span><span>S+J uppercut</span><span>D+J throw</span>
         ${player2Controls}
     `;
     hotkeysButton.addEventListener('click', () => {

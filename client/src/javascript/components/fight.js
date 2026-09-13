@@ -4,12 +4,15 @@ import {
     rectangularCollision,
     startAttack,
     setBlocking,
+    startDash,
     takeDamage,
     updateAttackBox
 } from '../game/battleEngine';
 import { getBattleFrameSource, getBattleSpriteConfig } from '../helpers/fighterAssets';
 import createBotController from '../game/botController';
 import showCountdownOverlay from './modal/countdownModal';
+import createVFXManager from '../game/vfxEngine';
+import { updateRoundMedallions, showMatchAnnouncement, updateSuperBar, updateTimerDisplay } from './arenaUI';
 
 /* eslint-disable no-param-reassign */
 
@@ -86,13 +89,69 @@ function setStatus(position, className) {
     if (className) element.classList.add(className);
 }
 
+function drawDizzyStars(context, fighter) {
+    const headX = fighter.position.x + fighterWidth / 2;
+    const headY = fighter.position.y + 12;
+    const time = performance.now() / 200;
+    const starCount = 4;
+    const rx = 42;
+    const ry = 14;
+
+    context.save();
+    for (let i = 0; i < starCount; i += 1) {
+        const angle = time + (i * Math.PI * 2) / starCount;
+        const starX = headX + Math.cos(angle) * rx;
+        const starY = headY + Math.sin(angle) * ry;
+
+        const depth = (Math.sin(angle) + 1) / 2;
+        const size = 4.5 + depth * 2.5;
+
+        context.save();
+        context.translate(starX, starY);
+        context.rotate(time * 2.5 + i);
+
+        context.fillStyle = depth > 0.4 ? '#fef08a' : '#facc15';
+        context.shadowColor = '#eab308';
+        context.shadowBlur = 10;
+
+        context.beginPath();
+        for (let p = 0; p < 4; p += 1) {
+            const a = (p * Math.PI) / 2;
+            const outerX = Math.cos(a) * size;
+            const outerY = Math.sin(a) * size;
+            const innerA = a + Math.PI / 4;
+            const innerX = Math.cos(innerA) * (size * 0.4);
+            const innerY = Math.sin(innerA) * (size * 0.4);
+            if (p === 0) {
+                context.moveTo(outerX, outerY);
+            } else {
+                context.lineTo(outerX, outerY);
+            }
+            context.lineTo(innerX, innerY);
+        }
+        context.closePath();
+        context.fill();
+
+        context.fillStyle = '#ffffff';
+        context.shadowBlur = 4;
+        context.beginPath();
+        context.arc(0, 0, size * 0.28, 0, Math.PI * 2);
+        context.fill();
+
+        context.restore();
+    }
+    context.restore();
+}
+
 function drawFighter(context, fighter) {
-    const pose = fighter.state === 'hit' ? 'idle' : fighter.state;
+    let pose = fighter.state === 'hit' ? 'idle' : fighter.state;
+    if (pose === 'crouch') pose = 'block';
     const image = getFrame(fighter, pose, fighter.currentFrame);
     if (!image.complete || image.naturalWidth === 0) return;
 
     context.save();
     context.imageSmoothingEnabled = true;
+
     if (fighter.facingLeft) {
         context.translate(fighter.position.x + fighterWidth, fighter.position.y);
         context.scale(-1, 1);
@@ -111,6 +170,10 @@ function drawFighter(context, fighter) {
         );
     }
     context.restore();
+
+    if (fighter.isDizzy) {
+        drawDizzyStars(context, fighter);
+    }
 }
 
 function getMovement(side, pressedKeys) {
@@ -155,41 +218,133 @@ function animateFighter(fighter, elapsed) {
         fighter.attackType = null;
         if (fighter.isBlocking) {
             fighter.state = 'block';
-        } else if (fighter.isGrounded) {
-            fighter.state = 'idle';
         } else {
-            fighter.state = 'jump';
+            fighter.state = fighter.isGrounded ? 'idle' : 'jump';
         }
         fighter.currentFrame = 0;
     }
 }
 
-function moveFighter(fighter, direction, elapsed, canvasWidth, groundY) {
+function moveFighter(fighter, direction, elapsed, canvasWidth, groundY, vfx) {
+    const timeScale = elapsed / 16;
+
+    if (fighter.dashTimer > 0) {
+        fighter.dashTimer -= elapsed;
+        if (fighter.dashTimer <= 0) {
+            fighter.isDashing = false;
+        }
+    }
+
+    if (fighter.specialCooldownTimer > 0) {
+        fighter.specialCooldownTimer -= elapsed;
+        if (fighter.specialCooldownTimer < 0) fighter.specialCooldownTimer = 0;
+    }
+
+    if (fighter.comboTimer > 0) {
+        fighter.comboTimer -= elapsed;
+        if (fighter.comboTimer <= 0) {
+            fighter.comboStreak = 0;
+        }
+    }
+
     if (fighter.velocity.x) {
-        fighter.position.x += fighter.velocity.x * (elapsed / 16);
-        fighter.velocity.x *= 0.82;
+        fighter.position.x += fighter.velocity.x * timeScale;
+        fighter.velocity.x *= fighter.isDashing ? 0.94 : 0.82;
         if (Math.abs(fighter.velocity.x) < 0.2) {
             fighter.velocity.x = 0;
         }
     }
 
-    if (direction && !fighter.isAttacking && !fighter.isBlocking && fighter.state !== 'hit') {
-        fighter.position.x += direction * fighter.speed * (elapsed / 16);
+    if (
+        direction &&
+        !fighter.isAttacking &&
+        !fighter.isBlocking &&
+        !fighter.isCrouching &&
+        fighter.state !== 'hit' &&
+        !fighter.isDizzy
+    ) {
+        fighter.position.x += direction * fighter.speed * timeScale;
         fighter.facingLeft = direction < 0;
     }
 
-    fighter.velocity.y += 0.7 * (elapsed / 16);
-    fighter.position.y += fighter.velocity.y * (elapsed / 16);
+    const prevGrounded = fighter.isGrounded;
+    const gravity = fighter.isJuggled ? 0.52 : 0.7;
+    fighter.velocity.y += gravity * timeScale;
+    fighter.position.y += fighter.velocity.y * timeScale;
+
     if (fighter.position.y >= groundY) {
         fighter.position.y = groundY;
         fighter.velocity.y = 0;
         fighter.isGrounded = true;
+        fighter.isJuggled = false;
+        if (!prevGrounded && vfx) {
+            vfx.spawnDust(fighter.position.x + fighterWidth / 2, groundY + fighterHeight - 20, 0);
+        }
     } else {
         fighter.isGrounded = false;
     }
 
     fighter.position.x = Math.max(20, Math.min(canvasWidth - fighterWidth - 20, fighter.position.x));
     updateAttackBox(fighter);
+}
+
+function executeSpecialMove(side, state, vfx) {
+    const fighter = state[side];
+    const opponentSide = side === 'left' ? 'right' : 'left';
+    const opponent = state[opponentSide];
+    const special = fighter.specialMove;
+    if (!special) return;
+
+    fighter.specialCooldownTimer = special.cooldown || 4000;
+    vfx.spawnFloatingText(
+        fighter.position.x + fighterWidth / 2,
+        fighter.position.y + 40,
+        special.name.toUpperCase(),
+        'special'
+    );
+
+    if (special.type === 'projectile' || special.type === 'ground_wave') {
+        const spawnX = fighter.facingLeft ? fighter.position.x + 20 : fighter.position.x + fighterWidth - 20;
+        const spawnY = fighter.position.y + 115;
+
+        vfx.spawnProjectile(side, spawnX, spawnY, fighter.facingLeft, {
+            speed: special.speed,
+            radius: special.radius,
+            color: special.color,
+            secondaryColor: special.secondaryColor,
+            damage: special.damage,
+            isLow: special.isLow
+        });
+        vfx.triggerScreenShake('light');
+    } else if (special.type === 'teleport') {
+        vfx.spawnDust(fighter.position.x + fighterWidth / 2, fighter.position.y + fighterHeight - 30, 0);
+        for (let i = 0; i < 18; i += 1) {
+            vfx.spawnHitSparks(
+                fighter.position.x + fighterWidth / 2,
+                fighter.position.y + fighterHeight / 2,
+                false,
+                true
+            );
+        }
+        const behindOffset = opponent.facingLeft ? 120 : -120;
+        fighter.position.x = Math.max(40, Math.min(1060, opponent.position.x + behindOffset));
+        fighter.facingLeft = fighter.position.x > opponent.position.x;
+        vfx.triggerScreenShake('light');
+    } else if (special.type === 'dash_strike') {
+        const dir = fighter.facingLeft ? -1 : 1;
+        fighter.velocity.x = dir * 16;
+        fighter.isDashing = true;
+        fighter.dashTimer = 220;
+        vfx.triggerScreenShake('medium');
+        for (let i = 0; i < 12; i += 1) {
+            vfx.spawnHitSparks(
+                fighter.position.x + fighterWidth / 2,
+                fighter.position.y + fighterHeight / 2,
+                false,
+                true
+            );
+        }
+    }
 }
 
 export default async function fight(firstFighter, secondFighter, options = {}) {
@@ -200,21 +355,56 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
 
     const canvas = document.querySelector('.arena___canvas');
     const context = canvas.getContext('2d');
+    const vfx = createVFXManager(canvas, context);
+
     const pressedKeys = new Set();
     const remoteKeys = new Set();
     const criticalSequence = { left: [], right: [] };
     const lastCriticalHit = { left: 0, right: 0 };
+    const lastTapTimes = {
+        PlayerOneLeft: 0,
+        PlayerOneRight: 0,
+        PlayerTwoLeft: 0,
+        PlayerTwoRight: 0
+    };
+    const comboChain = {
+        left: { step: 0, timer: 0 },
+        right: { step: 0, timer: 0 }
+    };
+
     let animationFrame;
     let previousTime = performance.now();
     let lastSyncTime = 0;
     let finished = false;
 
+    // Best of 3, Super Meter, & 99s Timer
+    const roundScores = { left: 0, right: 0 };
+    let currentRound = 1;
+    let roundTransitionActive = false;
+    let finishHimActive = false;
+    let finishHimOverlay = null;
+    let finishHimTimeout = null;
+    let matchTimer = 99;
+    let timerInterval = null;
+
+    updateRoundMedallions('left', 0);
+    updateRoundMedallions('right', 0);
+    updateSuperBar('left', 0);
+    updateSuperBar('right', 0);
+    updateTimerDisplay(99);
+
+    const sideMargin = 120;
+    const initialCanvasWidth = canvas.clientWidth || 1200;
+    const initialCanvasHeight = canvas.clientHeight || 560;
+    canvas.width = initialCanvasWidth;
+    canvas.height = initialCanvasHeight;
+
     const getGroundY = () => canvas.height - fighterHeight - 20;
 
     state.left.side = 'left';
     state.right.side = 'right';
-    state.left.position = { x: 180, y: getGroundY() };
-    state.right.position = { x: canvas.width - fighterWidth - 180, y: getGroundY() };
+    state.left.position = { x: sideMargin, y: getGroundY() };
+    state.right.position = { x: canvas.width - fighterWidth - sideMargin, y: getGroundY() };
     state.left.facingLeft = false;
     state.right.facingLeft = true;
     state.left.speed = 4;
@@ -232,12 +422,6 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
     updateHealthBar('left', state.left);
     updateHealthBar('right', state.right);
 
-    const initialCanvasWidth = canvas.clientWidth || canvas.width;
-    canvas.width = initialCanvasWidth;
-    canvas.height = canvas.clientHeight || 560;
-    const initialGroundY = getGroundY();
-    state.left.position.y = initialGroundY;
-    state.right.position.y = initialGroundY;
     context.clearRect(0, 0, canvas.width, canvas.height);
     drawFighter(context, state.left);
     drawFighter(context, state.right);
@@ -246,6 +430,23 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
         showCountdownOverlay(resolve);
     });
 
+    // Re-verify canvas dimensions after countdown in case DOM layout settled
+    const actualWidth = canvas.clientWidth || canvas.width;
+    const actualHeight = canvas.clientHeight || canvas.height;
+    if (actualWidth && actualHeight && (canvas.width !== actualWidth || canvas.height !== actualHeight)) {
+        canvas.width = actualWidth;
+        canvas.height = actualHeight;
+    }
+    state.left.position.x = sideMargin;
+    state.left.position.y = getGroundY();
+    state.right.position.x = canvas.width - fighterWidth - sideMargin;
+    state.right.position.y = getGroundY();
+    state.left.facingLeft = false;
+    state.right.facingLeft = true;
+    updateAttackBox(state.left);
+    updateAttackBox(state.right);
+
+    showMatchAnnouncement('ROUND 1 · FIGHT!', 'round', 1300);
     previousTime = performance.now();
 
     return new Promise(resolve => {
@@ -256,6 +457,9 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
         const finishFight = winner => {
             if (finished) return;
             finished = true;
+            if (timerInterval) clearInterval(timerInterval);
+            if (finishHimTimeout) clearTimeout(finishHimTimeout);
+            if (finishHimOverlay) finishHimOverlay.remove();
             cancelAnimationFrame(animationFrame);
             // eslint-disable-next-line no-use-before-define
             document.removeEventListener('keydown', handleKeyDown);
@@ -271,8 +475,205 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
             resolve(winner);
         };
 
+        const onRoundEnd = roundWinnerSide => {
+            roundScores[roundWinnerSide] += 1;
+            updateRoundMedallions(roundWinnerSide, roundScores[roundWinnerSide]);
+
+            const winnerFighter = state[roundWinnerSide];
+            showMatchAnnouncement(`ROUND ${currentRound} · ${winnerFighter.name.toUpperCase()} WINS`, 'round', 1700);
+
+            roundTransitionActive = true;
+            setTimeout(() => {
+                if (finished) return;
+
+                currentRound += 1;
+                state.left.health = 100;
+                state.right.health = 100;
+                state.left.position = { x: sideMargin, y: getGroundY() };
+                state.right.position = { x: canvas.width - fighterWidth - sideMargin, y: getGroundY() };
+                state.left.velocity = { x: 0, y: 0 };
+                state.right.velocity = { x: 0, y: 0 };
+                state.left.facingLeft = false;
+                state.right.facingLeft = true;
+                state.left.state = 'idle';
+                state.right.state = 'idle';
+                state.left.isAttacking = false;
+                state.right.isAttacking = false;
+                state.left.isBlocking = false;
+                state.right.isBlocking = false;
+                state.left.isCrouching = false;
+                state.right.isCrouching = false;
+                state.left.isDizzy = false;
+                state.right.isDizzy = false;
+                state.left.isGrounded = true;
+                state.right.isGrounded = true;
+                updateAttackBox(state.left);
+                updateAttackBox(state.right);
+                updateHealthBar('left', state.left);
+                updateHealthBar('right', state.right);
+                updateSuperBar('left', state.left.superMeter || 0);
+                updateSuperBar('right', state.right.superMeter || 0);
+                vfx.projectiles.length = 0;
+
+                const nextRoundName =
+                    roundScores.left === 1 && roundScores.right === 1 ? 'FINAL ROUND' : `ROUND ${currentRound}`;
+                showMatchAnnouncement(`${nextRoundName} · FIGHT!`, 'round', 1200);
+
+                // Reset and start 99-second fight timer for the new round
+                // eslint-disable-next-line no-use-before-define
+                startRoundTimer();
+
+                setTimeout(() => {
+                    roundTransitionActive = false;
+                }, 1200);
+            }, 1800);
+        };
+
+        const handleTimeOver = () => {
+            if (finished || roundTransitionActive || finishHimActive) return;
+            showMatchAnnouncement('TIME OVER!', 'round', 2000);
+            vfx.triggerScreenShake('medium');
+
+            setTimeout(() => {
+                if (finished) return;
+                const p1Health = state.left.health;
+                const p2Health = state.right.health;
+
+                let roundWinnerSide = 'left';
+                if (p2Health > p1Health) {
+                    roundWinnerSide = 'right';
+                } else if (p1Health === p2Health) {
+                    roundWinnerSide = Math.random() < 0.5 ? 'left' : 'right';
+                }
+
+                const isMatchDeciding = roundScores[roundWinnerSide] + 1 >= 2;
+                if (isMatchDeciding) {
+                    const loserSide = roundWinnerSide === 'left' ? 'right' : 'left';
+                    state[loserSide].health = 0;
+                    updateHealthBar(loserSide, state[loserSide]);
+                    finishFight(state[roundWinnerSide]);
+                } else {
+                    onRoundEnd(roundWinnerSide);
+                }
+            }, 1600);
+        };
+
+        const startRoundTimer = () => {
+            if (timerInterval) clearInterval(timerInterval);
+            matchTimer = 99;
+            updateTimerDisplay(matchTimer);
+
+            timerInterval = setInterval(() => {
+                if (finished || roundTransitionActive || finishHimActive) return;
+                matchTimer -= 1;
+                updateTimerDisplay(matchTimer);
+
+                if (matchTimer <= 0) {
+                    clearInterval(timerInterval);
+                    handleTimeOver();
+                }
+            }, 1000);
+        };
+
+        // Start countdown timer for Round 1
+        startRoundTimer();
+
         const beginAttack = (side, type) => {
+            if (roundTransitionActive) return;
             state[side] = startAttack(state[side], type);
+        };
+
+        const checkDoubleTap = keyName => {
+            const now = performance.now();
+            const prev = lastTapTimes[keyName] || 0;
+            lastTapTimes[keyName] = now;
+            return now - prev < 270;
+        };
+
+        const handleAttackInput = (side, attackType, forwardKey, blockKey) => {
+            if (roundTransitionActive || state[side].health <= 0 || state[side].isDizzy) return;
+            const oppSide = side === 'left' ? 'right' : 'left';
+            const dist = Math.abs(state[side].position.x - state[oppSide].position.x);
+            const isHoldingForward = pressedKeys.has(forwardKey);
+            const isHoldingBlock = pressedKeys.has(blockKey) || state[side].isBlocking;
+
+            if (attackType === 'jab') {
+                if (isHoldingBlock) {
+                    beginAttack(side, 'uppercut');
+                } else if (dist < 88 && isHoldingForward) {
+                    beginAttack(side, 'throw');
+                } else if (comboChain[side].step === 1 && comboChain[side].timer > 0) {
+                    beginAttack(side, 'jab2');
+                    comboChain[side].step = 2;
+                    comboChain[side].timer = 360;
+                } else {
+                    beginAttack(side, 'jab');
+                    comboChain[side].step = 1;
+                    comboChain[side].timer = 360;
+                }
+            } else if (attackType === 'kick') {
+                beginAttack(side, 'kick');
+                comboChain[side].step = 0;
+                comboChain[side].timer = 0;
+            } else if (attackType === 'special') {
+                if ((state[side].specialCooldownTimer || 0) <= 0) {
+                    beginAttack(side, 'special');
+                    executeSpecialMove(side, state, vfx);
+                }
+            }
+        };
+
+        const onFatalKnockout = (winner, loser) => {
+            if (finishHimTimeout) clearTimeout(finishHimTimeout);
+            loser.isDizzy = false;
+            loser.health = 0;
+            updateHealthBar(loser.side, loser);
+            vfx.triggerScreenShake('heavy');
+            vfx.triggerHitStop(140);
+
+            vfx.spawnBlood(
+                loser.position.x + fighterWidth / 2,
+                loser.position.y + 70,
+                loser.position.x >= winner.position.x ? 1 : -1,
+                'fatal'
+            );
+            vfx.spawnFloatingText(loser.position.x + fighterWidth / 2, loser.position.y, 'FATAL BLOW!', 'crit');
+
+            if (finishHimOverlay) {
+                const flawless = winner.health === 100;
+                const winText = flawless
+                    ? `${winner.name.toUpperCase()} WINS!\nFLAWLESS VICTORY`
+                    : `${winner.name.toUpperCase()} WINS!`;
+                finishHimOverlay.updateText(winText, 'winner');
+            }
+
+            setTimeout(() => {
+                if (finishHimOverlay) finishHimOverlay.remove();
+                finishFight(winner);
+            }, 2400);
+        };
+
+        const handleFighterHealthDepleted = (winnerSide, loserSide) => {
+            const isMatchDeciding = roundScores[winnerSide] + 1 >= 2;
+
+            if (isMatchDeciding && !finishHimActive) {
+                finishHimActive = true;
+                state[loserSide].isDizzy = true;
+                state[loserSide].health = 1;
+                state[loserSide].state = 'idle';
+                updateHealthBar(loserSide, state[loserSide]);
+
+                finishHimOverlay = showMatchAnnouncement('FINISH HIM!', 'finish', 0);
+
+                finishHimTimeout = setTimeout(() => {
+                    if (!finished) {
+                        if (finishHimOverlay) finishHimOverlay.remove();
+                        finishFight(state[winnerSide]);
+                    }
+                }, 5000);
+            } else {
+                onRoundEnd(winnerSide);
+            }
         };
 
         if (isOnline && socket) {
@@ -283,9 +684,14 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                     const isJab = code === controls.PlayerOneJab || code === controls.PlayerTwoJab;
                     const isKick = code === controls.PlayerOneKick || code === controls.PlayerTwoKick;
                     const isJump = code === controls.PlayerOneJump || code === controls.PlayerTwoJump;
+                    const isSpecial = code === controls.PlayerOneSpecial || code === controls.PlayerTwoSpecial;
 
                     if (isJab) beginAttack(remoteSide, 'jab');
                     if (isKick) beginAttack(remoteSide, 'kick');
+                    if (isSpecial) {
+                        beginAttack(remoteSide, 'special');
+                        executeSpecialMove(remoteSide, state, vfx);
+                    }
                     if (isJump && state[remoteSide].isGrounded && state[remoteSide].state !== 'hit') {
                         state[remoteSide].velocity.y = -13;
                     }
@@ -339,21 +745,111 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
             criticalSequence[side].push(key);
             if (criticalSequence[side].length > combination.length) criticalSequence[side].shift();
             const isReady = combination.every((value, index) => criticalSequence[side][index] === value);
-            if (!isReady || Date.now() - lastCriticalHit[side] < 10000) return;
+            if (!isReady) return;
 
-            const defenderSide = side === 'left' ? 'right' : 'left';
             const attacker = state[side];
-            state[defenderSide] = takeDamage(state[defenderSide], attacker.attack * 2, attacker.position.x);
+            const defenderSide = side === 'left' ? 'right' : 'left';
+            const defender = state[defenderSide];
+
+            if (roundTransitionActive || attacker.health <= 0 || attacker.isDizzy) return;
+
+            // Check Super Meter: requires full 100% meter
+            const currentMeter = attacker.superMeter || 0;
+            if (currentMeter < 100) {
+                vfx.spawnFloatingText(
+                    attacker.position.x + fighterWidth / 2,
+                    attacker.position.y + 40,
+                    'METER NOT FULL',
+                    'block'
+                );
+                return;
+            }
+
+            // Check Melee Distance: must be in close melee proximity (<= 140px)
+            const distance = Math.abs(attacker.position.x - defender.position.x);
+            if (distance > 140) {
+                vfx.spawnFloatingText(
+                    attacker.position.x + fighterWidth / 2,
+                    attacker.position.y + 40,
+                    'TOO FAR!',
+                    'block'
+                );
+                return;
+            }
+
+            if (Date.now() - lastCriticalHit[side] < 2000) return;
+
+            // Consume 100% Super Meter
+            attacker.superMeter = 0;
+            updateSuperBar(side, 0);
+
+            // Execute Critical Super Strike (24 damage, unblockable MK3 super strike)
+            state[defenderSide] = takeDamage(state[defenderSide], 24, attacker.position.x, {
+                isUnblockable: true
+            });
             updateHealthBar(defenderSide, state[defenderSide]);
             setStatus(defenderSide, 'arena___fighter--critical');
+            vfx.triggerScreenShake('heavy');
+            vfx.triggerHitStop(130);
+            vfx.spawnFloatingText(
+                defender.position.x + fighterWidth / 2,
+                defender.position.y + 40,
+                'CRITICAL SUPER!',
+                'crit'
+            );
+            vfx.spawnBlood(
+                defender.position.x + fighterWidth / 2,
+                defender.position.y + 70,
+                defender.position.x >= attacker.position.x ? 1 : -1,
+                'heavy'
+            );
+            vfx.spawnHitSparks(defender.position.x + fighterWidth / 2, defender.position.y + 100, false, true);
             lastCriticalHit[side] = Date.now();
             criticalSequence[side] = [];
-            if (state[defenderSide].health <= 0) finishFight(attacker);
+
+            if (state[defenderSide].isDizzy) {
+                onFatalKnockout(attacker, state[defenderSide]);
+            } else if (state[defenderSide].health <= 0) {
+                handleFighterHealthDepleted(side, defenderSide);
+            }
         };
 
         const handleKeyDown = event => {
             pressedKeys.add(event.code);
             handleCriticalInput(event.code);
+
+            // Double-tap dashes
+            if (event.code === controls.PlayerOneLeft && checkDoubleTap('PlayerOneLeft')) {
+                state.left = startDash(state.left, -1);
+                vfx.spawnDust(state.left.position.x + fighterWidth / 2, state.left.position.y + fighterHeight - 20, -1);
+            } else if (event.code === controls.PlayerOneRight && checkDoubleTap('PlayerOneRight')) {
+                state.left = startDash(state.left, 1);
+                vfx.spawnDust(state.left.position.x + fighterWidth / 2, state.left.position.y + fighterHeight - 20, 1);
+            } else if (
+                !isPvE &&
+                !isOnline &&
+                event.code === controls.PlayerTwoLeft &&
+                checkDoubleTap('PlayerTwoLeft')
+            ) {
+                state.right = startDash(state.right, -1);
+                vfx.spawnDust(
+                    state.right.position.x + fighterWidth / 2,
+                    state.right.position.y + fighterHeight - 20,
+                    -1
+                );
+            } else if (
+                !isPvE &&
+                !isOnline &&
+                event.code === controls.PlayerTwoRight &&
+                checkDoubleTap('PlayerTwoRight')
+            ) {
+                state.right = startDash(state.right, 1);
+                vfx.spawnDust(
+                    state.right.position.x + fighterWidth / 2,
+                    state.right.position.y + fighterHeight - 20,
+                    1
+                );
+            }
 
             if (isOnline) {
                 if (socket && roomCode) {
@@ -363,9 +859,12 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                 const isJab = event.code === controls.PlayerOneJab || event.code === controls.PlayerTwoJab;
                 const isKick = event.code === controls.PlayerOneKick || event.code === controls.PlayerTwoKick;
                 const isJump = event.code === controls.PlayerOneJump || event.code === controls.PlayerTwoJump;
+                const isSpecial = event.code === controls.PlayerOneSpecial || event.code === controls.PlayerTwoSpecial;
 
-                if (isJab) beginAttack(localSide, 'jab');
-                if (isKick) beginAttack(localSide, 'kick');
+                if (isJab) handleAttackInput(localSide, 'jab', controls.PlayerOneRight, controls.PlayerOneBlock);
+                if (isKick) handleAttackInput(localSide, 'kick', controls.PlayerOneRight, controls.PlayerOneBlock);
+                if (isSpecial)
+                    handleAttackInput(localSide, 'special', controls.PlayerOneRight, controls.PlayerOneBlock);
                 if (isJump && state[localSide].isGrounded && state[localSide].state !== 'hit') {
                     state[localSide].velocity.y = -13;
                 }
@@ -373,25 +872,44 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                 return;
             }
 
-            if (event.code === controls.PlayerOneJab) beginAttack('left', 'jab');
-            if (event.code === controls.PlayerOneKick) beginAttack('left', 'kick');
-            if (!isPvE && event.code === controls.PlayerTwoJab) beginAttack('right', 'jab');
-            if (!isPvE && event.code === controls.PlayerTwoKick) beginAttack('right', 'kick');
-            if (event.code === controls.PlayerOneJump && state.left.isGrounded && state.left.state !== 'hit')
+            // Player 1 Attacks
+            if (event.code === controls.PlayerOneJab) {
+                handleAttackInput('left', 'jab', controls.PlayerOneRight, controls.PlayerOneBlock);
+            }
+            if (event.code === controls.PlayerOneKick) {
+                handleAttackInput('left', 'kick', controls.PlayerOneRight, controls.PlayerOneBlock);
+            }
+            if (event.code === controls.PlayerOneSpecial) {
+                handleAttackInput('left', 'special', controls.PlayerOneRight, controls.PlayerOneBlock);
+            }
+            if (event.code === controls.PlayerOneJump && state.left.isGrounded && state.left.state !== 'hit') {
                 state.left.velocity.y = -13;
-            if (
-                !isPvE &&
-                event.code === controls.PlayerTwoJump &&
-                state.right.isGrounded &&
-                state.right.state !== 'hit'
-            )
-                state.right.velocity.y = -13;
-            if (event.code === controls.PlayerOneJump || (!isPvE && event.code === controls.PlayerTwoJump))
+            }
+
+            // Player 2 Local Attacks
+            if (!isPvE) {
+                if (event.code === controls.PlayerTwoJab) {
+                    handleAttackInput('right', 'jab', controls.PlayerTwoLeft, controls.PlayerTwoBlock);
+                }
+                if (event.code === controls.PlayerTwoKick) {
+                    handleAttackInput('right', 'kick', controls.PlayerTwoLeft, controls.PlayerTwoBlock);
+                }
+                if (event.code === controls.PlayerTwoSpecial) {
+                    handleAttackInput('right', 'special', controls.PlayerTwoLeft, controls.PlayerTwoBlock);
+                }
+                if (event.code === controls.PlayerTwoJump && state.right.isGrounded && state.right.state !== 'hit') {
+                    state.right.velocity.y = -13;
+                }
+            }
+
+            if (event.code === controls.PlayerOneJump || (!isPvE && event.code === controls.PlayerTwoJump)) {
                 event.preventDefault();
+            }
         };
 
         const handleKeyUp = event => {
             pressedKeys.delete(event.code);
+
             if (isOnline && socket && roomCode) {
                 socket.emit('player-input', { roomCode, type: 'keyup', code: event.code });
             }
@@ -401,13 +919,46 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
             if (finished) return;
             const elapsed = Math.min(40, time - previousTime);
             previousTime = time;
-            const canvasWidth = canvas.clientWidth || canvas.width;
-            canvas.width = canvasWidth;
-            canvas.height = canvas.clientHeight || 560;
+            const clientW = canvas.clientWidth || canvas.width;
+            const clientH = canvas.clientHeight || 560;
+            if (clientW && (canvas.width !== clientW || canvas.height !== clientH)) {
+                canvas.width = clientW;
+                canvas.height = clientH;
+            }
             const groundY = getGroundY();
             if (state.left.isGrounded) state.left.position.y = groundY;
             if (state.right.isGrounded) state.right.position.y = groundY;
             context.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Decrement combo chain timers
+            ['left', 'right'].forEach(side => {
+                if (comboChain[side].timer > 0) {
+                    comboChain[side].timer -= elapsed;
+                    if (comboChain[side].timer <= 0) {
+                        comboChain[side].step = 0;
+                    }
+                }
+            });
+
+            vfx.update(elapsed);
+
+            // Hit-Stop micro-freeze check
+            if (vfx.isHitStopped()) {
+                drawFighter(context, state.left);
+                drawFighter(context, state.right);
+                vfx.draw();
+                animationFrame = requestAnimationFrame(loop);
+                return;
+            }
+
+            // Pause physical updates during round reset
+            if (roundTransitionActive) {
+                drawFighter(context, state.left);
+                drawFighter(context, state.right);
+                vfx.draw();
+                animationFrame = requestAnimationFrame(loop);
+                return;
+            }
 
             let leftMovement = 0;
             let rightMovement = 0;
@@ -429,7 +980,6 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                     const remoteP2 = getMovement('right', remoteKeys);
                     rightMovement = remoteP1 || remoteP2;
 
-                    // Authoritative host sends sync-state periodically
                     if (socket && roomCode && time - lastSyncTime > 50) {
                         lastSyncTime = time;
                         socket.emit('sync-state', {
@@ -476,11 +1026,24 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                 leftMovement = getMovement('left', pressedKeys);
 
                 bot.update(elapsed, state.right, state.left, canvas.width, {
-                    beginAttack: type => beginAttack('right', type),
+                    beginAttack: type => {
+                        beginAttack('right', type);
+                        if (type === 'special') {
+                            executeSpecialMove('right', state, vfx);
+                        }
+                    },
                     jump: () => {
-                        if (state.right.isGrounded && state.right.state !== 'hit') {
+                        if (state.right.isGrounded && state.right.state !== 'hit' && !state.right.isDizzy) {
                             state.right.velocity.y = -13;
                         }
+                    },
+                    dash: direction => {
+                        state.right = startDash(state.right, direction);
+                        vfx.spawnDust(
+                            state.right.position.x + fighterWidth / 2,
+                            state.right.position.y + fighterHeight - 20,
+                            direction
+                        );
                     }
                 });
                 state.right = setBlocking(state.right, bot.isBlockingState());
@@ -493,16 +1056,70 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                 rightMovement = getMovement('right', pressedKeys);
             }
 
-            moveFighter(state.left, leftMovement, elapsed, canvas.width, groundY);
-            moveFighter(state.right, rightMovement, elapsed, canvas.width, groundY);
+            moveFighter(state.left, leftMovement, elapsed, canvas.width, groundY, vfx);
+            moveFighter(state.right, rightMovement, elapsed, canvas.width, groundY, vfx);
 
-            if (!state.left.isAttacking && state.left.state !== 'hit') {
+            if (!state.left.isAttacking && state.left.state !== 'hit' && !state.left.isDizzy) {
                 state.left.facingLeft = state.left.position.x > state.right.position.x;
             }
-            if (!state.right.isAttacking && state.right.state !== 'hit') {
+            if (!state.right.isAttacking && state.right.state !== 'hit' && !state.right.isDizzy) {
                 state.right.facingLeft = state.right.position.x > state.left.position.x;
             }
 
+            // Projectile collisions with fighters
+            for (let i = vfx.projectiles.length - 1; i >= 0; i -= 1) {
+                const proj = vfx.projectiles[i];
+                if (proj && proj.active) {
+                    const targetSide = proj.ownerSide === 'left' ? 'right' : 'left';
+                    const target = state[targetSide];
+                    const hitBox = {
+                        position: { x: proj.x - proj.radius, y: proj.y - proj.radius },
+                        width: proj.radius * 2,
+                        height: proj.radius * 2
+                    };
+
+                    if (rectangularCollision({ rectangle1: hitBox, rectangle2: target.bodyBox })) {
+                        proj.active = false;
+                        const blocked = target.isBlocking && !proj.isLow;
+                        state[targetSide] = takeDamage(target, proj.damage, proj.x, { isUnblockable: proj.isLow });
+                        updateHealthBar(targetSide, state[targetSide]);
+
+                        if (blocked) {
+                            target.superMeter = Math.min(100, (target.superMeter || 0) + 5);
+                            updateSuperBar(targetSide, target.superMeter);
+                            vfx.spawnHitSparks(proj.x, proj.y, true, false);
+                            vfx.triggerHitStop(40);
+                            vfx.triggerScreenShake('light');
+                            vfx.spawnFloatingText(proj.x, proj.y, 'BLOCKED', 'block');
+                        } else {
+                            state[proj.ownerSide].superMeter = Math.min(
+                                100,
+                                (state[proj.ownerSide].superMeter || 0) + 14
+                            );
+                            updateSuperBar(proj.ownerSide, state[proj.ownerSide].superMeter);
+                            target.superMeter = Math.min(100, (target.superMeter || 0) + 8);
+                            updateSuperBar(targetSide, target.superMeter);
+
+                            vfx.spawnBlood(proj.x, proj.y, target.position.x >= proj.x ? 1 : -1);
+                            vfx.spawnHitSparks(proj.x, proj.y, false, true);
+                            vfx.triggerHitStop(60);
+                            vfx.triggerScreenShake('medium');
+                            vfx.spawnFloatingText(proj.x, proj.y, 'PROJECTILE!', 'special');
+
+                            if (target.isDizzy) {
+                                onFatalKnockout(state[proj.ownerSide], target);
+                                break;
+                            }
+                        }
+
+                        if (state[targetSide].health <= 0) {
+                            handleFighterHealthDepleted(proj.ownerSide, targetSide);
+                        }
+                    }
+                }
+            }
+
+            // Melee Attacks and Hit Detection
             ['left', 'right'].forEach(side => {
                 const fighter = state[side];
                 const defenderSide = side === 'left' ? 'right' : 'left';
@@ -511,9 +1128,74 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                     if (
                         rectangularCollision({ rectangle1: fighter.attackBox, rectangle2: state[defenderSide].bodyBox })
                     ) {
-                        state[defenderSide] = takeDamage(state[defenderSide], fighter.damage, fighter.position.x);
+                        const isUnblockable = fighter.attackType === 'throw';
+                        const isUppercut = fighter.attackType === 'uppercut';
+                        const impactX =
+                            (fighter.attackBox.position.x + state[defenderSide].bodyBox.position.x + 60) / 2;
+                        const impactY =
+                            (fighter.attackBox.position.y + state[defenderSide].bodyBox.position.y + 40) / 2;
+                        const defenderWasBlocking = state[defenderSide].isBlocking && !isUnblockable;
+
+                        state[defenderSide] = takeDamage(state[defenderSide], fighter.damage, fighter.position.x, {
+                            isUnblockable,
+                            isUppercut
+                        });
                         updateHealthBar(defenderSide, state[defenderSide]);
-                        if (state[defenderSide].health <= 0) finishFight(fighter);
+
+                        if (defenderWasBlocking) {
+                            state[defenderSide].superMeter = Math.min(100, (state[defenderSide].superMeter || 0) + 6);
+                            updateSuperBar(defenderSide, state[defenderSide].superMeter);
+                            vfx.spawnHitSparks(impactX, impactY, true, false);
+                            vfx.triggerHitStop(40);
+                            vfx.triggerScreenShake('light');
+                            vfx.spawnFloatingText(impactX, impactY, 'BLOCKED', 'block');
+                        } else {
+                            fighter.superMeter = Math.min(100, (fighter.superMeter || 0) + 16);
+                            updateSuperBar(side, fighter.superMeter);
+                            state[defenderSide].superMeter = Math.min(100, (state[defenderSide].superMeter || 0) + 9);
+                            updateSuperBar(defenderSide, state[defenderSide].superMeter);
+
+                            fighter.comboStreak += 1;
+                            fighter.comboTimer = 1400;
+
+                            const bloodIntensity = isUppercut || isUnblockable ? 'heavy' : 'normal';
+                            vfx.spawnBlood(
+                                impactX,
+                                impactY,
+                                state[defenderSide].position.x >= fighter.position.x ? 1 : -1,
+                                bloodIntensity
+                            );
+                            vfx.spawnHitSparks(impactX, impactY, false, isUppercut || isUnblockable);
+
+                            if (fighter.comboStreak >= 2) {
+                                vfx.spawnFloatingText(impactX, impactY - 15, `${fighter.comboStreak} HITS`, 'combo');
+                            }
+
+                            if (isUppercut) {
+                                vfx.triggerScreenShake('heavy');
+                                vfx.triggerHitStop(110);
+                                vfx.spawnFloatingText(impactX, impactY, 'UPPERCUT!', 'special');
+                            } else if (isUnblockable) {
+                                vfx.triggerScreenShake('heavy');
+                                vfx.triggerHitStop(85);
+                                vfx.spawnFloatingText(impactX, impactY, 'THROW!', 'punish');
+                            } else if (fighter.attackType === 'kick') {
+                                vfx.triggerScreenShake('medium');
+                                vfx.triggerHitStop(70);
+                            } else {
+                                vfx.triggerScreenShake('light');
+                                vfx.triggerHitStop(45);
+                            }
+
+                            if (state[defenderSide].isDizzy) {
+                                onFatalKnockout(fighter, state[defenderSide]);
+                                return;
+                            }
+                        }
+
+                        if (state[defenderSide].health <= 0) {
+                            handleFighterHealthDepleted(side, defenderSide);
+                        }
                     }
                 }
             });
@@ -522,6 +1204,8 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
             animateFighter(state.right, elapsed);
             drawFighter(context, state.left);
             drawFighter(context, state.right);
+            vfx.draw();
+
             ['left', 'right'].forEach(side => {
                 const fighter = state[side];
                 if (fighter.state === 'hit') {
@@ -532,6 +1216,7 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                     setStatus(side, null);
                 }
             });
+
             animationFrame = requestAnimationFrame(loop);
         };
 

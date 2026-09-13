@@ -424,6 +424,92 @@
     background-color: rgba(255, 255, 255, 0.15);
 }
 
+.arena___fight-timer {
+    font-family: 'Russo One', sans-serif;
+    font-size: 40px;
+    line-height: 1;
+    color: #fbbf24;
+    text-shadow:
+        0 0 14px rgba(251, 191, 36, 0.7),
+        0 2px 4px #000000;
+    letter-spacing: 0.04em;
+    min-width: 52px;
+    text-align: center;
+    margin-bottom: 2px;
+    user-select: none;
+}
+
+.arena___fight-timer--urgent {
+    color: #ef4444;
+    text-shadow:
+        0 0 20px rgba(239, 68, 68, 0.9),
+        0 2px 4px #000000;
+    animation: timerUrgentPulse 0.5s infinite alternate ease-in-out;
+}
+
+@keyframes timerUrgentPulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.12); }
+}
+
+.arena___super-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    margin-top: 4px;
+}
+
+.arena___super-bar-container--right {
+    flex-direction: row-reverse;
+}
+
+.arena___super-bar {
+    flex: 1;
+    height: 7px;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 9999px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.arena___super-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #0284c7, #38bdf8);
+    border-radius: 9999px;
+    transition: width 0.18s ease-out;
+}
+
+.arena___super-bar-fill--ready {
+    background: linear-gradient(90deg, #f59e0b, #ef4444, #dc2626);
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.8), 0 0 16px rgba(245, 158, 11, 0.6);
+    animation: superReadyPulse 0.6s infinite alternate ease-in-out;
+}
+
+@keyframes superReadyPulse {
+    from { filter: brightness(1); }
+    to { filter: brightness(1.35) drop-shadow(0 0 6px rgba(239, 68, 68, 0.9)); }
+}
+
+.arena___super-label {
+    font-family: 'Russo One', sans-serif;
+    font-size: 10px;
+    line-height: 1;
+    letter-spacing: 0.08em;
+    color: #94a3b8;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.arena___super-label--ready {
+    color: #ef4444;
+    text-shadow: 0 0 8px rgba(239, 68, 68, 0.8);
+    animation: superReadyPulse 0.6s infinite alternate ease-in-out;
+}
+
 .arena___versus-sign {
     display: flex;
     align-items: center;
@@ -470,3 +556,143 @@
     color: #38bdf8;
     box-shadow: 0 0 10px rgba(6, 182, 212, 0.4);
 }
+
+/* Screen Shake Effects */
+.arena--shake-light {
+    animation: arenaShakeLight 140ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+.arena--shake-medium {
+    animation: arenaShakeMedium 220ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+.arena--shake-heavy {
+    animation: arenaShakeHeavy 350ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes arenaShakeLight {
+    10%, 90% { transform: translate3d(-1.5px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-2px, 1px, 0); }
+    40%, 60% { transform: translate3d(2px, -1px, 0); }
+}
+
+@keyframes arenaShakeMedium {
+    10%, 90% { transform: translate3d(-3.5px, 1.5px, 0); }
+    20%, 80% { transform: translate3d(4.5px, -2px, 0); }
+    30%, 50%, 70% { transform: translate3d(-5px, 2px, 0); }
+    40%, 60% { transform: translate3d(5px, -1.5px, 0); }
+}
+
+@keyframes arenaShakeHeavy {
+    10%, 90% { transform: translate3d(-7px, 3px, 0) scale(1.01); }
+    20%, 80% { transform: translate3d(8px, -4px, 0) scale(0.99); }
+    30%, 50%, 70% { transform: translate3d(-9px, 4px, 0) scale(1.02); }
+    40%, 60% { transform: translate3d(9px, -3px, 0) scale(1); }
+}
+
+/* Round Win Medallions */
+.arena___round-medallions {
+    display: flex;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.arena___round-medallions--right {
+    justify-content: flex-end;
+}
+
+.arena___round-medallion {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1px solid rgba(251, 191, 36, 0.45);
+    background: rgba(15, 23, 42, 0.85);
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.arena___round-medallion--won {
+    background: #fbbf24;
+    border-color: #f59e0b;
+    box-shadow: 0 0 8px rgba(251, 191, 36, 0.9), 0 0 14px rgba(245, 158, 11, 0.5);
+    transform: scale(1.2);
+}
+
+/* Match Announcements ("FINISH HIM!", "ROUND 1", etc.) */
+.arena___announcement-overlay {
+    position: absolute;
+    top: 36%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 50;
+    pointer-events: none;
+    text-align: center;
+    width: 100%;
+}
+
+.arena___announcement-title {
+    margin: 0;
+    font-family: 'Russo One', sans-serif;
+    font-size: 56px;
+    line-height: 1.1;
+    color: #ef4444;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    text-shadow:
+        0 0 35px rgba(239, 68, 68, 0.9),
+        0 0 18px rgba(185, 28, 28, 0.8),
+        0 4px 12px #000000;
+    animation: bannerPopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.arena___announcement-title--round {
+    color: #fbbf24;
+    font-size: 48px;
+    text-shadow:
+        0 0 35px rgba(251, 191, 36, 0.9),
+        0 0 18px rgba(245, 158, 11, 0.8),
+        0 4px 12px #000000;
+}
+
+.arena___announcement-title--finish {
+    color: #dc2626;
+    font-size: 68px;
+    animation: finishPulse 0.8s infinite alternate ease-in-out;
+}
+
+.arena___announcement-title--winner {
+    color: #38bdf8;
+    font-size: 52px;
+    text-shadow:
+        0 0 35px rgba(56, 189, 248, 0.9),
+        0 0 18px rgba(2, 132, 199, 0.8),
+        0 4px 12px #000000;
+}
+
+@keyframes finishPulse {
+    from {
+        transform: scale(0.98);
+        filter: drop-shadow(0 0 15px rgba(220, 38, 38, 0.8));
+    }
+    to {
+        transform: scale(1.08);
+        filter: drop-shadow(0 0 35px rgba(239, 68, 68, 1));
+    }
+}
+
+@keyframes bannerPopIn {
+    0% {
+        transform: scale(0.3);
+        opacity: 0;
+    }
+    70% {
+        transform: scale(1.15);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+

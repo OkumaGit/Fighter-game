@@ -12,7 +12,9 @@ const controls = {
     PlayerTwoKick: 'Numpad2',
     PlayerTwoJump: 'ArrowUp',
     PlayerOneCriticalHitCombination: ['KeyQ', 'KeyW', 'KeyE'],
-    PlayerTwoCriticalHitCombination: ['KeyU', 'KeyI', 'KeyO']
+    PlayerTwoCriticalHitCombination: ['Numpad7', 'Numpad8', 'Numpad9'],
+    PlayerOneSpecial: 'KeyU',
+    PlayerTwoSpecial: 'Numpad3'
 };
 
 export default controls;

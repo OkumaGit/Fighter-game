@@ -1,3 +1,71 @@
+/**
+ * Core Battle Engine for Fighter Arena.
+ * Handles damage calculation, collision detection, attack states, combos,
+ * crouching, uppercuts, throws, special moves, and juggle physics.
+ */
+
+export const SPECIAL_MOVES = {
+    Astra: {
+        name: 'Lightning Orb',
+        type: 'projectile',
+        cooldown: 4000,
+        damage: 14,
+        speed: 10,
+        radius: 22,
+        color: '#38bdf8',
+        secondaryColor: '#fde047'
+    },
+    Brute: {
+        name: 'Earth Boulder',
+        type: 'projectile',
+        cooldown: 4200,
+        damage: 15,
+        speed: 9,
+        radius: 25,
+        isLow: false,
+        color: '#f97316',
+        secondaryColor: '#ea580c'
+    },
+    Vex: {
+        name: 'Shadow Blink',
+        type: 'teleport',
+        cooldown: 4800,
+        damage: 14,
+        color: '#8b5cf6',
+        secondaryColor: '#c084fc'
+    },
+    Kite: {
+        name: 'Gale Crescent',
+        type: 'projectile',
+        cooldown: 3500,
+        damage: 13,
+        speed: 12,
+        radius: 20,
+        color: '#34d399',
+        secondaryColor: '#6ee7b7'
+    },
+    Nova: {
+        name: 'Flame Surge',
+        type: 'dash_strike',
+        cooldown: 4200,
+        damage: 15,
+        speed: 15,
+        radius: 28,
+        color: '#ef4444',
+        secondaryColor: '#f59e0b'
+    },
+    Rift: {
+        name: 'Void Blast',
+        type: 'projectile',
+        cooldown: 4500,
+        damage: 14,
+        speed: 7,
+        radius: 24,
+        color: '#a855f7',
+        secondaryColor: '#e879f9'
+    }
+};
+
 export function getHitPower(fighter) {
     return Number(fighter.attack ?? 0) * (Math.random() + 1);
 }
@@ -26,6 +94,11 @@ export function rectangularCollision({ rectangle1, rectangle2 }) {
     );
 }
 
+export function getFighterSpecialMove(fighter) {
+    const name = fighter.name || 'Astra';
+    return SPECIAL_MOVES[name] || SPECIAL_MOVES.Astra;
+}
+
 export function createBattleState(firstFighter, secondFighter) {
     const createFighterState = fighter => ({
         ...fighter,
@@ -37,18 +110,33 @@ export function createBattleState(firstFighter, secondFighter) {
         damage: 10,
         isAttacking: false,
         isBlocking: false,
+        isCrouching: false,
+        isDashing: false,
+        isJuggled: false,
+        isDizzy: false,
+        dashTimer: 0,
+        specialCooldownTimer: 0,
+        comboStreak: 0,
+        comboTimer: 0,
+        superMeter: 0,
         attackBox: {
             position: { x: 0, y: 0 },
             offset: { x: 50, y: 30 },
             width: 90,
             height: 50
         },
-        bodyBox: { position: { x: 0, y: 0 }, width: 128, height: 204 },
+        bodyBox: {
+            position: { x: 0, y: 0 },
+            width: 128,
+            height: 280,
+            offset: { x: 46, y: 28 }
+        },
         attackType: null,
         activeHitFrame: 0,
         attackHit: false,
         currentFrame: 0,
-        state: 'idle'
+        state: 'idle',
+        specialMove: getFighterSpecialMove(fighter)
     });
 
     return {
@@ -60,7 +148,7 @@ export function createBattleState(firstFighter, secondFighter) {
 /* eslint-disable no-param-reassign */
 export function updateAttackBox(fighter) {
     const { attackBox, bodyBox } = fighter;
-    const bodyOffset = bodyBox.offset || { x: 0, y: 0 };
+    const bodyOffset = bodyBox.offset || { x: 46, y: 28 };
 
     fighter.bodyBox.position = {
         x: fighter.position.x + bodyOffset.x,
@@ -80,11 +168,17 @@ export function updateAttackBox(fighter) {
 /* eslint-enable no-param-reassign */
 
 export function startAttack(fighter, type) {
-    if (fighter.isAttacking || fighter.state === 'hit' || fighter.health <= 0) return fighter;
+    if (fighter.isAttacking || fighter.state === 'hit' || fighter.health <= 0 || fighter.isDizzy) {
+        return fighter;
+    }
 
     const attackConfig = {
-        jab: { damage: 10, activeHitFrame: 3 },
-        kick: { damage: 18, activeHitFrame: 5 }
+        jab: { damage: 6.5, activeHitFrame: 3, duration: 320 },
+        jab2: { damage: 7.5, activeHitFrame: 2, duration: 280 },
+        kick: { damage: 11.5, activeHitFrame: 5, duration: 420 },
+        uppercut: { damage: 15.5, activeHitFrame: 4, duration: 460 },
+        throw: { damage: 16.5, activeHitFrame: 3, duration: 480 },
+        special: { damage: fighter.specialMove?.damage || 14, activeHitFrame: 4, duration: 450 }
     }[type];
 
     if (!attackConfig) return fighter;
@@ -98,37 +192,77 @@ export function startAttack(fighter, type) {
         activeHitFrame: attackConfig.activeHitFrame,
         currentFrame: 0,
         framesElapsed: 0,
-        state: type
+        state: type === 'uppercut' || type === 'throw' || type === 'jab' || type === 'jab2' ? 'jab' : 'kick'
     };
 }
 
 export function setBlocking(fighter, isBlocking) {
-    if (fighter.isAttacking || fighter.state === 'hit' || fighter.health <= 0) return fighter;
+    if (fighter.isAttacking || fighter.state === 'hit' || fighter.health <= 0) {
+        return fighter;
+    }
 
     return {
         ...fighter,
         isBlocking,
+        isCrouching: false,
         state: isBlocking ? 'block' : 'idle'
     };
 }
 
-export function takeDamage(fighter, amount, attackerPositionX = fighter.position.x) {
-    const blocked = fighter.isBlocking;
-    const damage = blocked ? Math.floor(amount * 0.2) : amount;
+export function setCrouching(fighter) {
+    return fighter;
+}
+
+export function startDash(fighter, direction = 1) {
+    if (fighter.isAttacking || fighter.state === 'hit' || fighter.health <= 0 || !fighter.isGrounded) {
+        return fighter;
+    }
+
+    return {
+        ...fighter,
+        isDashing: true,
+        dashTimer: 180,
+        velocity: { ...fighter.velocity, x: direction * 12 }
+    };
+}
+
+export function takeDamage(fighter, amount, attackerPositionX = fighter.position.x, options = {}) {
+    const { isUnblockable = false, isUppercut = false } = options;
+    const blocked = fighter.isBlocking && !isUnblockable;
+    const damage = blocked ? Math.max(1, Math.floor(amount * 0.15)) : amount;
     const direction = fighter.position.x >= attackerPositionX ? 1 : -1;
+
+    let velocityX = direction * (blocked ? 3 : 6);
+    let velocityY = fighter.velocity.y;
+
+    if (isUppercut) {
+        velocityY = -16;
+        velocityX = direction * 4.5;
+    } else if (isUnblockable) {
+        velocityY = -9;
+        velocityX = direction * 11;
+    } else if (!fighter.isGrounded) {
+        // Air Juggle
+        velocityY = -7.5;
+        velocityX = direction * 4;
+    }
 
     return {
         ...fighter,
         health: Math.max(0, fighter.health - damage),
-        velocity: { ...fighter.velocity, x: direction * (blocked ? 3 : 6) },
+        velocity: { x: velocityX, y: velocityY },
+        isGrounded: false,
         isBlocking: false,
         isAttacking: false,
+        isCrouching: false,
+        isDashing: false,
         attackType: null,
         attackHit: false,
         state: 'hit',
-        hitTimer: 200,
+        hitTimer: isUppercut ? 380 : 220,
         damageTaken: damage,
-        wasBlocking: blocked
+        wasBlocking: blocked,
+        isJuggled: !fighter.isGrounded || isUppercut
     };
 }
 
