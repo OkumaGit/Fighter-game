@@ -14,30 +14,6 @@ function startFight(selectedFighters, options = {}) {
     }
 }
 
-function showCountdownOverlay(onComplete) {
-    const root = document.getElementById('root');
-    const layer = createElement({ tagName: 'div', className: 'modal-layer online-countdown-layer' });
-    const countText = createElement({ tagName: 'div', className: 'online-countdown-text' });
-    countText.innerText = '3';
-    layer.appendChild(countText);
-    root.appendChild(layer);
-
-    let count = 3;
-    const interval = setInterval(() => {
-        count -= 1;
-        if (count > 0) {
-            countText.innerText = String(count);
-        } else if (count === 0) {
-            countText.innerText = 'FIGHT!';
-            countText.classList.add('online-countdown-text--fight');
-        } else {
-            clearInterval(interval);
-            layer.remove();
-            if (typeof onComplete === 'function') onComplete();
-        }
-    }, 750);
-}
-
 function createModeSelector(gameMode, onSelectMode) {
     const container = createElement({
         tagName: 'div',
@@ -494,13 +470,11 @@ export function createFightersSelector() {
                             });
 
                             socket.on('game-start', ({ fighters }) => {
-                                showCountdownOverlay(() => {
-                                    startFight(fighters, {
-                                        isOnline: true,
-                                        role: onlineRole,
-                                        roomCode: onlineRoomCode,
-                                        socket
-                                    });
+                                startFight(fighters, {
+                                    isOnline: true,
+                                    role: onlineRole,
+                                    roomCode: onlineRoomCode,
+                                    socket
                                 });
                             });
 
@@ -599,13 +573,11 @@ export function createFightersSelector() {
                     });
 
                     socket.on('game-start', ({ fighters }) => {
-                        showCountdownOverlay(() => {
-                            startFight(fighters, {
-                                isOnline: true,
-                                role: onlineRole,
-                                roomCode: onlineRoomCode,
-                                socket
-                            });
+                        startFight(fighters, {
+                            isOnline: true,
+                            role: onlineRole,
+                            roomCode: onlineRoomCode,
+                            socket
                         });
                     });
 

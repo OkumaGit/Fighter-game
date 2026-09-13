@@ -9,6 +9,7 @@ import {
 } from '../game/battleEngine';
 import { getBattleFrameSource, getBattleSpriteConfig } from '../helpers/fighterAssets';
 import createBotController from '../game/botController';
+import showCountdownOverlay from './modal/countdownModal';
 
 /* eslint-disable no-param-reassign */
 
@@ -230,6 +231,22 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
     updateAttackBox(state.right);
     updateHealthBar('left', state.left);
     updateHealthBar('right', state.right);
+
+    const initialCanvasWidth = canvas.clientWidth || canvas.width;
+    canvas.width = initialCanvasWidth;
+    canvas.height = canvas.clientHeight || 560;
+    const initialGroundY = getGroundY();
+    state.left.position.y = initialGroundY;
+    state.right.position.y = initialGroundY;
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    drawFighter(context, state.left);
+    drawFighter(context, state.right);
+
+    await new Promise(resolve => {
+        showCountdownOverlay(resolve);
+    });
+
+    previousTime = performance.now();
 
     return new Promise(resolve => {
         let handleOpponentInput;
