@@ -1,0 +1,137 @@
+<svg width="480" height="420" viewBox="0 0 480 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="modalBg" x1="0" y1="0" x2="480" y2="420" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#090E1A" />
+      <stop offset="60%" stop-color="#131C2E" />
+      <stop offset="100%" stop-color="#0A101D" />
+    </linearGradient>
+
+    <!-- Top Accent Gradient -->
+    <linearGradient id="topAccent" x1="0" y1="0" x2="480" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F59E0B" stop-opacity="0" />
+      <stop offset="20%" stop-color="#F59E0B" />
+      <stop offset="50%" stop-color="#FBBF24" />
+      <stop offset="80%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#F59E0B" stop-opacity="0" />
+    </linearGradient>
+
+    <!-- Metallic Title Gradient -->
+    <linearGradient id="titleMetallic" x1="0" y1="0" x2="0" y2="28" gradientUnits="userSpaceOnUse">
+      <stop offset="15%" stop-color="#FFFFFF" />
+      <stop offset="55%" stop-color="#CBD5E1" />
+      <stop offset="100%" stop-color="#94A3B8" />
+    </linearGradient>
+
+    <!-- Gold Tab Gradient -->
+    <linearGradient id="goldTab" x1="0" y1="0" x2="212" y2="32" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#D97706" />
+    </linearGradient>
+
+    <!-- Crimson CTA Button Gradient -->
+    <linearGradient id="crimsonBtn" x1="0" y1="0" x2="0" y2="48" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#DC2626" />
+      <stop offset="60%" stop-color="#B91C1C" />
+      <stop offset="100%" stop-color="#991B1B" />
+    </linearGradient>
+
+    <!-- Glow Filters -->
+    <filter id="modalShadow" x="-20" y="-10" width="520" height="460" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="24" stdDeviation="32" flood-color="#000000" flood-opacity="0.85" />
+      <feDropShadow dx="0" dy="0" stdDeviation="20" flood-color="#F59E0B" flood-opacity="0.15" />
+    </filter>
+
+    <filter id="goldGlow" x="-10" y="-10" width="232" height="52" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="2" stdDeviation="5" flood-color="#F59E0B" flood-opacity="0.5" />
+    </filter>
+
+    <filter id="btnShadow" x="-10" y="-10" width="180" height="68" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="6" stdDeviation="9" flood-color="#B91C1C" flood-opacity="0.55" />
+    </filter>
+
+    <filter id="greenGlow" x="-5" y="-5" width="18" height="18" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#10B981" flood-opacity="0.8" />
+    </filter>
+  </defs>
+
+  <!-- Group: Modal Window -->
+  <g id="Online-1v1-Lobby-Modal" filter="url(#modalShadow)">
+    <!-- Modal Base Frame -->
+    <rect id="Modal-Background" width="480" height="420" rx="12" fill="url(#modalBg)" stroke="#FBBF24" stroke-opacity="0.4" stroke-width="1.2" />
+
+    <!-- Top Amber Accent Line -->
+    <rect id="Top-Accent" x="0" y="0" width="480" height="3" fill="url(#topAccent)" />
+
+    <!-- Header -->
+    <g id="Header">
+      <text id="Subtitle" x="24" y="32" fill="#F59E0B" font-family="Oswald, sans-serif" font-size="11" font-weight="700" letter-spacing="2.4">ONLINE MULTIPLAYER</text>
+      <text id="Title" x="24" y="60" fill="url(#titleMetallic)" font-family="'Russo One', sans-serif" font-size="24" font-weight="700" letter-spacing="1.8">1V1 MATCH LOBBY</text>
+      
+      <!-- Close Button -->
+      <g id="Close-Button" transform="translate(428, 24)">
+        <rect width="28" height="28" rx="4" fill="#FFFFFF" fill-opacity="0.06" stroke="#FFFFFF" stroke-opacity="0.15" stroke-width="0.8" />
+        <text x="14" y="19" fill="#FFFFFF" fill-opacity="0.6" font-family="Arial, sans-serif" font-size="16" text-anchor="middle">×</text>
+      </g>
+      
+      <!-- Header Divider -->
+      <line id="Header-Divider" x1="0" y1="78" x2="480" y2="78" stroke="#FFFFFF" stroke-opacity="0.08" stroke-width="0.8" />
+    </g>
+
+    <!-- Mode Tabs (Pill Switcher) -->
+    <g id="Tabs-Pill-Switcher" transform="translate(24, 96)">
+      <rect width="432" height="40" rx="20" fill="#080E1A" fill-opacity="0.88" stroke="#FFFFFF" stroke-opacity="0.08" stroke-width="1" />
+      
+      <!-- Host Match Tab (Inactive) -->
+      <g id="Tab-Host-Match">
+        <path d="M78 19.5H89V21H78V19.5ZM78.5 18.5L77.5 11.5L81 14.5L83.5 9.5L86 14.5L89.5 11.5L88.5 18.5H78.5Z" fill="#94A3B8" />
+        <text x="96" y="24" fill="#94A3B8" font-family="Oswald, sans-serif" font-size="13" font-weight="600" letter-spacing="0.6">Host Match</text>
+      </g>
+
+      <!-- Join Match Tab (Active Pill) -->
+      <g id="Tab-Join-Match-Active" transform="translate(216, 4)">
+        <rect width="212" height="32" rx="16" fill="url(#goldTab)" filter="url(#goldGlow)" />
+        <rect width="212" height="32" rx="16" stroke="#FFFFFF" stroke-opacity="0.25" stroke-width="0.8" />
+        <!-- Gamepad Icon -->
+        <g transform="translate(56, 9)">
+          <path d="M3.5 3H10.5C12.433 3 14 4.567 14 6.5C14 8.433 12.433 10 10.5 10L9 8H5L3.5 10C1.567 10 0 8.433 0 6.5C0 4.567 1.567 3 3.5 3Z" stroke="#1A0E00" stroke-width="1.2" />
+          <path d="M4 6.5H6M5 5.5V7.5" stroke="#1A0E00" stroke-width="1.2" stroke-linecap="round" />
+          <circle cx="9.5" cy="6" r="0.75" fill="#1A0E00" />
+          <circle cx="11" cy="7" r="0.75" fill="#1A0E00" />
+        </g>
+        <text x="78" y="21" fill="#1A0E00" font-family="Oswald, sans-serif" font-size="13" font-weight="700" letter-spacing="0.6">Join Match</text>
+      </g>
+    </g>
+
+    <!-- Body / Join Panel -->
+    <g id="Join-Panel" transform="translate(24, 156)">
+      <text id="Description-Text" x="216" y="16" fill="#94A3B8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" text-anchor="middle">
+        Enter the 5-character room code shared by the host to join the battle.
+      </text>
+
+      <!-- Input Group Row -->
+      <g id="Input-Group-Row" transform="translate(0, 36)">
+        <!-- Room Code Input -->
+        <g id="Code-Input">
+          <rect width="262" height="48" rx="8" fill="#000000" fill-opacity="0.65" stroke="#FBBF24" stroke-opacity="0.5" stroke-width="1.5" />
+          <text x="131" y="32" fill="#FBBF24" font-family="'Russo One', sans-serif" font-size="20" letter-spacing="3.6" text-anchor="middle">FG742</text>
+        </g>
+
+        <!-- Join Match Button -->
+        <g id="Join-Match-Button" transform="translate(272, 0)" filter="url(#btnShadow)">
+          <rect width="160" height="48" rx="8" fill="url(#crimsonBtn)" stroke="#FFFFFF" stroke-opacity="0.2" stroke-width="1" />
+          <text x="80" y="30" fill="#FFFFFF" font-family="'Russo One', sans-serif" font-size="14" font-weight="700" letter-spacing="1.4" text-anchor="middle">JOIN MATCH</text>
+        </g>
+      </g>
+    </g>
+
+    <!-- Footer Status -->
+    <g id="Footer-Status" transform="translate(24, 372)">
+      <line x1="0" y1="0" x2="432" y2="0" stroke="#FFFFFF" stroke-opacity="0.06" stroke-width="0.8" />
+      <g transform="translate(100, 18)">
+        <circle cx="0" cy="0" r="4" fill="#10B981" filter="url(#greenGlow)" />
+        <text x="12" y="4" fill="#94A3B8" font-family="Oswald, sans-serif" font-size="12" letter-spacing="0.5">Online Server Connected (Ready)</text>
+      </g>
+    </g>
+  </g>
+</svg>
