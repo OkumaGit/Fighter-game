@@ -1,10 +1,10 @@
 import createElement from '../helpers/domHelper';
-import { getBattleSpriteConfig, getFighterSource, getBattleSpriteSheetSource } from '../helpers/fighterAssets';
+import { getBattleSpriteConfig, getFighterSource } from '../helpers/fighterAssets';
 
 export function createFighterImage(fighter = {}) {
     const source = getFighterSource(fighter);
 
-    if (!fighter || (!source && !fighter.name)) {
+    if (!fighter || !source) {
         const placeholder = createElement({
             tagName: 'div',
             className: 'fighter-preview___placeholder',
@@ -14,91 +14,18 @@ export function createFighterImage(fighter = {}) {
     }
 
     const { name = 'Fighter' } = fighter;
-    const canvas = createElement({
-        tagName: 'canvas',
+    const attributes = {
+        src: source,
+        title: name,
+        alt: name
+    };
+    const imgElement = createElement({
+        tagName: 'img',
         className: 'fighter-preview___img',
-        attributes: {
-            width: '820',
-            height: '820',
-            title: name,
-            'aria-label': name
-        }
+        attributes
     });
 
-    const ctx = canvas.getContext('2d');
-    const idleWebpSrc = getBattleSpriteSheetSource(fighter, 'idle');
-    const staticSrc = source;
-
-    let isDestroyed = false;
-    let isAttached = false;
-    let animFrameId = null;
-
-    const drawStaticFallback = () => {
-        if (!staticSrc) return;
-        const fallbackImg = new Image();
-        fallbackImg.onload = () => {
-            if (!isDestroyed) {
-                ctx.clearRect(0, 0, 820, 820);
-                const scale = Math.min(820 / fallbackImg.naturalWidth, 820 / fallbackImg.naturalHeight);
-                const w = fallbackImg.naturalWidth * scale;
-                const h = fallbackImg.naturalHeight * scale;
-                const x = (820 - w) / 2;
-                const y = (820 - h) / 2;
-                ctx.drawImage(fallbackImg, x, y, w, h);
-            }
-        };
-        fallbackImg.src = staticSrc;
-    };
-
-    const spriteSheet = new Image();
-    spriteSheet.onload = () => {
-        if (isDestroyed) return;
-
-        const totalFrames = 8;
-        const frameWidth = spriteSheet.naturalHeight || 820;
-        const frameHeight = spriteSheet.naturalHeight || 820;
-        const frameDuration = 300; // 2x slower for a calm, smooth idle preview (2400ms / 8 frames)
-        let lastTime = performance.now();
-        let currentFrame = 0;
-
-        // Draw first frame immediately
-        ctx.clearRect(0, 0, 820, 820);
-        ctx.drawImage(spriteSheet, 0, 0, frameWidth, frameHeight, 0, 0, 820, 820);
-
-        function animate(now) {
-            if (canvas.isConnected) {
-                isAttached = true;
-            } else if (isAttached) {
-                isDestroyed = true;
-                if (animFrameId) cancelAnimationFrame(animFrameId);
-                return;
-            }
-
-            if (now - lastTime >= frameDuration) {
-                currentFrame = (currentFrame + 1) % totalFrames;
-                lastTime = now;
-
-                ctx.clearRect(0, 0, 820, 820);
-                ctx.drawImage(spriteSheet, currentFrame * frameWidth, 0, frameWidth, frameHeight, 0, 0, 820, 820);
-            }
-
-            animFrameId = requestAnimationFrame(animate);
-        }
-
-        animFrameId = requestAnimationFrame(animate);
-    };
-
-    spriteSheet.onerror = () => {
-        drawStaticFallback();
-    };
-
-    spriteSheet.src = idleWebpSrc;
-
-    if (!spriteSheet.complete || spriteSheet.naturalWidth === 0) {
-        drawStaticFallback();
-    }
-
-    return canvas;
+    return imgElement;
 }
 
 export function createBattleFighterImage(fighter = {}) {
