@@ -57,7 +57,7 @@ export function createFighterImage(fighter = {}) {
         const totalFrames = 8;
         const frameWidth = spriteSheet.naturalHeight || 820;
         const frameHeight = spriteSheet.naturalHeight || 820;
-        const frameDuration = 150; // 1200ms / 8 frames
+        const frameDuration = 300; // 2x slower for a calm, smooth idle preview (2400ms / 8 frames)
         let lastTime = performance.now();
         let currentFrame = 0;
 
