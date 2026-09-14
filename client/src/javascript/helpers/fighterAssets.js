@@ -43,8 +43,17 @@ export function getFighterSource(fighter = {}) {
     );
 }
 
+const fighterNameToId = {
+    Astra: '1',
+    Kite: '2',
+    Vex: '3',
+    Brute: '4',
+    Nova: '5',
+    Rift: '6'
+};
+
 export function getBattleSpriteConfig(fighter = {}) {
-    const fighterId = String(fighter._id ?? fighter.id ?? '1');
+    const fighterId = String(fighter._id ?? fighter.id ?? fighterNameToId[fighter.name] ?? '1');
     const basePath = battleSpritePaths[fighterId] || defaultBattleSprite.basePath;
 
     return {
