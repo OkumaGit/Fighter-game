@@ -8,7 +8,9 @@ const INPUT_DIR = fs.existsSync(path.resolve("client/resources/fighters"))
   : path.resolve("resources/fighters");
 
 const ASSETS_OUTPUT_DIR = path.resolve("client/src/assets/fighters");
-const RESOURCES_OUTPUT_DIR = fs.existsSync(path.resolve("client/resources/fighters"))
+const RESOURCES_OUTPUT_DIR = fs.existsSync(
+  path.resolve("client/resources/fighters"),
+)
   ? path.resolve("client/resources/fighters")
   : path.resolve("resources/fighters");
 
@@ -16,7 +18,8 @@ const RESOURCES_OUTPUT_DIR = fs.existsSync(path.resolve("client/resources/fighte
  * Extract numerical index from frame file name (e.g. 'Idle_1.png' -> 1).
  */
 function extractFrameNumber(filename) {
-  const match = filename.match(/_(\d+)\.png$/i) || filename.match(/(\d+)\.png$/i);
+  const match =
+    filename.match(/_(\d+)\.png$/i) || filename.match(/(\d+)\.png$/i);
   return match ? parseInt(match[1], 10) : 0;
 }
 
@@ -33,7 +36,9 @@ async function stitchFrames(actionPath, outputFiles) {
   if (files.length === 0) return null;
 
   // Read metadata from the first frame to establish uniform width and height
-  const firstFrameMetadata = await sharp(path.join(actionPath, files[0])).metadata();
+  const firstFrameMetadata = await sharp(
+    path.join(actionPath, files[0]),
+  ).metadata();
   const frameWidth = firstFrameMetadata.width || 820;
   const frameHeight = firstFrameMetadata.height || 820;
   const totalWidth = frameWidth * files.length;
@@ -46,7 +51,7 @@ async function stitchFrames(actionPath, outputFiles) {
         .toBuffer(),
       left: index * frameWidth,
       top: 0,
-    }))
+    })),
   );
 
   // Generate WebP buffer with transparent background
@@ -110,7 +115,9 @@ async function buildAllSprites() {
       .readdirSync(fighterPath)
       .filter((a) => fs.statSync(path.join(fighterPath, a)).isDirectory());
 
-    console.log(`\n🥊 Processing [${fighterName}] (${actions.length} animations):`);
+    console.log(
+      `\n🥊 Processing [${fighterName}] (${actions.length} animations):`,
+    );
 
     const manifest = {
       fighter: fighterName,
@@ -140,7 +147,7 @@ async function buildAllSprites() {
         };
 
         console.log(
-          `  ✓ ${actionName.padEnd(8)}: ${result.frames} frames -> ${filename} (${result.totalWidth}x${result.frameHeight}px, ${result.sizeKb} KB)`
+          `  ✓ ${actionName.padEnd(8)}: ${result.frames} frames -> ${filename} (${result.totalWidth}x${result.frameHeight}px, ${result.sizeKb} KB)`,
         );
       }
     }
@@ -148,12 +155,17 @@ async function buildAllSprites() {
     // Write animation manifest for this fighter
     const manifestJson = JSON.stringify(manifest, null, 2);
     fs.writeFileSync(path.join(targetAssetsDir, "manifest.json"), manifestJson);
-    fs.writeFileSync(path.join(targetResourcesDir, "manifest.json"), manifestJson);
+    fs.writeFileSync(
+      path.join(targetResourcesDir, "manifest.json"),
+      manifestJson,
+    );
   }
 
   const durationSec = ((Date.now() - startTime) / 1000).toFixed(2);
   console.log(`\n✨ Build completed in ${durationSec}s!`);
-  console.log(`📊 Summary: ${totalStrips} WebP strips created from ${totalFrames} source frames.`);
+  console.log(
+    `📊 Summary: ${totalStrips} WebP strips created from ${totalFrames} source frames.`,
+  );
 }
 
 buildAllSprites().catch((err) => {

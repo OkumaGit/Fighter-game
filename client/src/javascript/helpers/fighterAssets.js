@@ -8,11 +8,11 @@ const fighterPortraits = {
 };
 
 const battleSpritePoses = {
-    idle: { folder: 'Idle', prefix: 'Idle', frames: 8, duration: 1200, loop: true },
-    jab: { folder: 'Jab', prefix: 'Jab', frames: 8, duration: 360, loop: false },
-    kick: { folder: 'Kick', prefix: 'Kick', frames: 8, duration: 420, loop: false },
-    block: { folder: 'Block', prefix: 'Block', frames: 8, duration: 260, loop: false },
-    jump: { folder: 'Jump', prefix: 'Jump', frames: 8, duration: 420, loop: false }
+    idle: { file: 'idle.webp', folder: 'Idle', prefix: 'Idle', frames: 8, duration: 1200, loop: true },
+    jab: { file: 'jab.webp', folder: 'Jab', prefix: 'Jab', frames: 8, duration: 360, loop: false },
+    kick: { file: 'kick.webp', folder: 'Kick', prefix: 'Kick', frames: 8, duration: 420, loop: false },
+    block: { file: 'block.webp', folder: 'Block', prefix: 'Block', frames: 8, duration: 260, loop: false },
+    jump: { file: 'jump.webp', folder: 'Jump', prefix: 'Jump', frames: 8, duration: 420, loop: false }
 };
 
 const battleSpritePaths = {
@@ -51,6 +51,13 @@ export function getBattleSpriteConfig(fighter = {}) {
         basePath,
         poses: battleSpritePoses
     };
+}
+
+export function getBattleSpriteSheetSource(fighter, pose) {
+    const config = getBattleSpriteConfig(fighter);
+    const animation = config.poses[pose] || config.poses.idle;
+    const filename = animation.file || `${pose.toLowerCase()}.webp`;
+    return `${config.basePath}/${filename}`;
 }
 
 export function getBattleFrameSource(fighter, pose, frame) {

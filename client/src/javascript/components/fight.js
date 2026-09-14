@@ -8,7 +8,7 @@ import {
     takeDamage,
     updateAttackBox
 } from '../game/battleEngine';
-import { getBattleFrameSource, getBattleSpriteConfig } from '../helpers/fighterAssets';
+import { getBattleFrameSource, getBattleSpriteConfig, getBattleSpriteSheetSource } from '../helpers/fighterAssets';
 import createBotController from '../game/botController';
 import showCountdownOverlay from './modal/countdownModal';
 import createVFXManager from '../game/vfxEngine';
@@ -16,6 +16,7 @@ import { updateRoundMedallions, showMatchAnnouncement, updateSuperBar, updateTim
 
 /* eslint-disable no-param-reassign */
 
+const spriteSheetCache = new Map();
 const frameCache = new Map();
 const fighterWidth = 220;
 const fighterHeight = 315;
@@ -23,6 +24,17 @@ const bodyWidth = 128;
 const bodyHeight = 280;
 const bodyOffsetX = 46;
 const bodyOffsetY = 28;
+
+function getSpriteSheet(fighter, pose) {
+    const fighterId = fighter._id ?? fighter.id ?? '1';
+    const key = `${fighterId}:${pose}`;
+    if (!spriteSheetCache.has(key)) {
+        const image = new Image();
+        image.src = getBattleSpriteSheetSource(fighter, pose);
+        spriteSheetCache.set(key, image);
+    }
+    return spriteSheetCache.get(key);
+}
 
 function getFrame(fighter, pose, frame) {
     const fighterId = fighter._id ?? fighter.id ?? '1';
@@ -40,22 +52,19 @@ async function preloadFighterSprites(fighters) {
 
     fighters.forEach(fighter => {
         const config = getBattleSpriteConfig(fighter);
-        Object.entries(config.poses).forEach(([pose, poseConfig]) => {
-            for (let i = 0; i < poseConfig.frames; i += 1) {
-                const fighterId = fighter._id ?? fighter.id ?? '1';
-                const src = getBattleFrameSource(fighter, pose, i);
-                const key = `${fighterId}:${pose}:${i}`;
+        Object.keys(config.poses).forEach(pose => {
+            const fighterId = fighter._id ?? fighter.id ?? '1';
+            const key = `${fighterId}:${pose}`;
 
-                if (!frameCache.has(key)) {
-                    const img = new Image();
-                    const promise = new Promise(resolve => {
-                        img.onload = resolve;
-                        img.onerror = resolve;
-                    });
-                    img.src = src;
-                    frameCache.set(key, img);
-                    promises.push(promise);
-                }
+            if (!spriteSheetCache.has(key)) {
+                const img = new Image();
+                const promise = new Promise(resolve => {
+                    img.onload = resolve;
+                    img.onerror = resolve;
+                });
+                img.src = getBattleSpriteSheetSource(fighter, pose);
+                spriteSheetCache.set(key, img);
+                promises.push(promise);
             }
         });
     });
@@ -146,28 +155,61 @@ function drawDizzyStars(context, fighter) {
 function drawFighter(context, fighter) {
     let pose = fighter.state === 'hit' ? 'idle' : fighter.state;
     if (pose === 'crouch') pose = 'block';
-    const image = getFrame(fighter, pose, fighter.currentFrame);
-    if (!image.complete || image.naturalWidth === 0) return;
+
+    const spriteSheet = getSpriteSheet(fighter, pose);
 
     context.save();
     context.imageSmoothingEnabled = true;
 
-    if (fighter.facingLeft) {
-        context.translate(fighter.position.x + fighterWidth, fighter.position.y);
-        context.scale(-1, 1);
-        context.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight, 0, 0, fighterWidth, fighterHeight);
+    if (spriteSheet && spriteSheet.complete && spriteSheet.naturalWidth > 0) {
+        const config = getBattleSpriteConfig(fighter).poses[pose] || getBattleSpriteConfig(fighter).poses.idle;
+        const frameWidth = spriteSheet.naturalHeight || 820;
+        const frameHeight = spriteSheet.naturalHeight || 820;
+        const maxFrames = config.frames || 8;
+        const currentFrameIndex = Math.min(Math.max(0, fighter.currentFrame || 0), maxFrames - 1);
+        const sourceX = currentFrameIndex * frameWidth;
+
+        if (fighter.facingLeft) {
+            context.translate(fighter.position.x + fighterWidth, fighter.position.y);
+            context.scale(-1, 1);
+            context.drawImage(spriteSheet, sourceX, 0, frameWidth, frameHeight, 0, 0, fighterWidth, fighterHeight);
+        } else {
+            context.drawImage(
+                spriteSheet,
+                sourceX,
+                0,
+                frameWidth,
+                frameHeight,
+                fighter.position.x,
+                fighter.position.y,
+                fighterWidth,
+                fighterHeight
+            );
+        }
     } else {
-        context.drawImage(
-            image,
-            0,
-            0,
-            image.naturalWidth,
-            image.naturalHeight,
-            fighter.position.x,
-            fighter.position.y,
-            fighterWidth,
-            fighterHeight
-        );
+        const image = getFrame(fighter, pose, fighter.currentFrame);
+        if (!image.complete || image.naturalWidth === 0) {
+            context.restore();
+            return;
+        }
+
+        if (fighter.facingLeft) {
+            context.translate(fighter.position.x + fighterWidth, fighter.position.y);
+            context.scale(-1, 1);
+            context.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight, 0, 0, fighterWidth, fighterHeight);
+        } else {
+            context.drawImage(
+                image,
+                0,
+                0,
+                image.naturalWidth,
+                image.naturalHeight,
+                fighter.position.x,
+                fighter.position.y,
+                fighterWidth,
+                fighterHeight
+            );
+        }
     }
     context.restore();
 
