@@ -10,7 +10,13 @@ const CRITICAL_ASSETS = [
     '/resources/fighters/fighter-3.png',
     '/resources/fighters/fighter-4.png',
     '/resources/fighters/fighter-5.png',
-    '/resources/fighters/fighter-6.png'
+    '/resources/fighters/fighter-6.png',
+    '/resources/fighters/fighter_1_sprite/idle.webp',
+    '/resources/fighters/fighter_2_sprite/idle.webp',
+    '/resources/fighters/fighter_3_sprite/idle.webp',
+    '/resources/fighters/fighter_4_sprite/idle.webp',
+    '/resources/fighters/fighter_5_sprite/idle.webp',
+    '/resources/fighters/fighter_6_sprite/idle.webp'
 ];
 
 export function preloadImage(url) {
