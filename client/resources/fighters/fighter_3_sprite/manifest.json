@@ -1,0 +1,40 @@
+{
+  "fighter": "fighter_3",
+  "animations": {
+    "block": {
+      "file": "block.webp",
+      "frames": 8,
+      "frameWidth": 820,
+      "frameHeight": 820,
+      "totalWidth": 6560
+    },
+    "idle": {
+      "file": "idle.webp",
+      "frames": 8,
+      "frameWidth": 820,
+      "frameHeight": 820,
+      "totalWidth": 6560
+    },
+    "jab": {
+      "file": "jab.webp",
+      "frames": 8,
+      "frameWidth": 820,
+      "frameHeight": 820,
+      "totalWidth": 6560
+    },
+    "jump": {
+      "file": "jump.webp",
+      "frames": 8,
+      "frameWidth": 820,
+      "frameHeight": 820,
+      "totalWidth": 6560
+    },
+    "kick": {
+      "file": "kick.webp",
+      "frames": 8,
+      "frameWidth": 820,
+      "frameHeight": 820,
+      "totalWidth": 6560
+    }
+  }
+}
