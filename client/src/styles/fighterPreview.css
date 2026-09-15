@@ -124,6 +124,13 @@
     transform: scaleX(-1);
 }
 
+.fighter-preview___video {
+    background: transparent;
+    pointer-events: none;
+    outline: none;
+    border: none;
+}
+
 .fighter-panel___placeholder {
     font-family: 'Russo One', sans-serif;
     font-size: 11px;

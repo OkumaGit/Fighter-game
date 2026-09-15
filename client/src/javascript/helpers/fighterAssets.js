@@ -43,6 +43,11 @@ export function getFighterSource(fighter = {}) {
     );
 }
 
+const fighterVideos = {
+    Astra: '/resources/fighters/video/Fighter-1.webm',
+    '1': '/resources/fighters/video/Fighter-1.webm'
+};
+
 const fighterNameToId = {
     Astra: '1',
     Kite: '2',
@@ -51,6 +56,12 @@ const fighterNameToId = {
     Nova: '5',
     Rift: '6'
 };
+
+export function getFighterVideoSource(fighter = {}) {
+    if (!fighter) return null;
+    const fighterId = String(fighter._id ?? fighter.id ?? fighterNameToId[fighter.name] ?? '');
+    return fighterVideos[fighter.name] || fighterVideos[fighterId] || null;
+}
 
 export function getBattleSpriteConfig(fighter = {}) {
     const fighterId = String(fighter._id ?? fighter.id ?? fighterNameToId[fighter.name] ?? '1');
