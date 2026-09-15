@@ -179,6 +179,12 @@
     pointer-events: none;
 }
 
+.fighter___fighter-video {
+    background: transparent;
+    outline: none;
+    border: none;
+}
+
 .fighters___fighter-name {
     font-family: 'Russo One', sans-serif;
     font-size: 10px;

@@ -8,7 +8,12 @@ import {
     takeDamage,
     updateAttackBox
 } from '../game/battleEngine';
-import { getBattleFrameSource, getBattleSpriteConfig, getBattleSpriteSheetSource } from '../helpers/fighterAssets';
+import {
+    getBattleFrameSource,
+    getBattleSpriteConfig,
+    getBattleSpriteSheetSource,
+    getFighterVideoSource
+} from '../helpers/fighterAssets';
 import createBotController from '../game/botController';
 import showCountdownOverlay from './modal/countdownModal';
 import createVFXManager from '../game/vfxEngine';
@@ -24,6 +29,45 @@ const bodyWidth = 128;
 const bodyHeight = 280;
 const bodyOffsetX = 46;
 const bodyOffsetY = 28;
+
+const battleVideos = new Map();
+
+function getBattleVideo(fighter) {
+    const videoSrc = getFighterVideoSource(fighter);
+    if (!videoSrc) return null;
+
+    const fighterId = String(fighter._id ?? fighter.id ?? '1');
+    if (!battleVideos.has(fighterId)) {
+        const video = document.createElement('video');
+        video.src = videoSrc;
+        video.loop = true;
+        video.muted = true;
+        video.autoplay = true;
+        video.playsInline = true;
+        video.setAttribute('playsinline', '');
+        video.setAttribute('webkit-playsinline', '');
+        video.setAttribute('muted', '');
+        video.setAttribute('autoplay', '');
+        video.setAttribute('loop', '');
+        video.crossOrigin = 'anonymous';
+        video.style.position = 'fixed';
+        video.style.top = '-9999px';
+        video.style.left = '-9999px';
+        video.style.opacity = '0';
+        video.style.pointerEvents = 'none';
+        document.body.appendChild(video);
+
+        video.load();
+        video.play().catch(() => {});
+        battleVideos.set(fighterId, video);
+    }
+
+    const video = battleVideos.get(fighterId);
+    if (video && video.paused) {
+        video.play().catch(() => {});
+    }
+    return video;
+}
 
 function getSpriteSheet(fighter, pose) {
     const fighterId = fighter._id ?? fighter.id ?? '1';
@@ -51,6 +95,21 @@ async function preloadFighterSprites(fighters) {
     const promises = [];
 
     fighters.forEach(fighter => {
+        const video = getBattleVideo(fighter);
+        if (video) {
+            promises.push(
+                new Promise(resolve => {
+                    if (video.readyState >= 2) {
+                        resolve();
+                    } else {
+                        video.addEventListener('canplay', () => resolve(), { once: true });
+                        video.addEventListener('error', () => resolve(), { once: true });
+                        setTimeout(resolve, 1500);
+                    }
+                })
+            );
+        }
+
         const config = getBattleSpriteConfig(fighter);
         Object.keys(config.poses).forEach(pose => {
             const fighterId = fighter._id ?? fighter.id ?? '1';
@@ -153,33 +212,26 @@ function drawDizzyStars(context, fighter) {
 }
 
 function drawFighter(context, fighter) {
-    let pose = fighter.state === 'hit' ? 'idle' : fighter.state;
-    if (pose === 'crouch') pose = 'block';
-
-    const spriteSheet = getSpriteSheet(fighter, pose);
+    const video = getBattleVideo(fighter);
 
     context.save();
     context.imageSmoothingEnabled = true;
 
-    if (spriteSheet && spriteSheet.complete && spriteSheet.naturalWidth > 0) {
-        const config = getBattleSpriteConfig(fighter).poses[pose] || getBattleSpriteConfig(fighter).poses.idle;
-        const frameWidth = spriteSheet.naturalHeight || 820;
-        const frameHeight = spriteSheet.naturalHeight || 820;
-        const maxFrames = config.frames || 8;
-        const currentFrameIndex = Math.min(Math.max(0, fighter.currentFrame || 0), maxFrames - 1);
-        const sourceX = currentFrameIndex * frameWidth;
+    if (video && video.readyState >= 2) {
+        const vWidth = video.videoWidth || 464;
+        const vHeight = video.videoHeight || 640;
 
         if (fighter.facingLeft) {
             context.translate(fighter.position.x + fighterWidth, fighter.position.y);
             context.scale(-1, 1);
-            context.drawImage(spriteSheet, sourceX, 0, frameWidth, frameHeight, 0, 0, fighterWidth, fighterHeight);
+            context.drawImage(video, 0, 0, vWidth, vHeight, 0, 0, fighterWidth, fighterHeight);
         } else {
             context.drawImage(
-                spriteSheet,
-                sourceX,
+                video,
                 0,
-                frameWidth,
-                frameHeight,
+                0,
+                vWidth,
+                vHeight,
                 fighter.position.x,
                 fighter.position.y,
                 fighterWidth,
@@ -187,28 +239,70 @@ function drawFighter(context, fighter) {
             );
         }
     } else {
-        const image = getFrame(fighter, pose, fighter.currentFrame);
-        if (!image.complete || image.naturalWidth === 0) {
-            context.restore();
-            return;
-        }
+        let pose = fighter.state === 'hit' ? 'idle' : fighter.state;
+        if (pose === 'crouch') pose = 'block';
 
-        if (fighter.facingLeft) {
-            context.translate(fighter.position.x + fighterWidth, fighter.position.y);
-            context.scale(-1, 1);
-            context.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight, 0, 0, fighterWidth, fighterHeight);
+        const spriteSheet = getSpriteSheet(fighter, pose);
+
+        if (spriteSheet && spriteSheet.complete && spriteSheet.naturalWidth > 0) {
+            const config = getBattleSpriteConfig(fighter).poses[pose] || getBattleSpriteConfig(fighter).poses.idle;
+            const frameWidth = spriteSheet.naturalHeight || 820;
+            const frameHeight = spriteSheet.naturalHeight || 820;
+            const maxFrames = config.frames || 8;
+            const currentFrameIndex = Math.min(Math.max(0, fighter.currentFrame || 0), maxFrames - 1);
+            const sourceX = currentFrameIndex * frameWidth;
+
+            if (fighter.facingLeft) {
+                context.translate(fighter.position.x + fighterWidth, fighter.position.y);
+                context.scale(-1, 1);
+                context.drawImage(spriteSheet, sourceX, 0, frameWidth, frameHeight, 0, 0, fighterWidth, fighterHeight);
+            } else {
+                context.drawImage(
+                    spriteSheet,
+                    sourceX,
+                    0,
+                    frameWidth,
+                    frameHeight,
+                    fighter.position.x,
+                    fighter.position.y,
+                    fighterWidth,
+                    fighterHeight
+                );
+            }
         } else {
-            context.drawImage(
-                image,
-                0,
-                0,
-                image.naturalWidth,
-                image.naturalHeight,
-                fighter.position.x,
-                fighter.position.y,
-                fighterWidth,
-                fighterHeight
-            );
+            const image = getFrame(fighter, pose, fighter.currentFrame);
+            if (!image.complete || image.naturalWidth === 0) {
+                context.restore();
+                return;
+            }
+
+            if (fighter.facingLeft) {
+                context.translate(fighter.position.x + fighterWidth, fighter.position.y);
+                context.scale(-1, 1);
+                context.drawImage(
+                    image,
+                    0,
+                    0,
+                    image.naturalWidth,
+                    image.naturalHeight,
+                    0,
+                    0,
+                    fighterWidth,
+                    fighterHeight
+                );
+            } else {
+                context.drawImage(
+                    image,
+                    0,
+                    0,
+                    image.naturalWidth,
+                    image.naturalHeight,
+                    fighter.position.x,
+                    fighter.position.y,
+                    fighterWidth,
+                    fighterHeight
+                );
+            }
         }
     }
     context.restore();
