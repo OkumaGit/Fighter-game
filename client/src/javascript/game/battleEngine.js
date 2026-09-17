@@ -173,12 +173,14 @@ export function startAttack(fighter, type) {
     }
 
     const attackConfig = {
-        jab: { damage: 6.5, activeHitFrame: 3, duration: 320 },
-        jab2: { damage: 7.5, activeHitFrame: 2, duration: 280 },
-        kick: { damage: 11.5, activeHitFrame: 5, duration: 420 },
-        uppercut: { damage: 15.5, activeHitFrame: 4, duration: 460 },
-        throw: { damage: 16.5, activeHitFrame: 3, duration: 480 },
-        special: { damage: fighter.specialMove?.damage || 14, activeHitFrame: 4, duration: 450 }
+        jab: { damage: 6.5, activeHitFrame: 3, duration: 320, state: 'jab' },
+        jab2: { damage: 7.5, activeHitFrame: 2, duration: 280, state: 'jab' },
+        kick: { damage: 11.5, activeHitFrame: 5, duration: 420, state: 'kick' },
+        uppercut: { damage: 15.5, activeHitFrame: 4, duration: 450, state: 'uppercut' },
+        sweep: { damage: 13.0, activeHitFrame: 4, duration: 450, state: 'sweep' },
+        jumpkick: { damage: 14.0, activeHitFrame: 4, duration: 420, state: 'jumpkick' },
+        throw: { damage: 16.5, activeHitFrame: 3, duration: 480, state: 'jab' },
+        special: { damage: fighter.specialMove?.damage || 14, activeHitFrame: 4, duration: 500, state: 'special' }
     }[type];
 
     if (!attackConfig) return fighter;
@@ -192,7 +194,7 @@ export function startAttack(fighter, type) {
         activeHitFrame: attackConfig.activeHitFrame,
         currentFrame: 0,
         framesElapsed: 0,
-        state: type === 'uppercut' || type === 'throw' || type === 'jab' || type === 'jab2' ? 'jab' : 'kick'
+        state: attackConfig.state
     };
 }
 
@@ -209,8 +211,16 @@ export function setBlocking(fighter, isBlocking) {
     };
 }
 
-export function setCrouching(fighter) {
-    return fighter;
+export function setCrouching(fighter, isCrouching = true) {
+    if (fighter.isAttacking || fighter.state === 'hit' || fighter.health <= 0) {
+        return fighter;
+    }
+
+    return {
+        ...fighter,
+        isCrouching,
+        state: isCrouching ? 'sweep' : 'idle'
+    };
 }
 
 export function startDash(fighter, direction = 1) {
@@ -227,7 +237,7 @@ export function startDash(fighter, direction = 1) {
 }
 
 export function takeDamage(fighter, amount, attackerPositionX = fighter.position.x, options = {}) {
-    const { isUnblockable = false, isUppercut = false } = options;
+    const { isUnblockable = false, isUppercut = false, isSweep = false } = options;
     const blocked = fighter.isBlocking && !isUnblockable;
     const damage = blocked ? Math.max(1, Math.floor(amount * 0.15)) : amount;
     const direction = fighter.position.x >= attackerPositionX ? 1 : -1;
@@ -238,6 +248,9 @@ export function takeDamage(fighter, amount, attackerPositionX = fighter.position
     if (isUppercut) {
         velocityY = -16;
         velocityX = direction * 4.5;
+    } else if (isSweep) {
+        velocityY = -8;
+        velocityX = direction * 7;
     } else if (isUnblockable) {
         velocityY = -9;
         velocityX = direction * 11;
@@ -246,6 +259,8 @@ export function takeDamage(fighter, amount, attackerPositionX = fighter.position
         velocityY = -7.5;
         velocityX = direction * 4;
     }
+
+    const isKnockdown = isUppercut || isSweep || fighter.health - damage <= 0;
 
     return {
         ...fighter,
@@ -258,8 +273,8 @@ export function takeDamage(fighter, amount, attackerPositionX = fighter.position
         isDashing: false,
         attackType: null,
         attackHit: false,
-        state: 'hit',
-        hitTimer: isUppercut ? 380 : 220,
+        state: isKnockdown ? 'fall' : 'hit',
+        hitTimer: isKnockdown ? 550 : 300,
         damageTaken: damage,
         wasBlocking: blocked,
         isJuggled: !fighter.isGrounded || isUppercut

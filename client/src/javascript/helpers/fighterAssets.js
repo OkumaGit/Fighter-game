@@ -9,10 +9,20 @@ const fighterPortraits = {
 
 const battleSpritePoses = {
     idle: { file: 'idle.webp', folder: 'Idle', prefix: 'Idle', frames: 8, duration: 1200, loop: true },
+    walk: { file: 'walk.webp', folder: 'Walk', prefix: 'Walk', frames: 8, duration: 800, loop: true },
     jab: { file: 'jab.webp', folder: 'Jab', prefix: 'Jab', frames: 8, duration: 360, loop: false },
     kick: { file: 'kick.webp', folder: 'Kick', prefix: 'Kick', frames: 8, duration: 420, loop: false },
+    uppercut: { file: 'uppercut.webp', folder: 'Uppercut', prefix: 'Uppercut', frames: 8, duration: 450, loop: false },
+    sweep: { file: 'sweep.webp', folder: 'Sweep', prefix: 'Sweep', frames: 8, duration: 450, loop: false },
+    special: { file: 'special.webp', folder: 'Special', prefix: 'Special', frames: 8, duration: 500, loop: false },
+    jump: { file: 'jump.webp', folder: 'Jump', prefix: 'Jump', frames: 8, duration: 420, loop: false },
+    jumpkick: { file: 'jumpkick.webp', folder: 'JumpKick', prefix: 'JumpKick', frames: 8, duration: 420, loop: false },
     block: { file: 'block.webp', folder: 'Block', prefix: 'Block', frames: 8, duration: 260, loop: false },
-    jump: { file: 'jump.webp', folder: 'Jump', prefix: 'Jump', frames: 8, duration: 420, loop: false }
+    hit: { file: 'hit.webp', folder: 'Hit', prefix: 'Hit', frames: 8, duration: 320, loop: false },
+    fall: { file: 'fall.webp', folder: 'Fall', prefix: 'Fall', frames: 8, duration: 600, loop: false },
+    getup: { file: 'getup.webp', folder: 'GetUp', prefix: 'GetUp', frames: 8, duration: 450, loop: false },
+    death: { file: 'death.webp', folder: 'Death', prefix: 'Death', frames: 8, duration: 700, loop: false },
+    dizzy: { file: 'dizzy.webp', folder: 'Dizzy', prefix: 'Dizzy', frames: 8, duration: 900, loop: true }
 };
 
 const battleSpritePaths = {

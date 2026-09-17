@@ -98,7 +98,12 @@ async function buildAllSprites() {
 
   const fighterFolders = fs
     .readdirSync(INPUT_DIR)
-    .filter((f) => fs.statSync(path.join(INPUT_DIR, f)).isDirectory());
+    .filter(
+      (f) =>
+        fs.statSync(path.join(INPUT_DIR, f)).isDirectory() &&
+        f.startsWith("fighter_") &&
+        f.endsWith("_sprite"),
+    );
 
   let totalStrips = 0;
   let totalFrames = 0;

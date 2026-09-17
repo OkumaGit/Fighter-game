@@ -8,8 +8,7 @@
     padding: 48px 24px;
     box-sizing: border-box;
     background-color: #0b1020;
-    background:
-        radial-gradient(circle at 50% 30%, rgba(15, 23, 42, 0.4) 0%, rgba(7, 10, 19, 0.94) 85%),
+    background: radial-gradient(circle at 50% 30%, rgba(15, 23, 42, 0.4) 0%, rgba(7, 10, 19, 0.94) 85%),
         url('/resources/backgrounds/arena-bg.jpg') center / cover no-repeat;
     user-select: none;
     overflow: hidden;
@@ -33,9 +32,7 @@
     text-transform: uppercase;
     color: #f8fafc;
     text-align: center;
-    text-shadow:
-        0 2px 10px rgba(0, 0, 0, 0.9),
-        0 0 24px rgba(245, 158, 11, 0.35);
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9), 0 0 24px rgba(245, 158, 11, 0.35);
 }
 
 .fighters___header-sub {
@@ -110,18 +107,13 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(8px);
     overflow: hidden;
-    transition:
-        transform 0.15s ease,
-        border-color 0.15s ease,
-        box-shadow 0.15s ease;
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .fighters___fighter:hover:not(.fighters___fighter--selected) {
     transform: translateY(-2px);
     border-color: rgba(255, 255, 255, 0.25);
-    box-shadow:
-        0 6px 16px rgba(0, 0, 0, 0.5),
-        0 0 10px rgba(255, 255, 255, 0.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 255, 255, 0.1);
 }
 
 .fighters___fighter:hover:not(.fighters___fighter--selected) .fighters___fighter-name {
@@ -136,9 +128,7 @@
 .fighters___fighter--p1 {
     border: 2px solid #0284c7;
     background: rgba(10, 20, 36, 0.85);
-    box-shadow:
-        0 0 16px rgba(56, 189, 248, 0.45),
-        inset 0 0 8px rgba(56, 189, 248, 0.2);
+    box-shadow: 0 0 16px rgba(56, 189, 248, 0.45), inset 0 0 8px rgba(56, 189, 248, 0.2);
 }
 
 .fighters___fighter--p1.fighters___fighter--preview {
@@ -155,9 +145,7 @@
 .fighters___fighter--p2 {
     border: 2px solid #ef4444;
     background: rgba(28, 12, 16, 0.85);
-    box-shadow:
-        0 0 16px rgba(239, 68, 68, 0.45),
-        inset 0 0 8px rgba(239, 68, 68, 0.2);
+    box-shadow: 0 0 16px rgba(239, 68, 68, 0.45), inset 0 0 8px rgba(239, 68, 68, 0.2);
 }
 
 .fighters___fighter--p2.fighters___fighter--preview {
@@ -177,12 +165,6 @@
     object-fit: contain;
     filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.7));
     pointer-events: none;
-}
-
-.fighter___fighter-video {
-    background: transparent;
-    outline: none;
-    border: none;
 }
 
 .fighters___fighter-name {
@@ -263,10 +245,12 @@
 .fighters___vs-line {
     flex: 1;
     height: 1px;
-    background: linear-gradient(90deg,
-            rgba(251, 191, 36, 0) 0%,
-            rgba(251, 191, 36, 0.3) 50%,
-            rgba(251, 191, 36, 0) 100%);
+    background: linear-gradient(
+        90deg,
+        rgba(251, 191, 36, 0) 0%,
+        rgba(251, 191, 36, 0.3) 50%,
+        rgba(251, 191, 36, 0) 100%
+    );
 }
 
 .fighters___vs-text {
@@ -290,9 +274,7 @@
     background: linear-gradient(180deg, #dc2626 0%, #b91c1c 60%, #991b1b 100%);
     border: 0.8px solid rgba(0, 0, 0, 0.4);
     border-radius: 5px;
-    box-shadow:
-        0 4px 14px rgba(185, 28, 28, 0.6),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 14px rgba(185, 28, 28, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.2);
     font-family: 'Russo One', sans-serif;
     font-size: 20px;
     line-height: 1;
@@ -300,17 +282,12 @@
     text-transform: uppercase;
     color: #ffffff;
     cursor: pointer;
-    transition:
-        transform 0.12s ease,
-        filter 0.12s ease,
-        box-shadow 0.12s ease;
+    transition: transform 0.12s ease, filter 0.12s ease, box-shadow 0.12s ease;
 }
 
 .fighters___fight-btn:hover:not(:disabled) {
     filter: brightness(1.15);
-    box-shadow:
-        0 6px 20px rgba(220, 38, 38, 0.75),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    box-shadow: 0 6px 20px rgba(220, 38, 38, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.3);
     transform: translateY(-1px);
 }
 

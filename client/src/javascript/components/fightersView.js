@@ -2,7 +2,7 @@ import createElement from '../helpers/domHelper';
 import fighterService from '../services/fightersService';
 import { createFighterPreview } from './fighterPreview';
 import { createFightersSelector } from './fighterSelector';
-import { getFighterSource, getFighterVideoSource } from '../helpers/fighterAssets';
+import { getFighterSource } from '../helpers/fighterAssets';
 
 export async function getFighterInfo(fighterId, container) {
     try {
@@ -21,35 +21,8 @@ export async function getFighterInfo(fighterId, container) {
 }
 
 function createImage(fighter) {
-    const videoSource = getFighterVideoSource(fighter);
-    const { name } = fighter;
-
-    if (videoSource) {
-        const videoElement = createElement({
-            tagName: 'video',
-            className: 'fighter___fighter-image fighter___fighter-video',
-            attributes: {
-                src: videoSource,
-                autoplay: '',
-                loop: '',
-                muted: '',
-                playsinline: '',
-                title: name,
-                'aria-label': name
-            }
-        });
-        videoElement.muted = true;
-        videoElement.autoplay = true;
-        videoElement.loop = true;
-        videoElement.playsInline = true;
-        videoElement.addEventListener('canplay', () => {
-            videoElement.play().catch(() => {});
-        });
-        videoElement.play().catch(() => {});
-        return videoElement;
-    }
-
     const source = getFighterSource(fighter);
+    const { name } = fighter;
     const attributes = {
         src: source,
         title: name,
