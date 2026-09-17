@@ -1,74 +1,76 @@
-import fs from 'fs';
-import path from 'path';
-import sharp from 'sharp';
+import fs from "fs";
+import path from "path";
+import sharp from "sharp";
 
-const BASE_ASSETS_DIR = path.resolve('client/resources/fighters/fighter-game-assets');
-const OUTPUT_BASE_DIR = path.resolve('client/resources/fighters');
+const BASE_ASSETS_DIR = path.resolve(
+  "client/resources/fighters/fighter-game-assets",
+);
+const OUTPUT_BASE_DIR = path.resolve("client/resources/fighters");
 
 const FIGHTER_SHEETS = [
   {
-    id: '1',
-    name: 'Astra',
-    g1: 'Moves 1-5/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_8ao8zn8ao8zn8ao8 1_upscayl_2x_digital-art-4x.png',
-    g2: 'Moves 6-10/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_43qu5o43qu5o43qu_fighter_1.png',
-    g3: 'Moves 10-15/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_xajrh2xajrh2xajr_fighter_1.png'
+    id: "1",
+    name: "Astra",
+    g1: "Moves 1-5/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_8ao8zn8ao8zn8ao8 1_upscayl_2x_digital-art-4x.png",
+    g2: "Moves 6-10/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_43qu5o43qu5o43qu_fighter_1.png",
+    g3: "Moves 10-15/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_xajrh2xajrh2xajr_fighter_1.png",
   },
   {
-    id: '2',
-    name: 'Kite',
-    g1: 'Moves 1-5/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_vr6vfqvr6vfqvr6v 2.png',
-    g2: 'Moves 6-10/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_laculklaculklacu_fighter_2.png',
-    g3: 'Moves 10-15/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_zcpruczcpruczcpr_fighter_2.png'
+    id: "2",
+    name: "Kite",
+    g1: "Moves 1-5/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_vr6vfqvr6vfqvr6v 2.png",
+    g2: "Moves 6-10/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_laculklaculklacu_fighter_2.png",
+    g3: "Moves 10-15/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_zcpruczcpruczcpr_fighter_2.png",
   },
   {
-    id: '3',
-    name: 'Vex',
-    g1: 'Moves 1-5/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_xja0kaxja0kaxja0 3.png',
-    g2: 'Moves 6-10/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_8z18j88z18j88z18_fighter_3.png',
-    g3: 'Moves 10-15/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_dkj65kdkj65kdkj6_fighter_3.png'
+    id: "3",
+    name: "Vex",
+    g1: "Moves 1-5/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_xja0kaxja0kaxja0 3.png",
+    g2: "Moves 6-10/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_2s72cf2s72cf2s72_fighter_4.png",
+    g3: "Moves 10-15/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_w1hlifw1hlifw1hl_fighter_4.png",
   },
   {
-    id: '4',
-    name: 'Brute',
-    g1: 'Moves 1-5/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image28ao8zn8ao8 4.png',
-    g2: 'Moves 6-10/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_2s72cf2s72cf2s72_fighter_4.png',
-    g3: 'Moves 10-15/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_w1hlifw1hlifw1hl_fighter_4.png'
+    id: "4",
+    name: "Brute",
+    g1: "Moves 1-5/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image28ao8zn8ao8 4.png",
+    g2: "Moves 6-10/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_8z18j88z18j88z18_fighter_3.png",
+    g3: "Moves 10-15/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_dkj65kdkj65kdkj6_fighter_3.png",
   },
   {
-    id: '5',
-    name: 'Nova',
-    g1: 'Moves 1-5/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image28ao8zn8ao8 5.png',
-    g2: 'Moves 6-10/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_o1tf1ho1tf1ho1tf_fighter_5.png',
-    g3: 'Moves 10-15/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_ivnhzwivnhzwivnh_fighter_5.png'
+    id: "5",
+    name: "Nova",
+    g1: "Moves 1-5/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image28ao8zn8ao8 5.png",
+    g2: "Moves 6-10/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_o1tf1ho1tf1ho1tf_fighter_5.png",
+    g3: "Moves 10-15/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_ivnhzwivnhzwivnh_fighter_5.png",
   },
   {
-    id: '6',
-    name: 'Rift',
-    g1: 'Moves 1-5/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image28ao8zn8ao8 6.png',
-    g2: 'Moves 6-10/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_fjx1zefjx1zefjx1_fighter_6.png',
-    g3: 'Moves 10-15/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_x011nzx011nzx011_fighter_6.png'
-  }
+    id: "6",
+    name: "Rift",
+    g1: "Moves 1-5/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image28ao8zn8ao8 6.png",
+    g2: "Moves 6-10/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_fjx1zefjx1zefjx1_fighter_6.png",
+    g3: "Moves 10-15/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_x011nzx011nzx011_fighter_6.png",
+  },
 ];
 
 const GROUPS = [
   {
-    key: 'g1',
-    name: 'Moves 1-5',
+    key: "g1",
+    name: "Moves 1-5",
     hasAlpha: true,
-    rows: ['Idle', 'Jab', 'Kick', 'Block', 'Jump']
+    rows: ["Idle", "Jab", "Kick", "Block", "Jump"],
   },
   {
-    key: 'g2',
-    name: 'Moves 6-10',
+    key: "g2",
+    name: "Moves 6-10",
     hasAlpha: false,
-    rows: ['Hit', 'Uppercut', 'Fall', 'GetUp', 'Death']
+    rows: ["Hit", "Uppercut", "Fall", "GetUp", "Death"],
   },
   {
-    key: 'g3',
-    name: 'Moves 10-15',
+    key: "g3",
+    name: "Moves 10-15",
     hasAlpha: false,
-    rows: ['Sweep', 'Special', 'Walk', 'JumpKick', 'Dizzy']
-  }
+    rows: ["Sweep", "Special", "Walk", "JumpKick", "Dizzy"],
+  },
 ];
 
 const COLS = 8;
@@ -115,7 +117,7 @@ function removeBlackBackground(data, w, h) {
         [x + 1, y],
         [x - 1, y],
         [x, y + 1],
-        [x, y - 1]
+        [x, y - 1],
       ];
       for (let i = 0; i < neighbors.length; i += 1) {
         const [nx, ny] = neighbors[i];
@@ -126,7 +128,11 @@ function removeBlackBackground(data, w, h) {
             const nr = data[nIdx * 3];
             const ng = data[nIdx * 3 + 1];
             const nb = data[nIdx * 3 + 2];
-            if (nr <= BLACK_THRESHOLD && ng <= BLACK_THRESHOLD && nb <= BLACK_THRESHOLD) {
+            if (
+              nr <= BLACK_THRESHOLD &&
+              ng <= BLACK_THRESHOLD &&
+              nb <= BLACK_THRESHOLD
+            ) {
               queue.push(nx, ny);
             }
           }
@@ -145,7 +151,12 @@ function removeBlackBackground(data, w, h) {
     rgba[i * 4 + 1] = g;
     rgba[i * 4 + 2] = b;
 
-    if (visited[i] && r <= BLACK_THRESHOLD && g <= BLACK_THRESHOLD && b <= BLACK_THRESHOLD) {
+    if (
+      visited[i] &&
+      r <= BLACK_THRESHOLD &&
+      g <= BLACK_THRESHOLD &&
+      b <= BLACK_THRESHOLD
+    ) {
       rgba[i * 4 + 3] = 0;
     } else {
       rgba[i * 4 + 3] = 255;
@@ -162,7 +173,9 @@ async function processSheet(fighter, group) {
     return;
   }
 
-  console.log(`  Processing [${fighter.name} (id:${fighter.id})] -> ${group.name}...`);
+  console.log(
+    `  Processing [${fighter.name} (id:${fighter.id})] -> ${group.name}...`,
+  );
   const image = sharp(inputPath);
   const metadata = await image.metadata();
 
@@ -193,11 +206,11 @@ async function processSheet(fighter, group) {
             left: colLeft,
             top: rowTop,
             width: actualColWidth,
-            height: actualRowHeight
+            height: actualRowHeight,
           })
           .resize(TARGET_SIZE, TARGET_SIZE, {
-            fit: 'contain',
-            background: { r: 0, g: 0, b: 0, alpha: 0 }
+            fit: "contain",
+            background: { r: 0, g: 0, b: 0, alpha: 0 },
           })
           .png()
           .toBuffer();
@@ -207,7 +220,7 @@ async function processSheet(fighter, group) {
             left: colLeft,
             top: rowTop,
             width: actualColWidth,
-            height: actualRowHeight
+            height: actualRowHeight,
           })
           .raw()
           .toBuffer({ resolveWithObject: true });
@@ -215,26 +228,29 @@ async function processSheet(fighter, group) {
         const transparentRgba = removeBlackBackground(
           rawExtract.data,
           rawExtract.info.width,
-          rawExtract.info.height
+          rawExtract.info.height,
         );
 
         frameBuffer = await sharp(transparentRgba, {
           raw: {
             width: rawExtract.info.width,
             height: rawExtract.info.height,
-            channels: 4
-          }
+            channels: 4,
+          },
         })
           .resize(TARGET_SIZE, TARGET_SIZE, {
-            fit: 'contain',
-            background: { r: 0, g: 0, b: 0, alpha: 0 }
+            fit: "contain",
+            background: { r: 0, g: 0, b: 0, alpha: 0 },
           })
           .png()
           .toBuffer();
       }
 
       const frameNumber = c + 1;
-      const targetFilePath = path.join(actionDir, `${actionName}_${frameNumber}.png`);
+      const targetFilePath = path.join(
+        actionDir,
+        `${actionName}_${frameNumber}.png`,
+      );
       fs.writeFileSync(targetFilePath, frameBuffer);
     }
   }
@@ -242,11 +258,19 @@ async function processSheet(fighter, group) {
 
 async function main() {
   const startTime = Date.now();
-  console.log('🚀 Starting import of all 15 moves for all 6 fighters...\n');
+  const filterArg = process.argv[2];
+  const targetIds = filterArg ? filterArg.split(',') : null;
+  const listToProcess = targetIds
+    ? FIGHTER_SHEETS.filter((f) => targetIds.includes(f.id))
+    : FIGHTER_SHEETS;
 
-  for (let f = 0; f < FIGHTER_SHEETS.length; f += 1) {
-    const fighter = FIGHTER_SHEETS[f];
-    console.log(`🥊 [${f + 1}/6] Importing Fighter ${fighter.id} (${fighter.name})...`);
+  console.log(`🚀 Starting import of moves for ${listToProcess.length} fighter(s)...\n`);
+
+  for (let f = 0; f < listToProcess.length; f += 1) {
+    const fighter = listToProcess[f];
+    console.log(
+      `🥊 [${f + 1}/${listToProcess.length}] Importing Fighter ${fighter.id} (${fighter.name})...`,
+    );
     for (let g = 0; g < GROUPS.length; g += 1) {
       await processSheet(fighter, GROUPS[g]);
     }
@@ -254,10 +278,10 @@ async function main() {
   }
 
   const durationSec = ((Date.now() - startTime) / 1000).toFixed(1);
-  console.log(`🎉 All sheets sliced and imported in ${durationSec}s!`);
+  console.log(`🎉 Selected sheets sliced and imported in ${durationSec}s!`);
 }
 
 main().catch((err) => {
-  console.error('❌ Error during import:', err);
+  console.error("❌ Error during import:", err);
   process.exit(1);
 });
