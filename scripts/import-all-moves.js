@@ -259,12 +259,14 @@ async function processSheet(fighter, group) {
 async function main() {
   const startTime = Date.now();
   const filterArg = process.argv[2];
-  const targetIds = filterArg ? filterArg.split(',') : null;
+  const targetIds = filterArg ? filterArg.split(",") : null;
   const listToProcess = targetIds
     ? FIGHTER_SHEETS.filter((f) => targetIds.includes(f.id))
     : FIGHTER_SHEETS;
 
-  console.log(`🚀 Starting import of moves for ${listToProcess.length} fighter(s)...\n`);
+  console.log(
+    `🚀 Starting import of moves for ${listToProcess.length} fighter(s)...\n`,
+  );
 
   for (let f = 0; f < listToProcess.length; f += 1) {
     const fighter = listToProcess[f];
