@@ -749,10 +749,8 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
             loser.isDashing = false;
 
             const direction = loser.position.x >= winner.position.x ? 1 : -1;
-            if (loser.velocity.y >= 0) {
-                loser.velocity.y = -10;
-                loser.velocity.x = direction * 7;
-            }
+            loser.velocity.y = -10;
+            loser.velocity.x = direction * 7;
             loser.isGrounded = false;
             loser.isJuggled = true;
 
@@ -784,6 +782,10 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
             if (isMatchDeciding && !finishHimActive) {
                 finishHimActive = true;
                 state[loserSide].isDizzy = true;
+                state[loserSide].isBlocking = false;
+                state[loserSide].isCrouching = false;
+                state[loserSide].isAttacking = false;
+                state[loserSide].isDashing = false;
                 state[loserSide].health = 1;
                 state[loserSide].state = 'idle';
                 updateHealthBar(loserSide, state[loserSide]);
@@ -1237,9 +1239,9 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
 
                     if (!isTargetDowned && rectangularCollision({ rectangle1: hitBox, rectangle2: target.bodyBox })) {
                         proj.active = false;
-                        const blocked = target.isBlocking && !proj.isLow;
                         state[targetSide] = takeDamage(target, proj.damage, proj.x, { isUnblockable: proj.isLow });
                         updateHealthBar(targetSide, state[targetSide]);
+                        const blocked = state[targetSide].wasBlocking;
 
                         if (blocked) {
                             target.superMeter = Math.min(100, (target.superMeter || 0) + 5);
@@ -1299,14 +1301,13 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                             (fighter.attackBox.position.x + state[defenderSide].bodyBox.position.x + 60) / 2;
                         const impactY =
                             (fighter.attackBox.position.y + state[defenderSide].bodyBox.position.y + 40) / 2;
-                        const defenderWasBlocking = state[defenderSide].isBlocking && !isUnblockable;
-
                         state[defenderSide] = takeDamage(state[defenderSide], fighter.damage, fighter.position.x, {
                             isUnblockable,
                             isUppercut,
                             isSweep
                         });
                         updateHealthBar(defenderSide, state[defenderSide]);
+                        const defenderWasBlocking = state[defenderSide].wasBlocking;
 
                         if (defenderWasBlocking) {
                             state[defenderSide].superMeter = Math.min(100, (state[defenderSide].superMeter || 0) + 6);
