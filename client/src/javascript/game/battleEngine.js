@@ -272,6 +272,8 @@ export function takeDamage(fighter, amount, attackerPositionX = fighter.position
     const damage = blocked ? Math.max(1, Math.floor(amount * 0.15)) : amount;
     const direction = fighter.position.x >= attackerPositionX ? 1 : -1;
 
+    const isFatal = fighter.health - damage <= 0;
+
     let velocityX = direction * (blocked ? 3 : 6);
     let velocityY = fighter.velocity.y;
 
@@ -288,9 +290,13 @@ export function takeDamage(fighter, amount, attackerPositionX = fighter.position
         // Air Juggle
         velocityY = -7.5;
         velocityX = direction * 4;
+    } else if (isFatal) {
+        // Fatal knockout strike on grounded opponent (Jab, Kick, Projectile, etc.)
+        velocityY = -10;
+        velocityX = direction * 7;
     }
 
-    const isKnockdown = isUppercut || isSweep || isUnblockable || fighter.health - damage <= 0;
+    const isKnockdown = isUppercut || isSweep || isUnblockable || isFatal;
 
     return {
         ...fighter,
@@ -309,7 +315,7 @@ export function takeDamage(fighter, amount, attackerPositionX = fighter.position
         hitTimer: isKnockdown ? 600 : 300,
         damageTaken: damage,
         wasBlocking: blocked,
-        isJuggled: !fighter.isGrounded || isUppercut
+        isJuggled: !fighter.isGrounded || isUppercut || (isFatal && !isSweep)
     };
 }
 

@@ -288,10 +288,10 @@ function animateFighter(fighter, elapsed) {
         fighter.attackType = null;
         if (fighter.state === 'fall') {
             if (fighter.health <= 0) {
-                fighter.state = 'death';
-            } else {
-                fighter.state = 'getup';
+                fighter.currentFrame = config.frames - 1;
+                return;
             }
+            fighter.state = 'getup';
         } else if (fighter.state === 'getup') {
             fighter.state = 'idle';
         } else if (fighter.state === 'death') {
@@ -753,10 +753,11 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
             setTimeout(() => {
                 if (finishHimOverlay) finishHimOverlay.remove();
                 finishFight(winner);
-            }, 2400);
+            }, 2600);
         };
 
         const handleFighterHealthDepleted = (winnerSide, loserSide) => {
+            if (finished) return;
             const isMatchDeciding = roundScores[winnerSide] + 1 >= 2;
 
             if (isMatchDeciding && !finishHimActive) {
@@ -774,7 +775,7 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                         finishFight(state[winnerSide]);
                     }
                 }, 5000);
-            } else {
+            } else if (!finishHimActive) {
                 onRoundEnd(winnerSide);
             }
         };
@@ -854,7 +855,7 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
             const defenderSide = side === 'left' ? 'right' : 'left';
             const defender = state[defenderSide];
 
-            if (roundTransitionActive || attacker.health <= 0 || attacker.isDizzy) return;
+            if (roundTransitionActive || attacker.health <= 0 || attacker.isDizzy || defender.health <= 0) return;
 
             // Check Super Meter: requires full 100% meter
             const currentMeter = attacker.superMeter || 0;
@@ -1075,19 +1076,14 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                 return;
             }
 
-            // Pause physical updates during round reset
-            if (roundTransitionActive) {
-                drawFighter(context, state.left);
-                drawFighter(context, state.right);
-                vfx.draw();
-                animationFrame = requestAnimationFrame(loop);
-                return;
-            }
-
             let leftMovement = 0;
             let rightMovement = 0;
 
-            if (isOnline) {
+            if (roundTransitionActive) {
+                // Keep physics (gravity, knockdown fall) and animation playing during round reset
+                leftMovement = 0;
+                rightMovement = 0;
+            } else if (isOnline) {
                 if (role === 'host') {
                     state.left = setBlocking(
                         state.left,
@@ -1210,6 +1206,7 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                     };
 
                     const isTargetDowned =
+                        target.health <= 0 ||
                         target.state === 'death' ||
                         (target.isGrounded && (target.state === 'fall' || target.state === 'getup'));
 
@@ -1256,12 +1253,14 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
 
             // Melee Attacks and Hit Detection
             ['left', 'right'].forEach(side => {
+                if (roundTransitionActive) return;
                 const fighter = state[side];
                 const defenderSide = side === 'left' ? 'right' : 'left';
                 if (fighter.isAttacking && fighter.currentFrame === fighter.activeHitFrame && !fighter.attackHit) {
                     fighter.attackHit = true;
                     const defender = state[defenderSide];
                     const isDefenderDowned =
+                        defender.health <= 0 ||
                         defender.state === 'death' ||
                         (defender.isGrounded && (defender.state === 'fall' || defender.state === 'getup'));
                     if (
