@@ -5,3 +5,4 @@ dist/
 build/
 .vscode
 client/resources/fighters/fighter-game-assets/
+desktop.ini

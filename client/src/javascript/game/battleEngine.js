@@ -168,7 +168,15 @@ export function updateAttackBox(fighter) {
 /* eslint-enable no-param-reassign */
 
 export function startAttack(fighter, type) {
-    if (fighter.isAttacking || fighter.state === 'hit' || fighter.health <= 0 || fighter.isDizzy) {
+    if (
+        fighter.isAttacking ||
+        fighter.state === 'hit' ||
+        fighter.state === 'fall' ||
+        fighter.state === 'getup' ||
+        fighter.state === 'death' ||
+        fighter.health <= 0 ||
+        fighter.isDizzy
+    ) {
         return fighter;
     }
 
@@ -199,7 +207,14 @@ export function startAttack(fighter, type) {
 }
 
 export function setBlocking(fighter, isBlocking) {
-    if (fighter.isAttacking || fighter.state === 'hit' || fighter.health <= 0) {
+    if (
+        fighter.isAttacking ||
+        fighter.state === 'hit' ||
+        fighter.state === 'fall' ||
+        fighter.state === 'getup' ||
+        fighter.state === 'death' ||
+        fighter.health <= 0
+    ) {
         return fighter;
     }
 
@@ -212,7 +227,14 @@ export function setBlocking(fighter, isBlocking) {
 }
 
 export function setCrouching(fighter, isCrouching = true) {
-    if (fighter.isAttacking || fighter.state === 'hit' || fighter.health <= 0) {
+    if (
+        fighter.isAttacking ||
+        fighter.state === 'hit' ||
+        fighter.state === 'fall' ||
+        fighter.state === 'getup' ||
+        fighter.state === 'death' ||
+        fighter.health <= 0
+    ) {
         return fighter;
     }
 
@@ -224,7 +246,15 @@ export function setCrouching(fighter, isCrouching = true) {
 }
 
 export function startDash(fighter, direction = 1) {
-    if (fighter.isAttacking || fighter.state === 'hit' || fighter.health <= 0 || !fighter.isGrounded) {
+    if (
+        fighter.isAttacking ||
+        fighter.state === 'hit' ||
+        fighter.state === 'fall' ||
+        fighter.state === 'getup' ||
+        fighter.state === 'death' ||
+        fighter.health <= 0 ||
+        !fighter.isGrounded
+    ) {
         return fighter;
     }
 
@@ -260,7 +290,7 @@ export function takeDamage(fighter, amount, attackerPositionX = fighter.position
         velocityX = direction * 4;
     }
 
-    const isKnockdown = isUppercut || isSweep || fighter.health - damage <= 0;
+    const isKnockdown = isUppercut || isSweep || isUnblockable || fighter.health - damage <= 0;
 
     return {
         ...fighter,
@@ -273,8 +303,10 @@ export function takeDamage(fighter, amount, attackerPositionX = fighter.position
         isDashing: false,
         attackType: null,
         attackHit: false,
+        currentFrame: 0,
+        framesElapsed: 0,
         state: isKnockdown ? 'fall' : 'hit',
-        hitTimer: isKnockdown ? 550 : 300,
+        hitTimer: isKnockdown ? 600 : 300,
         damageTaken: damage,
         wasBlocking: blocked,
         isJuggled: !fighter.isGrounded || isUppercut

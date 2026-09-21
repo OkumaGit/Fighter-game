@@ -156,7 +156,7 @@ function drawFighter(context, fighter) {
     let pose = fighter.state;
     if (fighter.isDizzy) {
         pose = 'dizzy';
-    } else if (fighter.health <= 0 && fighter.isGrounded && fighter.state !== 'fall') {
+    } else if (fighter.health <= 0 && fighter.isGrounded && fighter.state !== 'fall' && fighter.state !== 'getup') {
         pose = 'death';
     } else if (fighter.isMoving && fighter.isGrounded && (fighter.state === 'idle' || !fighter.state)) {
         pose = 'walk';
@@ -244,19 +244,7 @@ function animateFighter(fighter, elapsed) {
             }
             fighter.hitTimer = 0;
             fighter.currentFrame = 0;
-        }
-    } else if (fighter.state === 'fall') {
-        fighter.hitTimer = (fighter.hitTimer || 0) - elapsed;
-        if (fighter.hitTimer <= 0 && fighter.isGrounded) {
-            if (fighter.health <= 0) {
-                fighter.state = 'death';
-                fighter.currentFrame = 0;
-                fighter.framesElapsed = 0;
-            } else {
-                fighter.state = 'getup';
-                fighter.currentFrame = 0;
-                fighter.framesElapsed = 0;
-            }
+            fighter.framesElapsed = 0;
         }
     }
 
@@ -269,7 +257,7 @@ function animateFighter(fighter, elapsed) {
     let pose = fighter.state;
     if (fighter.isDizzy) {
         pose = 'dizzy';
-    } else if (fighter.health <= 0 && fighter.isGrounded && fighter.state !== 'fall') {
+    } else if (fighter.health <= 0 && fighter.isGrounded && fighter.state !== 'fall' && fighter.state !== 'getup') {
         pose = 'death';
     } else if (fighter.isMoving && fighter.isGrounded && (fighter.state === 'idle' || !fighter.state)) {
         pose = 'walk';
@@ -284,6 +272,13 @@ function animateFighter(fighter, elapsed) {
     if (fighter.framesElapsed < frameDuration) return;
 
     fighter.framesElapsed = 0;
+
+    // During knockdown fall: hold frame 3 (airborne pose) while airborne until landing on ground
+    if (fighter.state === 'fall' && !fighter.isGrounded && fighter.currentFrame >= 3) {
+        fighter.currentFrame = 3;
+        return;
+    }
+
     if (fighter.currentFrame < config.frames - 1) {
         fighter.currentFrame += 1;
     } else if (config.loop) {
@@ -291,7 +286,13 @@ function animateFighter(fighter, elapsed) {
     } else {
         fighter.isAttacking = false;
         fighter.attackType = null;
-        if (fighter.state === 'getup') {
+        if (fighter.state === 'fall') {
+            if (fighter.health <= 0) {
+                fighter.state = 'death';
+            } else {
+                fighter.state = 'getup';
+            }
+        } else if (fighter.state === 'getup') {
             fighter.state = 'idle';
         } else if (fighter.state === 'death') {
             fighter.currentFrame = config.frames - 1;
@@ -302,6 +303,7 @@ function animateFighter(fighter, elapsed) {
             fighter.state = fighter.isGrounded ? 'idle' : 'jump';
         }
         fighter.currentFrame = 0;
+        fighter.framesElapsed = 0;
     }
 }
 
@@ -676,7 +678,17 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
         };
 
         const handleAttackInput = (side, attackType, forwardKey, blockKey) => {
-            if (roundTransitionActive || state[side].health <= 0 || state[side].isDizzy) return;
+            if (
+                roundTransitionActive ||
+                state[side].health <= 0 ||
+                state[side].isDizzy ||
+                state[side].state === 'hit' ||
+                state[side].state === 'fall' ||
+                state[side].state === 'getup' ||
+                state[side].state === 'death'
+            ) {
+                return;
+            }
             const oppSide = side === 'left' ? 'right' : 'left';
             const dist = Math.abs(state[side].position.x - state[oppSide].position.x);
             const isHoldingForward = pressedKeys.has(forwardKey);
@@ -956,7 +968,14 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                 if (isKick) handleAttackInput(localSide, 'kick', controls.PlayerOneRight, controls.PlayerOneBlock);
                 if (isSpecial)
                     handleAttackInput(localSide, 'special', controls.PlayerOneRight, controls.PlayerOneBlock);
-                if (isJump && state[localSide].isGrounded && state[localSide].state !== 'hit') {
+                if (
+                    isJump &&
+                    state[localSide].isGrounded &&
+                    state[localSide].state !== 'hit' &&
+                    state[localSide].state !== 'fall' &&
+                    state[localSide].state !== 'getup' &&
+                    state[localSide].state !== 'death'
+                ) {
                     state[localSide].velocity.y = -13;
                 }
                 if (isJump) event.preventDefault();
@@ -973,7 +992,14 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
             if (event.code === controls.PlayerOneSpecial) {
                 handleAttackInput('left', 'special', controls.PlayerOneRight, controls.PlayerOneBlock);
             }
-            if (event.code === controls.PlayerOneJump && state.left.isGrounded && state.left.state !== 'hit') {
+            if (
+                event.code === controls.PlayerOneJump &&
+                state.left.isGrounded &&
+                state.left.state !== 'hit' &&
+                state.left.state !== 'fall' &&
+                state.left.state !== 'getup' &&
+                state.left.state !== 'death'
+            ) {
                 state.left.velocity.y = -13;
             }
 
@@ -988,7 +1014,14 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                 if (event.code === controls.PlayerTwoSpecial) {
                     handleAttackInput('right', 'special', controls.PlayerTwoLeft, controls.PlayerTwoBlock);
                 }
-                if (event.code === controls.PlayerTwoJump && state.right.isGrounded && state.right.state !== 'hit') {
+                if (
+                    event.code === controls.PlayerTwoJump &&
+                    state.right.isGrounded &&
+                    state.right.state !== 'hit' &&
+                    state.right.state !== 'fall' &&
+                    state.right.state !== 'getup' &&
+                    state.right.state !== 'death'
+                ) {
                     state.right.velocity.y = -13;
                 }
             }
@@ -1124,7 +1157,14 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                         }
                     },
                     jump: () => {
-                        if (state.right.isGrounded && state.right.state !== 'hit' && !state.right.isDizzy) {
+                        if (
+                            state.right.isGrounded &&
+                            state.right.state !== 'hit' &&
+                            state.right.state !== 'fall' &&
+                            state.right.state !== 'getup' &&
+                            state.right.state !== 'death' &&
+                            !state.right.isDizzy
+                        ) {
                             state.right.velocity.y = -13;
                         }
                     },
@@ -1169,7 +1209,11 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                         height: proj.radius * 2
                     };
 
-                    if (rectangularCollision({ rectangle1: hitBox, rectangle2: target.bodyBox })) {
+                    const isTargetDowned =
+                        target.state === 'death' ||
+                        (target.isGrounded && (target.state === 'fall' || target.state === 'getup'));
+
+                    if (!isTargetDowned && rectangularCollision({ rectangle1: hitBox, rectangle2: target.bodyBox })) {
                         proj.active = false;
                         const blocked = target.isBlocking && !proj.isLow;
                         state[targetSide] = takeDamage(target, proj.damage, proj.x, { isUnblockable: proj.isLow });
@@ -1216,8 +1260,13 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                 const defenderSide = side === 'left' ? 'right' : 'left';
                 if (fighter.isAttacking && fighter.currentFrame === fighter.activeHitFrame && !fighter.attackHit) {
                     fighter.attackHit = true;
+                    const defender = state[defenderSide];
+                    const isDefenderDowned =
+                        defender.state === 'death' ||
+                        (defender.isGrounded && (defender.state === 'fall' || defender.state === 'getup'));
                     if (
-                        rectangularCollision({ rectangle1: fighter.attackBox, rectangle2: state[defenderSide].bodyBox })
+                        !isDefenderDowned &&
+                        rectangularCollision({ rectangle1: fighter.attackBox, rectangle2: defender.bodyBox })
                     ) {
                         const isUnblockable = fighter.attackType === 'throw';
                         const isUppercut = fighter.attackType === 'uppercut';

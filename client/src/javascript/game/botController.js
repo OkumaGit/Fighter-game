@@ -54,8 +54,13 @@ export default function createBotController(side = 'right', options = {}) {
     const update = (elapsed, botFighter, opponentFighter, canvasWidth, actions) => {
         if (!botFighter || !opponentFighter) return;
 
-        // If bot is stunned / in hit state, drop guard/crouch and reset pending reactions
-        if (botFighter.state === 'hit') {
+        // If bot is stunned / in hit state / knocked down, drop guard/crouch and reset pending reactions
+        if (
+            botFighter.state === 'hit' ||
+            botFighter.state === 'fall' ||
+            botFighter.state === 'getup' ||
+            botFighter.state === 'death'
+        ) {
             isBlocking = false;
             isCrouching = false;
             reactionTimer = 0;
