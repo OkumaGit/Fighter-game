@@ -206,14 +206,15 @@ export function startAttack(fighter, type) {
     };
 }
 
-export function setBlocking(fighter, isBlocking) {
+export function setBlocking(fighter, isBlocking = true) {
     if (
         fighter.isAttacking ||
         fighter.state === 'hit' ||
         fighter.state === 'fall' ||
         fighter.state === 'getup' ||
         fighter.state === 'death' ||
-        fighter.health <= 0
+        fighter.health <= 0 ||
+        fighter.isDizzy
     ) {
         return fighter;
     }
@@ -233,7 +234,8 @@ export function setCrouching(fighter, isCrouching = true) {
         fighter.state === 'fall' ||
         fighter.state === 'getup' ||
         fighter.state === 'death' ||
-        fighter.health <= 0
+        fighter.health <= 0 ||
+        fighter.isDizzy
     ) {
         return fighter;
     }
@@ -268,7 +270,7 @@ export function startDash(fighter, direction = 1) {
 
 export function takeDamage(fighter, amount, attackerPositionX = fighter.position.x, options = {}) {
     const { isUnblockable = false, isUppercut = false, isSweep = false } = options;
-    const blocked = fighter.isBlocking && !isUnblockable;
+    const blocked = fighter.isBlocking && !isUnblockable && !fighter.isDizzy;
     const damage = blocked ? Math.max(1, Math.floor(amount * 0.15)) : amount;
     const direction = fighter.position.x >= attackerPositionX ? 1 : -1;
 
@@ -307,6 +309,7 @@ export function takeDamage(fighter, amount, attackerPositionX = fighter.position
         isAttacking: false,
         isCrouching: false,
         isDashing: false,
+        isDizzy: false,
         attackType: null,
         attackHit: false,
         currentFrame: 0,

@@ -726,20 +726,41 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
             }
         };
 
-        const onFatalKnockout = (winner, loser) => {
+        const onFatalKnockout = (winner, loserSide) => {
             if (finishHimTimeout) clearTimeout(finishHimTimeout);
+            let actualLoserSide = 'right';
+            if (typeof loserSide === 'string') {
+                actualLoserSide = loserSide;
+            } else if (winner === state.left) {
+                actualLoserSide = 'right';
+            } else {
+                actualLoserSide = 'left';
+            }
+            const loser = typeof loserSide === 'string' ? state[loserSide] : loserSide;
+
             loser.isDizzy = false;
             loser.health = 0;
-            updateHealthBar(loser.side, loser);
+            loser.state = 'fall';
+            loser.currentFrame = 0;
+            loser.framesElapsed = 0;
+            loser.isAttacking = false;
+            loser.isBlocking = false;
+            loser.isCrouching = false;
+            loser.isDashing = false;
+
+            const direction = loser.position.x >= winner.position.x ? 1 : -1;
+            if (loser.velocity.y >= 0) {
+                loser.velocity.y = -10;
+                loser.velocity.x = direction * 7;
+            }
+            loser.isGrounded = false;
+            loser.isJuggled = true;
+
+            updateHealthBar(actualLoserSide, loser);
             vfx.triggerScreenShake('heavy');
             vfx.triggerHitStop(140);
 
-            vfx.spawnBlood(
-                loser.position.x + fighterWidth / 2,
-                loser.position.y + 70,
-                loser.position.x >= winner.position.x ? 1 : -1,
-                'fatal'
-            );
+            vfx.spawnBlood(loser.position.x + fighterWidth / 2, loser.position.y + 70, direction, 'fatal');
             vfx.spawnFloatingText(loser.position.x + fighterWidth / 2, loser.position.y, 'FATAL BLOW!', 'crit');
 
             if (finishHimOverlay) {
@@ -772,6 +793,10 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                 finishHimTimeout = setTimeout(() => {
                     if (!finished) {
                         if (finishHimOverlay) finishHimOverlay.remove();
+                        state[loserSide].isDizzy = false;
+                        state[loserSide].health = 0;
+                        state[loserSide].state = 'death';
+                        state[loserSide].currentFrame = 0;
                         finishFight(state[winnerSide]);
                     }
                 }, 5000);
@@ -911,8 +936,8 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
             lastCriticalHit[side] = Date.now();
             criticalSequence[side] = [];
 
-            if (state[defenderSide].isDizzy) {
-                onFatalKnockout(attacker, state[defenderSide]);
+            if (finishHimActive || state[defenderSide].isDizzy || defender.isDizzy) {
+                onFatalKnockout(attacker, defenderSide);
             } else if (state[defenderSide].health <= 0) {
                 handleFighterHealthDepleted(side, defenderSide);
             }
@@ -1238,8 +1263,8 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                             vfx.triggerScreenShake('medium');
                             vfx.spawnFloatingText(proj.x, proj.y, 'PROJECTILE!', 'special');
 
-                            if (target.isDizzy) {
-                                onFatalKnockout(state[proj.ownerSide], target);
+                            if (finishHimActive || target.isDizzy || state[targetSide].isDizzy) {
+                                onFatalKnockout(state[proj.ownerSide], targetSide);
                                 break;
                             }
                         }
@@ -1335,8 +1360,8 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                                 vfx.spawnFloatingText(impactX, impactY, `${fighter.comboStreak} HITS!`, 'hit');
                             }
 
-                            if (state[defenderSide].isDizzy) {
-                                onFatalKnockout(fighter, state[defenderSide]);
+                            if (finishHimActive || defender.isDizzy || state[defenderSide].isDizzy) {
+                                onFatalKnockout(fighter, defenderSide);
                                 return;
                             }
                         }
