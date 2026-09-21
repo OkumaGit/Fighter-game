@@ -158,7 +158,8 @@
     box-sizing: border-box;
 }
 
-.winner-modal___image-container img {
+.winner-modal___image-container img,
+.winner-modal___image-container .fighter-preview___img {
     max-width: 100%;
     max-height: 140px;
     object-fit: contain;

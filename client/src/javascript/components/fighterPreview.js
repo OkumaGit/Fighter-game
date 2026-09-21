@@ -1,11 +1,10 @@
 import createElement from '../helpers/domHelper';
-import { getBattleSpriteConfig, getFighterSource, getFighterVideoSource } from '../helpers/fighterAssets';
+import { getBattleSpriteConfig, getFighterSource } from '../helpers/fighterAssets';
 
 export function createFighterImage(fighter = {}) {
-    const videoSource = getFighterVideoSource(fighter);
     const source = getFighterSource(fighter);
 
-    if (!fighter || (!source && !videoSource)) {
+    if (!fighter || !source) {
         const placeholder = createElement({
             tagName: 'div',
             className: 'fighter-preview___placeholder',
@@ -16,28 +15,6 @@ export function createFighterImage(fighter = {}) {
 
     const { name = 'Fighter' } = fighter;
 
-    if (videoSource) {
-        const videoElement = createElement({
-            tagName: 'video',
-            className: 'fighter-preview___img fighter-preview___video',
-            attributes: {
-                src: videoSource,
-                autoplay: 'true',
-                loop: 'true',
-                muted: 'true',
-                playsinline: 'true',
-                title: name,
-                'aria-label': name
-            }
-        });
-        videoElement.muted = true;
-        videoElement.autoplay = true;
-        videoElement.loop = true;
-        videoElement.playsInline = true;
-        videoElement.play().catch(() => {});
-        return videoElement;
-    }
-
     const attributes = {
         src: source,
         title: name,
@@ -47,6 +24,10 @@ export function createFighterImage(fighter = {}) {
         tagName: 'img',
         className: 'fighter-preview___img',
         attributes
+    });
+
+    imgElement.addEventListener('error', () => {
+        imgElement.src = '/resources/fighters/fighter-1.png';
     });
 
     return imgElement;

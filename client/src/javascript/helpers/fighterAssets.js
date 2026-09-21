@@ -47,15 +47,13 @@ const battleBackgrounds = [
     { key: 'lantern', src: '/resources/backgrounds/background-3.jpg' }
 ];
 
-export function getFighterSource(fighter = {}) {
-    return (
-        fighterPortraits[fighter.name] || fighter.source || fighter.image || fighter.sprite || fighterPortraits.Astra
-    );
-}
-
-const fighterVideos = {
-    Astra: '/resources/fighters/video/Fighter-1.webm',
-    '1': '/resources/fighters/video/Fighter-1.webm'
+const fighterIdToPortrait = {
+    '1': '/resources/fighters/fighter-1.png',
+    '2': '/resources/fighters/fighter-2.png',
+    '3': '/resources/fighters/fighter-3.png',
+    '4': '/resources/fighters/fighter-4.png',
+    '5': '/resources/fighters/fighter-5.png',
+    '6': '/resources/fighters/fighter-6.png'
 };
 
 const fighterNameToId = {
@@ -67,10 +65,24 @@ const fighterNameToId = {
     Rift: '6'
 };
 
-export function getFighterVideoSource(fighter = {}) {
-    if (!fighter) return null;
+export function getFighterSource(fighter = {}) {
+    if (!fighter) return fighterPortraits.Astra;
+    if (fighter.name && fighterPortraits[fighter.name]) {
+        return fighterPortraits[fighter.name];
+    }
     const fighterId = String(fighter._id ?? fighter.id ?? fighterNameToId[fighter.name] ?? '');
-    return fighterVideos[fighter.name] || fighterVideos[fighterId] || null;
+    if (fighterId && fighterIdToPortrait[fighterId]) {
+        return fighterIdToPortrait[fighterId];
+    }
+    if (fighter.name) {
+        const foundKey = Object.keys(fighterPortraits).find(k => k.toLowerCase() === fighter.name.toLowerCase());
+        if (foundKey) return fighterPortraits[foundKey];
+    }
+    return fighter.source || fighter.image || fighter.sprite || fighterPortraits.Astra;
+}
+
+export function getFighterVideoSource() {
+    return null;
 }
 
 export function getBattleSpriteConfig(fighter = {}) {
