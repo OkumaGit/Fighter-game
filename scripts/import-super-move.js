@@ -25,6 +25,14 @@ const FIGHTER_CONFIGS = {
       return false;
     },
   },
+  2: {
+    name: "Kite",
+    upscaledPath:
+      "C:/Users/Student/Dev/fighter-game-assets/Moves 11/Upscaled/green_plasma_sprite_fighter_2_upscayl_2x_digital-art-4x.png",
+    rawPath:
+      "C:/Users/Student/Dev/fighter-game-assets/Moves 11/green_plasma_sprite_fighter_2.png",
+    cleanFrame: null,
+  },
   4: {
     name: "Brute",
     upscaledPath:
