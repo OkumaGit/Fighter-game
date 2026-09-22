@@ -152,6 +152,121 @@ function drawDizzyStars(context, fighter) {
     context.restore();
 }
 
+function drawFighterShadow(context, fighter, groundY) {
+    if (!fighter) return;
+
+    // Contact baseline on the floor (matches sprite feet height in 820x820 scale)
+    const groundFloorY = groundY + Math.round(fighterHeight * (815 / 820));
+    const centerX = fighter.position.x + fighterWidth / 2;
+    const currentY = fighter.position.y;
+    const altitude = Math.max(0, groundY - currentY);
+
+    let pose = fighter.state;
+    if (fighter.isDizzy) {
+        pose = 'dizzy';
+    } else if (fighter.health <= 0 && fighter.isGrounded && fighter.state !== 'fall' && fighter.state !== 'getup') {
+        pose = 'death';
+    } else if (fighter.isMoving && fighter.isGrounded && (fighter.state === 'idle' || !fighter.state)) {
+        pose = 'walk';
+    } else if (pose === 'crouch') {
+        pose = 'sweep';
+    }
+
+    // Base dimensions for standing pose
+    let baseRadiusX = 58;
+    let baseRadiusY = 14;
+    let baseOpacity = 0.58;
+
+    if (pose === 'crouch' || pose === 'sweep') {
+        baseRadiusX = 72;
+        baseRadiusY = 16;
+        baseOpacity = 0.65;
+    } else if (pose === 'fall' || pose === 'death') {
+        baseRadiusX = 94;
+        baseRadiusY = 17;
+        baseOpacity = 0.62;
+    } else if (pose === 'jumpkick' || pose === 'jump') {
+        baseRadiusX = 48;
+        baseRadiusY = 12;
+    } else if (pose === 'walk') {
+        const walkBob = Math.sin((fighter.currentFrame || 0) * (Math.PI / 4)) * 3;
+        baseRadiusX = 58 + walkBob;
+    }
+
+    // Altitude scaling: as fighter ascends, shadow contracts and softly diffuses
+    const altitudeFactor = Math.min(1, altitude / 360);
+    const scale = Math.max(0.36, 1 - altitudeFactor * 0.56);
+    const opacity = Math.max(0.12, baseOpacity * (1 - altitudeFactor * 0.72));
+
+    const radiusX = Math.max(16, baseRadiusX * scale);
+    const radiusY = Math.max(5, baseRadiusY * scale);
+
+    context.save();
+
+    // Subtle elemental underglow during Super Attacks
+    if (pose === 'super') {
+        const fighterId = String(fighter._id ?? fighter.id ?? '1');
+        let glowColor = null;
+        if (fighterId === '1') glowColor = 'rgba(249, 115, 22, 0.28)';
+        else if (fighterId === '2') glowColor = 'rgba(34, 197, 94, 0.32)';
+        else if (fighterId === '3') glowColor = 'rgba(148, 163, 184, 0.28)';
+        else if (fighterId === '4') glowColor = 'rgba(186, 230, 253, 0.35)';
+        else if (fighterId === '5') glowColor = 'rgba(234, 179, 8, 0.30)';
+        else if (fighterId === '6') glowColor = 'rgba(168, 85, 247, 0.32)';
+
+        if (glowColor) {
+            context.save();
+            context.translate(centerX, groundFloorY);
+            context.scale(1, (radiusY * 1.5) / (radiusX * 1.5));
+            const glowGrad = context.createRadialGradient(0, 0, 0, 0, 0, radiusX * 1.5);
+            glowGrad.addColorStop(0, glowColor);
+            glowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            context.fillStyle = glowGrad;
+            context.beginPath();
+            context.arc(0, 0, radiusX * 1.5, 0, Math.PI * 2);
+            context.fill();
+            context.restore();
+        }
+    }
+
+    // Outer diffuse penumbra (soft feathered shadow)
+    context.save();
+    context.translate(centerX, groundFloorY);
+    context.scale(1, radiusY / radiusX);
+    const diffuseGrad = context.createRadialGradient(0, 0, 0, 0, 0, radiusX);
+    diffuseGrad.addColorStop(0, `rgba(6, 9, 16, ${0.52 * opacity})`);
+    diffuseGrad.addColorStop(0.45, `rgba(8, 12, 20, ${0.32 * opacity})`);
+    diffuseGrad.addColorStop(0.82, `rgba(12, 16, 24, ${0.12 * opacity})`);
+    diffuseGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    context.fillStyle = diffuseGrad;
+    context.beginPath();
+    context.arc(0, 0, radiusX, 0, Math.PI * 2);
+    context.fill();
+    context.restore();
+
+    // Inner contact core (ambient occlusion under boots when grounded)
+    if (altitude < 50) {
+        const contactAlpha = (1 - altitude / 50) * 0.46;
+        const coreRadiusX = radiusX * 0.55;
+        const coreRadiusY = radiusY * 0.45;
+
+        context.save();
+        context.translate(centerX, groundFloorY);
+        context.scale(1, coreRadiusY / coreRadiusX);
+        const coreGrad = context.createRadialGradient(0, 0, 0, 0, 0, coreRadiusX);
+        coreGrad.addColorStop(0, `rgba(2, 4, 8, ${contactAlpha})`);
+        coreGrad.addColorStop(0.7, `rgba(4, 6, 12, ${contactAlpha * 0.4})`);
+        coreGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        context.fillStyle = coreGrad;
+        context.beginPath();
+        context.arc(0, 0, coreRadiusX, 0, Math.PI * 2);
+        context.fill();
+        context.restore();
+    }
+
+    context.restore();
+}
+
 function drawFighter(context, fighter) {
     let pose = fighter.state;
     if (fighter.isDizzy) {
@@ -497,6 +612,8 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
     updateHealthBar('right', state.right);
 
     context.clearRect(0, 0, canvas.width, canvas.height);
+    drawFighterShadow(context, state.left, getGroundY());
+    drawFighterShadow(context, state.right, getGroundY());
     drawFighter(context, state.left);
     drawFighter(context, state.right);
 
@@ -1088,6 +1205,8 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
 
             // Hit-Stop micro-freeze check
             if (vfx.isHitStopped()) {
+                drawFighterShadow(context, state.left, getGroundY());
+                drawFighterShadow(context, state.right, getGroundY());
                 drawFighter(context, state.left);
                 drawFighter(context, state.right);
                 vfx.draw();
@@ -1368,6 +1487,8 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
 
             animateFighter(state.left, elapsed);
             animateFighter(state.right, elapsed);
+            drawFighterShadow(context, state.left, getGroundY());
+            drawFighterShadow(context, state.right, getGroundY());
             drawFighter(context, state.left);
             drawFighter(context, state.right);
             vfx.draw();
