@@ -1,6 +1,6 @@
 /**
  * VFX and Visual Game Feel Engine for Fighter Arena.
- * Street Fighter inspired hit-sparks, directional blood splatter,
+ * Street Fighter inspired hit-sparks, realistic directional blood splatter,
  * arcade hit flares, floor staining, dust, screen shake, hit-stop, and projectiles.
  */
 
@@ -42,9 +42,9 @@ export default function createVFXManager(canvas, context) {
 
     // --- Street Fighter Style Hit Flares ---
     const spawnHitFlare = (x, y, isBlocked = false, isCrit = false) => {
-        let radius = 32;
-        if (isCrit) radius = 40;
-        else if (isBlocked) radius = 26;
+        let radius = 30;
+        if (isCrit) radius = 38;
+        else if (isBlocked) radius = 24;
 
         hitFlares.push({
             x,
@@ -54,7 +54,7 @@ export default function createVFXManager(canvas, context) {
             radius,
             rotation: Math.random() * Math.PI,
             lifetime: 0,
-            maxLifetime: isBlocked ? 100 : 130
+            maxLifetime: isBlocked ? 100 : 125
         });
     };
 
@@ -63,7 +63,7 @@ export default function createVFXManager(canvas, context) {
         // 1. Always spawn a tight, punchy geometric hit flare at the impact point
         spawnHitFlare(x, y, isBlocked, isCrit);
 
-        // 2. Spawn a few crisp, needle-like directional spark streaks (not fireworks)
+        // 2. Spawn a few crisp, needle-like directional spark streaks
         let count = 4;
         let speedMult = 1;
         let colors = ['#ffffff', '#fde047', '#f59e0b'];
@@ -97,90 +97,72 @@ export default function createVFXManager(canvas, context) {
         }
     };
 
-    // --- Street Fighter Style Blood System ---
-    const bloodPalettes = [
-        { main: '#dc2626', highlight: '#fca5a5' },
-        { main: '#b91c1c', highlight: '#f87171' },
-        { main: '#991b1b', highlight: '#ef4444' },
-        { main: '#7f1d1d', highlight: '#fca5a5' }
+    // --- Realistic Directional Blood System ---
+    const bloodPalette = [
+        { main: '#780606', splat: '#280202' },
+        { main: '#8b0808', splat: '#2f0303' },
+        { main: '#9e1212', splat: '#380404' },
+        { main: '#660404', splat: '#200101' },
+        { main: '#560303', splat: '#1b0101' }
     ];
 
     const spawnBlood = (x, y, direction = 1, intensity = 'normal') => {
-        let count = 12; // Clearly visible punchy droplet spray
-        let speedMin = 3.5;
-        let speedMax = 8.0;
-        let mistCount = 3;
+        let count = 8; // Normal hit: 8 droplets (moderate & clean)
+        let speedMin = 3.0;
+        let speedMax = 7.0;
 
         if (intensity === 'fatal') {
-            count = 32; // Dramatic KO finish
-            speedMin = 5.5;
-            speedMax = 12.0;
-            mistCount = 6;
-        } else if (intensity === 'heavy') {
-            count = 20; // Heavy impact (uppercut, throw)
+            count = 20; // Fatal KO: 20 droplets
             speedMin = 4.5;
-            speedMax = 10.0;
-            mistCount = 5;
+            speedMax = 11.0;
+        } else if (intensity === 'heavy') {
+            count = 14; // Heavy hit (uppercut, throw): 14 droplets
+            speedMin = 3.8;
+            speedMax = 9.0;
         }
 
-        // 1. Stylized crimson impact crescent on heavy / fatal hits
+        // Subtle organic arterial slash streak on heavy / fatal hits
         if (intensity === 'heavy' || intensity === 'fatal') {
             slashArcs.push({
                 x,
                 y,
                 direction,
-                radius: intensity === 'fatal' ? 44 : 34,
+                radius: intensity === 'fatal' ? 36 : 26,
                 angleOffset: direction > 0 ? -0.15 : Math.PI + 0.15,
                 lifetime: 0,
-                maxLifetime: 130
+                maxLifetime: 100
             });
         }
 
-        // 2. Immediate crimson mist puff at point of impact for weight
-        for (let m = 0; m < mistCount; m += 1) {
-            particles.push({
-                isBloodMist: true,
-                x: x + (Math.random() - 0.5) * 10,
-                y: y + (Math.random() - 0.5) * 10,
-                vx: direction * (Math.random() * 2.5 + 1.2),
-                vy: (Math.random() - 0.5) * 1.8,
-                size: Math.random() * 6 + 6,
-                maxSize: Math.random() * 10 + 16,
-                color: '#991b1b',
-                alpha: 0.6,
-                decay: 0.035,
-                gravity: 0.05
-            });
-        }
-
-        // 3. Directional droplet spray
         for (let i = 0; i < count; i += 1) {
-            // Tight backward cone from the impact point (~30 degrees)
-            const spread = (Math.random() - 0.5) * 0.55;
-            const baseAngle = direction > 0 ? -0.22 : Math.PI + 0.22;
+            // Directional cone: blood ejects away from attacker along strike momentum
+            const spread = (Math.random() - 0.5) * 0.6;
+            const baseAngle = direction > 0 ? -0.2 : Math.PI + 0.2;
             const angle = baseAngle + spread;
             const speed = Math.random() * (speedMax - speedMin) + speedMin;
 
-            // Noticeable droplet sizes: 2.8px to 6.2px
-            let size = Math.random() * 1.6 + 2.8;
-            if (Math.random() < 0.25) {
-                size = Math.random() * 1.8 + 4.4; // Larger chunky droplets
+            // Realistic natural size distribution: mostly fine droplets + few medium beads
+            let size = Math.random() * 1.0 + 1.5; // Fine droplets: 1.5 - 2.5px
+            if (Math.random() < 0.35) {
+                size = Math.random() * 1.2 + 2.7; // Medium beads: 2.7 - 3.9px
+            } else if (intensity !== 'normal' && Math.random() < 0.12) {
+                size = Math.random() * 0.8 + 4.0; // Occasional larger bead on heavy hits
             }
 
-            const palette = bloodPalettes[Math.floor(Math.random() * bloodPalettes.length)];
+            const colorSet = bloodPalette[Math.floor(Math.random() * bloodPalette.length)];
 
             particles.push({
                 isBlood: true,
-                x: x + (Math.random() - 0.5) * 8,
-                y: y + (Math.random() - 0.5) * 8,
+                x: x + (Math.random() - 0.5) * 6,
+                y: y + (Math.random() - 0.5) * 6,
                 vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed - (Math.random() * 1.5 + 0.5),
+                vy: Math.sin(angle) * speed - (Math.random() * 1.3 + 0.3),
                 size,
-                color: palette.main,
-                highlight: palette.highlight,
-                alpha: 1,
-                decay: Math.random() * 0.016 + 0.013, // Long enough to see the beautiful arc
-                gravity: 0.28,
+                color: colorSet.main,
+                splatColor: colorSet.splat,
+                alpha: 0.95,
+                decay: Math.random() * 0.02 + 0.015, // Natural flight ~600ms
+                gravity: 0.32 + Math.random() * 0.06, // Realistic downward arc
                 glow: false
             });
         }
@@ -287,7 +269,7 @@ export default function createVFXManager(canvas, context) {
             }
         }
 
-        // 3. Update Flying Particles (Blood, Blood Mist, Sparks, Dust)
+        // 3. Update Flying Particles (Blood, Sparks, Dust)
         for (let i = particles.length - 1; i >= 0; i -= 1) {
             const p = particles[i];
 
@@ -297,21 +279,31 @@ export default function createVFXManager(canvas, context) {
 
             if (p.isBlood) {
                 p.vx *= 0.94; // Viscous air drag
-                p.vy *= 0.96;
+                p.vy *= 0.95;
 
-                // Ground splats (max 24 on screen)
+                // Realistic ground splats (max 18 on screen)
                 if (p.y >= groundY - 2) {
-                    if (p.size >= 2.0 && bloodStains.length < 24) {
+                    if (p.size >= 1.8 && bloodStains.length < 18) {
+                        const satellites = [];
+                        if (p.size >= 3.0) {
+                            satellites.push({
+                                dx: (Math.random() - 0.5) * 8,
+                                dy: (Math.random() - 0.5) * 2.5,
+                                r: Math.random() * 0.6 + 0.5
+                            });
+                        }
+
                         bloodStains.push({
                             x: p.x,
-                            y: groundY - Math.random() * 2,
-                            radiusX: p.size * (1.2 + Math.random() * 0.5),
-                            radiusY: Math.max(1.0, p.size * 0.42),
-                            angle: (Math.random() - 0.5) * 0.2,
-                            color: '#340404',
-                            alpha: 0.8,
+                            y: groundY - Math.random() * 1.5,
+                            radiusX: p.size * (1.1 + Math.random() * 0.4),
+                            radiusY: Math.max(0.6, p.size * 0.35),
+                            angle: (Math.random() - 0.5) * 0.15,
+                            color: p.splatColor || '#280202',
+                            alpha: 0.78,
                             lifetime: 0,
-                            maxLifetime: 3200 + Math.random() * 1000
+                            maxLifetime: 3000 + Math.random() * 1200,
+                            satellites
                         });
                     }
 
@@ -319,9 +311,6 @@ export default function createVFXManager(canvas, context) {
                     // eslint-disable-next-line no-continue
                     continue;
                 }
-            } else if (p.isBloodMist) {
-                p.vx *= 0.88;
-                p.vy *= 0.88;
             } else if (p.isSpark) {
                 p.vx *= 0.88;
                 p.vy *= 0.88;
@@ -386,7 +375,7 @@ export default function createVFXManager(canvas, context) {
 
     // --- Draw Loop ---
     const draw = () => {
-        // 1. Subtle Floor Blood Stains
+        // 1. Realistic Floor Blood Stains
         bloodStains.forEach(stain => {
             context.save();
             const fade = Math.max(0, 1 - stain.lifetime / stain.maxLifetime);
@@ -396,35 +385,43 @@ export default function createVFXManager(canvas, context) {
             context.beginPath();
             context.ellipse(stain.x, stain.y, stain.radiusX, stain.radiusY, stain.angle, 0, Math.PI * 2);
             context.fill();
+
+            if (stain.satellites && stain.satellites.length > 0) {
+                stain.satellites.forEach(sat => {
+                    context.beginPath();
+                    context.arc(stain.x + sat.dx, stain.y + sat.dy, sat.r, 0, Math.PI * 2);
+                    context.fill();
+                });
+            }
             context.restore();
         });
 
-        // 2. Street Fighter Impact Slashes (Crescents)
+        // 2. Subtle Organic Strike Slashes
         slashArcs.forEach(slash => {
             const progress = slash.lifetime / slash.maxLifetime;
             const currentAlpha = Math.max(0, 1 - progress);
 
             context.save();
             context.translate(slash.x, slash.y);
-            context.globalAlpha = currentAlpha * 0.9;
+            context.globalAlpha = currentAlpha * 0.65;
 
-            const r = slash.radius * (0.8 + progress * 0.45);
-            const startAngle = slash.angleOffset - 0.7;
-            const endAngle = slash.angleOffset + 0.7;
+            const r = slash.radius * (0.85 + progress * 0.3);
+            const startAngle = slash.angleOffset - 0.5;
+            const endAngle = slash.angleOffset + 0.5;
 
-            // Outer crimson edge
-            context.strokeStyle = '#991b1b';
-            context.lineWidth = Math.max(1, 6 * (1 - progress));
+            // Organic dark crimson strike streak
+            context.strokeStyle = '#6b0505';
+            context.lineWidth = Math.max(0.5, 3.5 * (1 - progress));
             context.lineCap = 'round';
             context.beginPath();
             context.arc(0, 0, r, startAngle, endAngle, false);
             context.stroke();
 
-            // Inner bright core
-            context.strokeStyle = '#f87171';
-            context.lineWidth = Math.max(0.5, 2.5 * (1 - progress));
+            // Inner streak
+            context.strokeStyle = '#991111';
+            context.lineWidth = Math.max(0.3, 1.5 * (1 - progress));
             context.beginPath();
-            context.arc(0, 0, r, startAngle + 0.1, endAngle - 0.1, false);
+            context.arc(0, 0, r, startAngle + 0.08, endAngle - 0.08, false);
             context.stroke();
 
             context.restore();
@@ -503,7 +500,7 @@ export default function createVFXManager(canvas, context) {
             context.restore();
         });
 
-        // 4. Flying Particles (Directional Blood Droplets, Blood Mist, Needle Sparks, Dust)
+        // 4. Flying Particles (Directional Blood Droplets, Needle Sparks, Dust)
         particles.forEach(p => {
             context.save();
             context.globalAlpha = Math.max(0, p.alpha);
@@ -511,29 +508,24 @@ export default function createVFXManager(canvas, context) {
             if (p.isBlood) {
                 const speed = Math.hypot(p.vx, p.vy);
                 const angle = Math.atan2(p.vy, p.vx);
-                const length = Math.max(p.size * 1.6, p.size + speed * 2.2);
+                const length = Math.max(p.size * 1.3, p.size + speed * 1.6);
 
                 context.translate(p.x, p.y);
                 context.rotate(angle);
 
-                // Tapered rich crimson droplet along trajectory
+                // Natural fluid droplet (tapered capsule)
                 context.fillStyle = p.color;
                 context.beginPath();
-                context.ellipse(0, 0, length * 0.55, Math.max(1, p.size * 0.8), 0, 0, Math.PI * 2);
+                context.ellipse(0, 0, length * 0.5, Math.max(0.8, p.size * 0.55), 0, 0, Math.PI * 2);
                 context.fill();
 
-                // High-visibility bright specular core highlight on leading head
-                context.fillStyle = p.highlight || '#f87171';
-                context.beginPath();
-                context.arc(length * 0.25, 0, Math.max(0.8, p.size * 0.45), 0, Math.PI * 2);
-                context.fill();
-            } else if (p.isBloodMist) {
-                const progress = Math.max(0, Math.min(1, 1 - p.alpha));
-                const currentRadius = p.size + (p.maxSize - p.size) * progress;
-                context.fillStyle = p.color;
-                context.beginPath();
-                context.arc(p.x, p.y, currentRadius, 0, Math.PI * 2);
-                context.fill();
+                // Subtle fluid specular sheen on larger drops
+                if (p.size >= 2.6) {
+                    context.fillStyle = 'rgba(215, 45, 45, 0.45)';
+                    context.beginPath();
+                    context.ellipse(length * 0.15, -p.size * 0.15, length * 0.22, p.size * 0.25, 0, 0, Math.PI * 2);
+                    context.fill();
+                }
             } else if (p.isSpark) {
                 context.strokeStyle = p.color;
                 context.lineWidth = Math.max(1, p.size);
