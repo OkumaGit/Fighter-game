@@ -405,17 +405,11 @@ function executeSpecialMove(side, state, vfx) {
         vfx.triggerScreenShake('light');
     } else if (special.type === 'teleport') {
         vfx.spawnDust(fighter.position.x + fighterWidth / 2, fighter.position.y + fighterHeight - 30, 0);
-        for (let i = 0; i < 18; i += 1) {
-            vfx.spawnHitSparks(
-                fighter.position.x + fighterWidth / 2,
-                fighter.position.y + fighterHeight / 2,
-                false,
-                true
-            );
-        }
+        vfx.spawnHitSparks(fighter.position.x + fighterWidth / 2, fighter.position.y + fighterHeight / 2, false, true);
         const behindOffset = opponent.facingLeft ? 120 : -120;
         fighter.position.x = Math.max(40, Math.min(1060, opponent.position.x + behindOffset));
         fighter.facingLeft = fighter.position.x > opponent.position.x;
+        vfx.spawnHitSparks(fighter.position.x + fighterWidth / 2, fighter.position.y + fighterHeight / 2, false, true);
         vfx.triggerScreenShake('light');
     } else if (special.type === 'dash_strike') {
         const dir = fighter.facingLeft ? -1 : 1;
@@ -423,14 +417,7 @@ function executeSpecialMove(side, state, vfx) {
         fighter.isDashing = true;
         fighter.dashTimer = 220;
         vfx.triggerScreenShake('medium');
-        for (let i = 0; i < 12; i += 1) {
-            vfx.spawnHitSparks(
-                fighter.position.x + fighterWidth / 2,
-                fighter.position.y + fighterHeight / 2,
-                false,
-                true
-            );
-        }
+        vfx.spawnHitSparks(fighter.position.x + fighterWidth / 2, fighter.position.y + fighterHeight / 2, false, true);
     }
 }
 
