@@ -156,7 +156,7 @@ function drawFighterShadow(context, fighter, groundY) {
     if (!fighter) return;
 
     // Contact baseline on the floor (matches sprite feet height in 820x820 scale)
-    const groundFloorY = groundY + Math.round(fighterHeight * (815 / 820));
+    const groundFloorY = groundY + fighterHeight - 4;
     const centerX = fighter.position.x + fighterWidth / 2;
     const currentY = fighter.position.y;
     const altitude = Math.max(0, groundY - currentY);
@@ -172,34 +172,32 @@ function drawFighterShadow(context, fighter, groundY) {
         pose = 'sweep';
     }
 
-    // Base dimensions for standing pose
-    let baseRadiusX = 58;
-    let baseRadiusY = 14;
-    let baseOpacity = 0.58;
+    // Base dimensions for standing pose (clearly wider than the 120px feet spread)
+    let baseRadiusX = 90;
+    let baseRadiusY = 22;
+    const baseOpacity = 1.0;
 
     if (pose === 'crouch' || pose === 'sweep') {
-        baseRadiusX = 72;
-        baseRadiusY = 16;
-        baseOpacity = 0.65;
+        baseRadiusX = 106;
+        baseRadiusY = 25;
     } else if (pose === 'fall' || pose === 'death') {
-        baseRadiusX = 94;
-        baseRadiusY = 17;
-        baseOpacity = 0.62;
+        baseRadiusX = 126;
+        baseRadiusY = 26;
     } else if (pose === 'jumpkick' || pose === 'jump') {
-        baseRadiusX = 48;
-        baseRadiusY = 12;
+        baseRadiusX = 74;
+        baseRadiusY = 18;
     } else if (pose === 'walk') {
-        const walkBob = Math.sin((fighter.currentFrame || 0) * (Math.PI / 4)) * 3;
-        baseRadiusX = 58 + walkBob;
+        const walkBob = Math.sin((fighter.currentFrame || 0) * (Math.PI / 4)) * 5;
+        baseRadiusX = 90 + walkBob;
     }
 
     // Altitude scaling: as fighter ascends, shadow contracts and softly diffuses
-    const altitudeFactor = Math.min(1, altitude / 360);
-    const scale = Math.max(0.36, 1 - altitudeFactor * 0.56);
-    const opacity = Math.max(0.12, baseOpacity * (1 - altitudeFactor * 0.72));
+    const altitudeFactor = Math.min(1, altitude / 380);
+    const scale = Math.max(0.42, 1 - altitudeFactor * 0.5);
+    const opacity = Math.max(0.28, baseOpacity * (1 - altitudeFactor * 0.65));
 
-    const radiusX = Math.max(16, baseRadiusX * scale);
-    const radiusY = Math.max(5, baseRadiusY * scale);
+    const radiusX = Math.max(25, baseRadiusX * scale);
+    const radiusY = Math.max(8, baseRadiusY * scale);
 
     context.save();
 
@@ -207,62 +205,39 @@ function drawFighterShadow(context, fighter, groundY) {
     if (pose === 'super') {
         const fighterId = String(fighter._id ?? fighter.id ?? '1');
         let glowColor = null;
-        if (fighterId === '1') glowColor = 'rgba(249, 115, 22, 0.28)';
-        else if (fighterId === '2') glowColor = 'rgba(34, 197, 94, 0.32)';
-        else if (fighterId === '3') glowColor = 'rgba(148, 163, 184, 0.28)';
-        else if (fighterId === '4') glowColor = 'rgba(186, 230, 253, 0.35)';
-        else if (fighterId === '5') glowColor = 'rgba(234, 179, 8, 0.30)';
-        else if (fighterId === '6') glowColor = 'rgba(168, 85, 247, 0.32)';
+        if (fighterId === '1') glowColor = 'rgba(249, 115, 22, 0.45)';
+        else if (fighterId === '2') glowColor = 'rgba(34, 197, 94, 0.48)';
+        else if (fighterId === '3') glowColor = 'rgba(148, 163, 184, 0.45)';
+        else if (fighterId === '4') glowColor = 'rgba(186, 230, 253, 0.55)';
+        else if (fighterId === '5') glowColor = 'rgba(234, 179, 8, 0.48)';
+        else if (fighterId === '6') glowColor = 'rgba(168, 85, 247, 0.50)';
 
         if (glowColor) {
-            context.save();
-            context.translate(centerX, groundFloorY);
-            context.scale(1, (radiusY * 1.5) / (radiusX * 1.5));
-            const glowGrad = context.createRadialGradient(0, 0, 0, 0, 0, radiusX * 1.5);
-            glowGrad.addColorStop(0, glowColor);
-            glowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-            context.fillStyle = glowGrad;
             context.beginPath();
-            context.arc(0, 0, radiusX * 1.5, 0, Math.PI * 2);
+            context.ellipse(centerX, groundFloorY, radiusX * 1.35, radiusY * 1.45, 0, 0, Math.PI * 2);
+            context.fillStyle = glowColor;
             context.fill();
-            context.restore();
         }
     }
 
-    // Outer diffuse penumbra (soft feathered shadow)
-    context.save();
-    context.translate(centerX, groundFloorY);
-    context.scale(1, radiusY / radiusX);
-    const diffuseGrad = context.createRadialGradient(0, 0, 0, 0, 0, radiusX);
-    diffuseGrad.addColorStop(0, `rgba(6, 9, 16, ${0.52 * opacity})`);
-    diffuseGrad.addColorStop(0.45, `rgba(8, 12, 20, ${0.32 * opacity})`);
-    diffuseGrad.addColorStop(0.82, `rgba(12, 16, 24, ${0.12 * opacity})`);
-    diffuseGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    context.fillStyle = diffuseGrad;
+    // Multi-layered arcade shadow (guaranteed high visibility, smooth feathered falloff)
+    // 1. Outer soft feathered penumbra
     context.beginPath();
-    context.arc(0, 0, radiusX, 0, Math.PI * 2);
+    context.ellipse(centerX, groundFloorY, radiusX, radiusY, 0, 0, Math.PI * 2);
+    context.fillStyle = `rgba(0, 0, 0, ${0.32 * opacity})`;
     context.fill();
-    context.restore();
 
-    // Inner contact core (ambient occlusion under boots when grounded)
-    if (altitude < 50) {
-        const contactAlpha = (1 - altitude / 50) * 0.46;
-        const coreRadiusX = radiusX * 0.55;
-        const coreRadiusY = radiusY * 0.45;
+    // 2. Main shadow body
+    context.beginPath();
+    context.ellipse(centerX, groundFloorY, radiusX * 0.76, radiusY * 0.76, 0, 0, Math.PI * 2);
+    context.fillStyle = `rgba(0, 0, 0, ${0.38 * opacity})`;
+    context.fill();
 
-        context.save();
-        context.translate(centerX, groundFloorY);
-        context.scale(1, coreRadiusY / coreRadiusX);
-        const coreGrad = context.createRadialGradient(0, 0, 0, 0, 0, coreRadiusX);
-        coreGrad.addColorStop(0, `rgba(2, 4, 8, ${contactAlpha})`);
-        coreGrad.addColorStop(0.7, `rgba(4, 6, 12, ${contactAlpha * 0.4})`);
-        coreGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        context.fillStyle = coreGrad;
-        context.beginPath();
-        context.arc(0, 0, coreRadiusX, 0, Math.PI * 2);
-        context.fill();
-        context.restore();
-    }
+    // 3. Deep ambient occlusion contact core under feet
+    context.beginPath();
+    context.ellipse(centerX, groundFloorY, radiusX * 0.5, radiusY * 0.5, 0, 0, Math.PI * 2);
+    context.fillStyle = `rgba(0, 0, 0, ${0.45 * opacity})`;
+    context.fill();
 
     context.restore();
 }
