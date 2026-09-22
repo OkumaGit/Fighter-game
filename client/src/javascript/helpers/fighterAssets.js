@@ -22,7 +22,8 @@ const battleSpritePoses = {
     fall: { file: 'fall.webp', folder: 'Fall', prefix: 'Fall', frames: 8, duration: 600, loop: false },
     getup: { file: 'getup.webp', folder: 'GetUp', prefix: 'GetUp', frames: 8, duration: 450, loop: false },
     death: { file: 'death.webp', folder: 'Death', prefix: 'Death', frames: 8, duration: 700, loop: false },
-    dizzy: { file: 'dizzy.webp', folder: 'Dizzy', prefix: 'Dizzy', frames: 8, duration: 900, loop: true }
+    dizzy: { file: 'dizzy.webp', folder: 'Dizzy', prefix: 'Dizzy', frames: 8, duration: 900, loop: true },
+    super: { file: 'super.webp', folder: 'Super', prefix: 'Super', frames: 8, duration: 800, loop: false }
 };
 
 const battleSpritePaths = {

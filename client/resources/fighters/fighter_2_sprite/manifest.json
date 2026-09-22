@@ -85,6 +85,13 @@
       "frameHeight": 820,
       "totalWidth": 6560
     },
+    "super": {
+      "file": "super.webp",
+      "frames": 8,
+      "frameWidth": 820,
+      "frameHeight": 820,
+      "totalWidth": 6560
+    },
     "sweep": {
       "file": "sweep.webp",
       "frames": 8,

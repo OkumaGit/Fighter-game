@@ -248,7 +248,7 @@ function animateFighter(fighter, elapsed) {
         }
     }
 
-    const attackStates = ['jab', 'jab2', 'kick', 'uppercut', 'sweep', 'special', 'jumpkick'];
+    const attackStates = ['jab', 'jab2', 'kick', 'uppercut', 'sweep', 'special', 'jumpkick', 'super'];
     if (!attackStates.includes(fighter.state)) {
         fighter.isAttacking = false;
         fighter.attackType = null;
@@ -900,6 +900,11 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
             // Consume 100% Super Meter
             attacker.superMeter = 0;
             updateSuperBar(side, 0);
+
+            // Trigger Super Move Animation on Attacker (allowing super cancel)
+            state[side].isAttacking = false;
+            state[side] = startAttack(state[side], 'super');
+            state[side].attackHit = true;
 
             // Execute Critical Super Strike (24 damage, unblockable MK3 super strike)
             state[defenderSide] = takeDamage(state[defenderSide], 24, attacker.position.x, {

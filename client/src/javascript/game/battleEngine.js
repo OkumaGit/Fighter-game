@@ -188,7 +188,8 @@ export function startAttack(fighter, type) {
         sweep: { damage: 13.0, activeHitFrame: 4, duration: 450, state: 'sweep' },
         jumpkick: { damage: 14.0, activeHitFrame: 4, duration: 420, state: 'jumpkick' },
         throw: { damage: 16.5, activeHitFrame: 3, duration: 480, state: 'jab' },
-        special: { damage: fighter.specialMove?.damage || 14, activeHitFrame: 4, duration: 500, state: 'special' }
+        special: { damage: fighter.specialMove?.damage || 14, activeHitFrame: 4, duration: 500, state: 'special' },
+        super: { damage: 24.0, activeHitFrame: 5, duration: 800, state: 'super' }
     }[type];
 
     if (!attackConfig) return fighter;
