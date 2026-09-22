@@ -2,9 +2,13 @@ import fs from "fs";
 import path from "path";
 import sharp from "sharp";
 
-const BASE_ASSETS_DIR = path.resolve(
+const EXTERNAL_ASSETS_DIR = "C:/Users/Student/Dev/fighter-game-assets";
+const LOCAL_ASSETS_DIR = path.resolve(
   "client/resources/fighters/fighter-game-assets",
 );
+const BASE_ASSETS_DIR = fs.existsSync(EXTERNAL_ASSETS_DIR)
+  ? EXTERNAL_ASSETS_DIR
+  : LOCAL_ASSETS_DIR;
 const OUTPUT_BASE_DIR = path.resolve("client/resources/fighters");
 
 const FIGHTER_SHEETS = [
@@ -27,28 +31,28 @@ const FIGHTER_SHEETS = [
     name: "Vex",
     g1: "Moves 1-5/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_xja0kaxja0kaxja0 3.png",
     g2: "Moves 6-10/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_2s72cf2s72cf2s72_fighter_4.png",
-    g3: "Moves 10-15/Gemini_Generated_Image_pv8m85pv8m85pv8m_fighter_3.jpg",
+    g3: "Moves 10-15/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_pv8m85pv8m85pv8m_fighter_3.png",
   },
   {
     id: "4",
     name: "Brute",
     g1: "Moves 1-5/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image28ao8zn8ao8 4.png",
     g2: "Moves 6-10/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_8z18j88z18j88z18_fighter_3.png",
-    g3: "Moves 10-15/Gemini_Generated_Image_g2tcw2g2tcw2g2tc_fighter_4.jpg",
+    g3: "Moves 10-15/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_g2tcw2g2tcw2g2tc_fighter_4.png",
   },
   {
     id: "5",
     name: "Nova",
     g1: "Moves 1-5/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image28ao8zn8ao8 5.png",
     g2: "Moves 6-10/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_o1tf1ho1tf1ho1tf_fighter_5.png",
-    g3: "Moves 10-15/Gemini_Generated_Image_klodqmklodqmklod_fighter_5.jpg",
+    g3: "Moves 10-15/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_klodqmklodqmklod_fighter_5.png",
   },
   {
     id: "6",
     name: "Rift",
     g1: "Moves 1-5/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image28ao8zn8ao8 6.png",
     g2: "Moves 6-10/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_fjx1zefjx1zefjx1_fighter_6.png",
-    g3: "Moves 10-15/Gemini_Generated_Image_soskdhsoskdhsosk_fighter_6.jpg",
+    g3: "Moves 10-15/upscayl_png_digital-art-4x_2x/Gemini_Generated_Image_soskdhsoskdhsosk_fighter_6.png",
   },
 ];
 
@@ -260,7 +264,8 @@ async function main() {
   const startTime = Date.now();
   const filterArg = process.argv[2];
   const groupArg = process.argv[3];
-  const targetIds = filterArg ? filterArg.split(",") : null;
+  const targetIds =
+    filterArg && filterArg !== "all" ? filterArg.split(",") : null;
   const listToProcess = targetIds
     ? FIGHTER_SHEETS.filter((f) => targetIds.includes(f.id))
     : FIGHTER_SHEETS;
