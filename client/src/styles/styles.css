@@ -82,6 +82,8 @@ img {
     width: 320px;
     max-width: 85vw;
     height: auto;
+    aspect-ratio: 16 / 9;
+    display: block;
     margin-bottom: 26px;
     filter: drop-shadow(0 0 24px rgba(251, 191, 36, 0.5)) drop-shadow(0 0 50px rgba(239, 68, 68, 0.3));
     animation: loaderLogoPulse 2.8s ease-in-out infinite alternate;
