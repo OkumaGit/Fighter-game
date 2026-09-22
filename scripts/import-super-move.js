@@ -17,6 +17,9 @@ const FIGHTER_CONFIGS = {
       "C:/Users/Student/Dev/fighter-game-assets/Moves 11/Upscaled/fire_sprite_fighter_1_upscayl_2x_digital-art-4x.png",
     rawPath:
       "C:/Users/Student/Dev/fighter-game-assets/Moves 11/fire_sprite_fighter_1.png",
+    bgType: "gradient",
+    bgTolerance: 6,
+    allowEnclosed: true,
     cleanFrame: (f, x, y, fw, fh) => {
       // Frame 2: flame spillover from Frame 3 at x > 620
       if (f === 2 && x > 620) return true;
@@ -31,7 +34,24 @@ const FIGHTER_CONFIGS = {
       "C:/Users/Student/Dev/fighter-game-assets/Moves 11/Upscaled/green_plasma_sprite_fighter_2_upscayl_2x_digital-art-4x.png",
     rawPath:
       "C:/Users/Student/Dev/fighter-game-assets/Moves 11/green_plasma_sprite_fighter_2.png",
+    bgType: "flat",
     cleanFrame: null,
+  },
+  3: {
+    name: "Vex",
+    upscaledPath:
+      "C:/Users/Student/Dev/fighter-game-assets/Moves 11/upscayl_png_digital-art-4x_2x/sprite_blue_fire_fighter_3_upscayl_2x_digital-art-4x.png",
+    rawPath:
+      "C:/Users/Student/Dev/fighter-game-assets/Moves 11/sprite_blue_fire_fighter_3.png",
+    bgType: "white",
+    allowEnclosed: true,
+    cleanFrame: (f, x, y, fw, fh) => {
+      if (f === 2 && x > 690) return true;
+      if (f === 5 && x > 695 && y < 100) return true;
+      if (f === 6 && x < 85) return true;
+      if (f === 7 && x < 85 && y > 580) return true;
+      return false;
+    },
   },
   4: {
     name: "Brute",
@@ -39,11 +59,45 @@ const FIGHTER_CONFIGS = {
       "C:/Users/Student/Dev/fighter-game-assets/Moves 11/Upscaled/sprite_super_moves_upscayl_2x_digital-art-4x.png",
     rawPath:
       "C:/Users/Student/Dev/fighter-game-assets/Moves 11/super_attack_fighter_4.png",
+    bgType: "gradient",
+    bgTolerance: 6,
+    allowEnclosed: true,
     cleanFrame: (f, x, y, fw, fh) => {
       if (f === 4 && x > 600) return true;
       if (f === 6 && x < 80 && y < 450) return true;
       return false;
     },
+  },
+  5: {
+    name: "Nova",
+    upscaledPath:
+      "C:/Users/Student/Dev/fighter-game-assets/Moves 11/upscayl_png_digital-art-4x_2x/desert_fighter_sprite_fighter_5_upscayl_2x_digital-art-4x.png",
+    rawPath:
+      "C:/Users/Student/Dev/fighter-game-assets/Moves 11/desert_fighter_sprite_fighter_5.png",
+    bgType: "gradient",
+    bgTolerance: 8,
+    allowEnclosed: false,
+    skipBorderSeed: (f, edge, x, y) => {
+      if (f === 6 && edge === "right" && y >= 440 && y <= 640) return true;
+      return false;
+    },
+    cleanFrame: (f, x, y, fw, fh) => {
+      if (f === 0 && y < 150 && x > 400) return true;
+      if (f === 2 && (x > 620 || (y < 200 && x < 400))) return true;
+      if (f === 6 && (x < 250 || (y < 250 && x > 600))) return true;
+      if (f === 7 && (x < 150 || (x > 500 && y < 200))) return true;
+      return false;
+    },
+  },
+  6: {
+    name: "Rift",
+    upscaledPath:
+      "C:/Users/Student/Dev/fighter-game-assets/Moves 11/upscayl_png_digital-art-4x_2x/super_attack_fighter_6.png",
+    rawPath:
+      "C:/Users/Student/Dev/fighter-game-assets/Moves 11/super_attack_fighter_6.jpg",
+    bgType: "black",
+    allowEnclosed: false,
+    cleanFrame: null,
   },
 };
 
@@ -118,7 +172,7 @@ async function importFighterSuper(fighterId) {
     let r = 0;
     let g = 0;
     let b = 0;
-    const sampleXs = [5, 15, 25, 35, 45];
+    const sampleXs = [0, 1, 2, 3, 4, 5];
     for (const x of sampleXs) {
       const idx = (y * width + x) * 3;
       r += rawFull[idx];
@@ -151,60 +205,127 @@ async function importFighterSuper(fighterId) {
       const r = frameBuf[idx];
       const g = frameBuf[idx + 1];
       const b = frameBuf[idx + 2];
+      if (config.bgType === "white") {
+        return r >= 246 && g >= 246 && b >= 246;
+      }
+      if (config.bgType === "black") {
+        return Math.max(r, g, b) <= 22;
+      }
+      if (config.bgType === "flat") {
+        return (
+          Math.abs(r - 84) <= 6 &&
+          Math.abs(g - 84) <= 6 &&
+          Math.abs(b - 84) <= 6
+        );
+      }
       const exp = bgModel[y];
+      const tol = config.bgTolerance || 6;
       return (
-        Math.abs(r - exp[0]) <= 6 &&
-        Math.abs(g - exp[1]) <= 6 &&
-        Math.abs(b - exp[2]) <= 6
+        Math.abs(r - exp[0]) <= tol &&
+        Math.abs(g - exp[1]) <= tol &&
+        Math.abs(b - exp[2]) <= tol
       );
     }
 
     const visited = new Uint8Array(fw * fh);
     const isTransparent = new Uint8Array(fw * fh);
 
+    const queue = [];
+    for (let x = 0; x < fw; x += 1) {
+      if (!config.skipBorderSeed?.(f, "top", x, 0) && isBg(x, 0)) {
+        queue.push(x, 0);
+        visited[0 * fw + x] = 1;
+        isTransparent[0 * fw + x] = 1;
+      }
+      if (!config.skipBorderSeed?.(f, "bottom", x, fh - 1) && isBg(x, fh - 1)) {
+        queue.push(x, fh - 1);
+        visited[(fh - 1) * fw + x] = 1;
+        isTransparent[(fh - 1) * fw + x] = 1;
+      }
+    }
     for (let y = 0; y < fh; y += 1) {
-      for (let x = 0; x < fw; x += 1) {
-        const idx = y * fw + x;
-        if (!visited[idx] && isBg(x, y)) {
-          const queue = [x, y];
-          visited[idx] = 1;
-          const compPixels = [idx];
-          let head = 0;
-          let touchesBorder = false;
+      if (
+        !config.skipBorderSeed?.(f, "left", 0, y) &&
+        isBg(0, y) &&
+        !visited[y * fw + 0]
+      ) {
+        queue.push(0, y);
+        visited[y * fw + 0] = 1;
+        isTransparent[y * fw + 0] = 1;
+      }
+      if (
+        !config.skipBorderSeed?.(f, "right", fw - 1, y) &&
+        isBg(fw - 1, y) &&
+        !visited[y * fw + fw - 1]
+      ) {
+        queue.push(fw - 1, y);
+        visited[y * fw + fw - 1] = 1;
+        isTransparent[y * fw + fw - 1] = 1;
+      }
+    }
 
-          while (head < queue.length) {
-            const qx = queue[head];
-            head += 1;
-            const qy = queue[head];
-            head += 1;
+    let head = 0;
+    while (head < queue.length) {
+      const qx = queue[head];
+      head += 1;
+      const qy = queue[head];
+      head += 1;
 
-            if (qx === 0 || qx === fw - 1 || qy === 0 || qy === fh - 1) {
-              touchesBorder = true;
-            }
+      const nbrs = [
+        [qx + 1, qy],
+        [qx - 1, qy],
+        [qx, qy + 1],
+        [qx, qy - 1],
+      ];
+      for (let i = 0; i < 4; i += 1) {
+        const nx = nbrs[i][0];
+        const ny = nbrs[i][1];
+        if (nx >= 0 && nx < fw && ny >= 0 && ny < fh) {
+          const nIdx = ny * fw + nx;
+          if (!visited[nIdx] && isBg(nx, ny)) {
+            visited[nIdx] = 1;
+            isTransparent[nIdx] = 1;
+            queue.push(nx, ny);
+          }
+        }
+      }
+    }
 
-            const nbrs = [
-              [qx + 1, qy],
-              [qx - 1, qy],
-              [qx, qy + 1],
-              [qx, qy - 1],
-            ];
-            for (let i = 0; i < 4; i += 1) {
-              const nx = nbrs[i][0];
-              const ny = nbrs[i][1];
-              if (nx >= 0 && nx < fw && ny >= 0 && ny < fh) {
-                const nIdx = ny * fw + nx;
-                if (!visited[nIdx] && isBg(nx, ny)) {
-                  visited[nIdx] = 1;
-                  compPixels.push(nIdx);
-                  queue.push(nx, ny);
+    if (config.allowEnclosed) {
+      for (let y = 0; y < fh; y += 1) {
+        for (let x = 0; x < fw; x += 1) {
+          const idx = y * fw + x;
+          if (!visited[idx] && isBg(x, y)) {
+            const comp = [idx];
+            const lq = [x, y];
+            visited[idx] = 1;
+            let lh = 0;
+            while (lh < lq.length) {
+              const lx = lq[lh];
+              lh += 1;
+              const ly = lq[lh];
+              lh += 1;
+              const nbrs = [
+                [lx + 1, ly],
+                [lx - 1, ly],
+                [lx, ly + 1],
+                [lx, ly - 1],
+              ];
+              for (let i = 0; i < 4; i += 1) {
+                const nx = nbrs[i][0];
+                const ny = nbrs[i][1];
+                if (nx >= 0 && nx < fw && ny >= 0 && ny < fh) {
+                  const nIdx = ny * fw + nx;
+                  if (!visited[nIdx] && isBg(nx, ny)) {
+                    visited[nIdx] = 1;
+                    comp.push(nIdx);
+                    lq.push(nx, ny);
+                  }
                 }
               }
             }
-          }
-
-          if (touchesBorder || compPixels.length >= 150) {
-            for (let i = 0; i < compPixels.length; i += 1) {
-              isTransparent[compPixels[i]] = 1;
+            if (comp.length >= 80) {
+              for (const p of comp) isTransparent[p] = 1;
             }
           }
         }

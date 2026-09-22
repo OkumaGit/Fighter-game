@@ -207,10 +207,10 @@ function drawFighterShadow(context, fighter, groundY) {
         let glowRGB = null;
         if (fighterId === '1') glowRGB = '249, 115, 22';
         else if (fighterId === '2') glowRGB = '34, 197, 94';
-        else if (fighterId === '3') glowRGB = '148, 163, 184';
+        else if (fighterId === '3') glowRGB = '245, 158, 11';
         else if (fighterId === '4') glowRGB = '186, 230, 253';
         else if (fighterId === '5') glowRGB = '234, 179, 8';
-        else if (fighterId === '6') glowRGB = '168, 85, 247';
+        else if (fighterId === '6') glowRGB = '250, 204, 21';
 
         if (glowRGB) {
             context.save();
