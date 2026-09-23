@@ -15,9 +15,9 @@ export default function showMoveListModal({
     const f1Lore = getFighterLore(fighter1);
     const f2Lore = getFighterLore(fighter2);
 
-    let p2Label = 'Игрок 2 (P2)';
-    if (isOnline) p2Label = 'Онлайн Соперник';
-    else if (isPvE || isTower) p2Label = 'Бот / AI';
+    let p2Label = 'Player 2 (P2)';
+    if (isOnline) p2Label = 'Online Opponent';
+    else if (isPvE || isTower) p2Label = 'Computer (AI)';
 
     const layer = createElement({
         tagName: 'div',
@@ -28,6 +28,20 @@ export default function showMoveListModal({
         tagName: 'div',
         className: 'modal-root move-list-modal___container'
     });
+
+    // Top gold accent line
+    const topAccent = createElement({ tagName: 'div', className: 'move-list-modal___top-accent' });
+
+    // Corner brackets matching winner-modal aesthetic
+    const createCorner = mod =>
+        createElement({
+            tagName: 'span',
+            className: `move-list-modal___corner move-list-modal___corner--${mod}`
+        });
+    const cornerTL = createCorner('tl');
+    const cornerTR = createCorner('tr');
+    const cornerBL = createCorner('bl');
+    const cornerBR = createCorner('br');
 
     // Header
     const header = createElement({ tagName: 'div', className: 'move-list-modal___header' });
@@ -40,7 +54,7 @@ export default function showMoveListModal({
     const title = createElement({
         tagName: 'h2',
         className: 'move-list-modal___title',
-        innerText: 'СПРАВОЧНИК ПРИЁМОВ'
+        innerText: 'MOVE LIST'
     });
     headerTitleBox.append(subtitle, title);
 
@@ -82,7 +96,7 @@ export default function showMoveListModal({
         const fName = createElement({
             tagName: 'h3',
             className: 'move-list-modal___fighter-name',
-            innerText: `${lore.ruName} (${lore.name})`
+            innerText: lore.name
         });
         const elementPill = createElement({
             tagName: 'span',
@@ -97,7 +111,7 @@ export default function showMoveListModal({
         return badge;
     };
 
-    const fighter1Badge = createFighterBadge(f1Lore, 'Игрок 1 (P1)', 'left');
+    const fighter1Badge = createFighterBadge(f1Lore, 'Player 1 (P1)', 'left');
     const vsSign = createElement({
         tagName: 'div',
         className: 'move-list-modal___vs-sign',
@@ -113,19 +127,19 @@ export default function showMoveListModal({
         tagName: 'button',
         className: 'move-list-modal___tab move-list-modal___tab--active',
         attributes: { type: 'button' },
-        innerText: 'Все комбо и приёмы'
+        innerText: 'All Moves & Combos'
     });
     const tabP1 = createElement({
         tagName: 'button',
         className: 'move-list-modal___tab',
         attributes: { type: 'button' },
-        innerText: `Игрок 1 [${f1Lore.ruName}]`
+        innerText: `Player 1 [${f1Lore.name}]`
     });
     const tabP2 = createElement({
         tagName: 'button',
         className: 'move-list-modal___tab',
         attributes: { type: 'button' },
-        innerText: `${p2Label} [${f2Lore.ruName}]`
+        innerText: `${p2Label} [${f2Lore.name}]`
     });
     tabsContainer.append(tabAll, tabP1, tabP2);
 
@@ -135,97 +149,97 @@ export default function showMoveListModal({
     const movesData = [
         {
             category: 'super',
-            name: 'СУПЕР-УДАР (SUPER MOVE)',
-            badge: '100% SUPER METER · КРИТИЧЕСКИЙ',
+            name: 'SUPER MOVE (CRITICAL STRIKE)',
+            badge: '100% SUPER · UNBLOCKABLE',
             badgeClass: 'super',
             p1Keys: '<kbd>Q</kbd> + <kbd>W</kbd> + <kbd>E</kbd>',
             p2Keys: '<kbd>Num 7</kbd> + <kbd>Num 8</kbd> + <kbd>Num 9</kbd>',
-            desc: 'Неблокируемый разрушительный удар стихии! Требует 100% шкалы Super и дистанцию вплотную (<= 140px). Наносит 24 ед. урона и активирует кинематографический вихрь.',
-            p1Detail: `Стихия ${f1Lore.ruName}: <strong>${f1Lore.superName}</strong> — ${f1Lore.superDesc}`,
-            p2Detail: `Стихия ${f2Lore.ruName}: <strong>${f2Lore.superName}</strong> — ${f2Lore.superDesc}`
+            desc: 'Devastating unblockable elemental surge! Requires 100% Super Meter at point-blank range (<= 140px). Breaks through any guard, cancels from normal strikes, and deals 24 flat damage.',
+            p1Detail: `${f1Lore.elementIcon} ${f1Lore.name}: <strong>${f1Lore.superName}</strong> — ${f1Lore.superDesc}`,
+            p2Detail: `${f2Lore.elementIcon} ${f2Lore.name}: <strong>${f2Lore.superName}</strong> — ${f2Lore.superDesc}`
         },
         {
             category: 'special',
-            name: 'ОСОБАЯ МАГИЯ (SPECIAL MOVE)',
-            badge: 'ЭЛЕМЕНТАРНАЯ МАГИЯ · КУЛДАУН',
+            name: 'SPECIAL MOVE (ELEMENTAL MAGIC)',
+            badge: 'SIGNATURE MAGIC · COOLDOWN',
             badgeClass: 'special',
             p1Keys: '<kbd>U</kbd>',
             p2Keys: '<kbd>Num 3</kbd>',
-            desc: 'Фирменная магия бойца с перезарядкой (~4 сек).',
-            p1Detail: `${f1Lore.elementIcon} ${f1Lore.ruName}: <strong>${f1Lore.specialName}</strong> — ${f1Lore.specialDesc}`,
-            p2Detail: `${f2Lore.elementIcon} ${f2Lore.ruName}: <strong>${f2Lore.specialName}</strong> — ${f2Lore.specialDesc}`
+            desc: 'Fighter signature elemental technique on cooldown (~4 sec).',
+            p1Detail: `${f1Lore.elementIcon} ${f1Lore.name}: <strong>${f1Lore.specialName}</strong> — ${f1Lore.specialDesc}`,
+            p2Detail: `${f2Lore.elementIcon} ${f2Lore.name}: <strong>${f2Lore.specialName}</strong> — ${f2Lore.specialDesc}`
         },
         {
             category: 'throw',
-            name: 'БРОСОК ЧЕРЕЗ СЕБЯ (THROW)',
-            badge: 'НЕБЛОКИРУЕМЫЙ · ВПЛОТНУЮ',
+            name: 'GRAPPLE THROW (CLOSE RANGE)',
+            badge: 'UNBLOCKABLE · POINT BLANK',
             badgeClass: 'unblockable',
-            p1Keys: '<kbd>D</kbd> + <kbd>J</kbd> (Вперёд + Удар)',
-            p2Keys: '<kbd>←</kbd> + <kbd>Num 1</kbd> (Вперёд + Удар)',
-            desc: 'Мощный бросок соперника о землю на дистанции вплотную (< 88px). Игнорирует и пробивает блок соперника!'
+            p1Keys: '<kbd>D</kbd> + <kbd>J</kbd> (Forward + Jab)',
+            p2Keys: '<kbd>←</kbd> + <kbd>Num 1</kbd> (Forward + Jab)',
+            desc: 'Slam the opponent overhead at point-blank range (< 88px). Pierces directly through enemy guard!'
         },
         {
             category: 'uppercut',
-            name: 'АППЕРКОТ (UPPERCUT)',
-            badge: 'ЛАУНЧЕР · ПОДБРОС В ВОЗДУХ',
+            name: 'UPPERCUT (LAUNCHER)',
+            badge: 'LAUNCHER · HEAVY HIT',
             badgeClass: 'launcher',
-            p1Keys: '<kbd>S</kbd> + <kbd>J</kbd> (Блок + Удар)',
-            p2Keys: '<kbd>↓</kbd> + <kbd>Num 1</kbd> (Блок + Удар)',
-            desc: 'Сокрушительный апперкот снизу вверх. Подбрасывает противника высоко в воздух, открывая окно для джаггл-комбо (juggle)!'
+            p1Keys: '<kbd>S</kbd> + <kbd>J</kbd> (Block + Jab)',
+            p2Keys: '<kbd>↓</kbd> + <kbd>Num 1</kbd> (Block + Jab)',
+            desc: 'Heavy rising strike from crouch. Launches the foe skyward, opening up juggle follow-ups!'
         },
         {
             category: 'sweep',
-            name: 'НИЗКАЯ ПОДСЕЧКА (LOW SWEEP)',
-            badge: 'НИЗКИЙ УДАР · СБИВАНИЕ С НОГ',
+            name: 'LOW SWEEP (TRIP)',
+            badge: 'LOW ATTACK · KNOCKDOWN',
             badgeClass: 'sweep',
-            p1Keys: '<kbd>S</kbd> + <kbd>K</kbd> (Блок + Пинок)',
-            p2Keys: '<kbd>↓</kbd> + <kbd>Num 2</kbd> (Блок + Пинок)',
-            desc: 'Скользящий удар ногой по низу. Сбивает соперника с ног и опрокидывает в нокдаун.'
+            p1Keys: '<kbd>S</kbd> + <kbd>K</kbd> (Block + Kick)',
+            p2Keys: '<kbd>↓</kbd> + <kbd>Num 2</kbd> (Block + Kick)',
+            desc: 'Low sweeping leg kick. Knocks the opponent off their feet onto the ground.'
         },
         {
             category: 'combo',
-            name: 'СЕРИЯ УДАРОВ (2-HIT COMBO)',
-            badge: 'СЕРИЯ ДЖЕБОВ',
+            name: '2-HIT JAB COMBO',
+            badge: 'RAPID CHAIN',
             badgeClass: 'combo',
-            p1Keys: '<kbd>J</kbd> затем сразу <kbd>J</kbd>',
-            p2Keys: '<kbd>Num 1</kbd> затем <kbd>Num 1</kbd>',
-            desc: 'Быстрая комбинация из двух последовательных ударов руками. Увеличивает множитель шкалы Super!'
+            p1Keys: '<kbd>J</kbd> then immediately <kbd>J</kbd>',
+            p2Keys: '<kbd>Num 1</kbd> then <kbd>Num 1</kbd>',
+            desc: 'Fast double-jab combination with changing animation. Accelerates Super Meter build!'
         },
         {
             category: 'jumpkick',
-            name: 'УДАР В ПРЫЖКЕ (JUMP KICK)',
-            badge: 'ВОЗДУШНАЯ АТАКА',
+            name: 'FLYING JUMP KICK',
+            badge: 'AERIAL STRIKE',
             badgeClass: 'aerial',
             p1Keys: '<kbd>Space</kbd> + <kbd>K</kbd>',
             p2Keys: '<kbd>↑</kbd> + <kbd>Num 2</kbd>',
-            desc: 'Удар ногой с воздуха в прыжке. Имеет высокий приоритет при сближении.'
+            desc: 'Mid-air diving kick with high priority and extended reach.'
         },
         {
             category: 'block',
-            name: 'БЛОК И ЗАЩИТА (BLOCK HOLD)',
-            badge: 'ОБОРОНА · ФИКСАЦИЯ СТОЙКИ',
+            name: 'GUARD & CROUCH (BLOCK HOLD)',
+            badge: 'DEFENSE · HOLD GUARD',
             badgeClass: 'defense',
-            p1Keys: '<kbd>S</kbd> (Зажать)',
-            p2Keys: '<kbd>↓</kbd> (Зажать)',
-            desc: 'Удержание кнопки фиксирует бойца в глухой защитной стойке. Поглощает урон и заряжает шкалу Super при блокировании.'
+            p1Keys: '<kbd>S</kbd> (Hold)',
+            p2Keys: '<kbd>↓</kbd> (Hold)',
+            desc: 'Holding the key locks the fighter in an immovable guard pose. Reduces incoming damage and gains Super Meter on block.'
         },
         {
             category: 'dash',
-            name: 'БЫСТРЫЙ РЫВОК (DASH)',
-            badge: 'МОБИЛЬНОСТЬ · ДВОЙНОЙ ТАП',
+            name: 'EVASIVE DASH',
+            badge: 'MOBILITY · DOUBLE-TAP',
             badgeClass: 'mobility',
-            p1Keys: 'Двойной тап <kbd>A</kbd>, <kbd>A</kbd> или <kbd>D</kbd>, <kbd>D</kbd>',
-            p2Keys: 'Двойной тап <kbd>←</kbd>, <kbd>←</kbd> или <kbd>→</kbd>, <kbd>→</kbd>',
-            desc: 'Стремительный рывок вперёд или назад с облаком пыли для быстрого сближения или уклонения.'
+            p1Keys: 'Double-tap <kbd>A</kbd>, <kbd>A</kbd> or <kbd>D</kbd>, <kbd>D</kbd>',
+            p2Keys: 'Double-tap <kbd>←</kbd>, <kbd>←</kbd> or <kbd>→</kbd>, <kbd>→</kbd>',
+            desc: 'Instant forward or backward burst of speed with dust trail for spacing or closing in.'
         },
         {
             category: 'movement',
-            name: 'ДВИЖЕНИЕ И ПРЫЖОК',
-            badge: 'БАЗОВОЕ',
+            name: 'MOVEMENT & JUMP',
+            badge: 'BASIC NAVIGATION',
             badgeClass: 'movement',
-            p1Keys: '<kbd>A</kbd> влево, <kbd>D</kbd> вправо, <kbd>Space</kbd> прыжок',
-            p2Keys: '<kbd>←</kbd> влево, <kbd>→</kbd> вправо, <kbd>↑</kbd> прыжок',
-            desc: 'Перемещение по арене и вертикальный прыжок.'
+            p1Keys: '<kbd>A</kbd> Left, <kbd>D</kbd> Right, <kbd>Space</kbd> Jump',
+            p2Keys: '<kbd>←</kbd> Left, <kbd>→</kbd> Right, <kbd>↑</kbd> Jump',
+            desc: 'Arena traversal, spacing, and vertical jumping.'
         }
     ];
 
@@ -257,7 +271,7 @@ export default function showMoveListModal({
 
             if (currentFilter === 'all' || currentFilter === 'p1') {
                 const p1Col = createElement({ tagName: 'div', className: 'move-card___key-group' });
-                p1Col.innerHTML = `<span class="move-card___key-label">Игрок 1:</span> <span class="move-card___keys">${item.p1Keys}</span>`;
+                p1Col.innerHTML = `<span class="move-card___key-label">Player 1:</span> <span class="move-card___keys">${item.p1Keys}</span>`;
                 keysRow.appendChild(p1Col);
             }
 
@@ -318,7 +332,6 @@ export default function showMoveListModal({
         tabP2.classList.add('move-list-modal___tab--active');
         tabAll.classList.remove('move-list-modal___tab--active');
         tabP1.classList.remove('move-list-modal___tab--active');
-        tabP2.classList.remove('move-list-modal___tab--active');
         renderMoves();
     });
 
@@ -330,18 +343,29 @@ export default function showMoveListModal({
         tagName: 'button',
         className: 'move-list-modal___btn move-list-modal___btn--back',
         attributes: { type: 'button' },
-        innerText: '◀ Меню паузы'
+        innerText: '◀ Back to Pause Menu'
     });
     const resumeBtn = createElement({
         tagName: 'button',
         className: 'move-list-modal___btn move-list-modal___btn--resume',
         attributes: { type: 'button' },
-        innerText: '▶ В бой [ESC]'
+        innerText: '▶ Resume Fight [ESC]'
     });
 
     footer.append(backBtn, resumeBtn);
 
-    modal.append(header, matchupBar, tabsContainer, movesList, footer);
+    modal.append(
+        topAccent,
+        cornerTL,
+        cornerTR,
+        cornerBL,
+        cornerBR,
+        header,
+        matchupBar,
+        tabsContainer,
+        movesList,
+        footer
+    );
     layer.append(modal);
     root.append(layer);
 

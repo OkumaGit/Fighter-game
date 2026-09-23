@@ -164,25 +164,25 @@
     align-items: center;
     gap: 8px;
     padding: 7px 14px;
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.88), rgba(30, 41, 59, 0.78));
-    border: 1px solid rgba(250, 204, 21, 0.45);
-    border-radius: 6px;
-    color: #f8fafc;
-    font-family: inherit;
+    background: linear-gradient(160deg, #0b1120 0%, #1e293b 100%);
+    border: 1px solid rgba(251, 191, 36, 0.45);
+    border-radius: 4px;
+    color: #ffffff;
+    font-family: 'Russo One', sans-serif;
     font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     cursor: pointer;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 10px rgba(250, 204, 21, 0.15);
-    backdrop-filter: blur(8px);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6), 0 0 12px rgba(251, 191, 36, 0.15);
+    backdrop-filter: blur(6px);
+    transition: all 0.15s ease-out;
 }
 
 .arena___pause-button:hover {
-    background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(51, 65, 85, 0.85));
-    border-color: rgba(250, 204, 21, 0.9);
-    color: #facc15;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 16px rgba(250, 204, 21, 0.4);
+    background: linear-gradient(160deg, #1e293b 0%, #334155 100%);
+    border-color: #fbbf24;
+    color: #fbbf24;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.7), 0 0 16px rgba(251, 191, 36, 0.4);
     transform: translateY(-1px);
 }
 
@@ -196,18 +196,20 @@
 }
 
 .arena___pause-label {
+    font-family: 'Russo One', sans-serif;
     font-size: 11px;
+    letter-spacing: 0.1em;
     padding: 2px 6px;
-    border-radius: 4px;
-    background: rgba(255, 255, 255, 0.1);
-    color: #94a3b8;
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 3px;
+    background: rgba(11, 17, 32, 0.85);
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.35);
 }
 
 .arena___pause-button:hover .arena___pause-label {
-    background: rgba(250, 204, 21, 0.2);
-    color: #fef08a;
-    border-color: rgba(250, 204, 21, 0.4);
+    background: rgba(251, 191, 36, 0.2);
+    color: #ffffff;
+    border-color: #fbbf24;
 }
 
 @keyframes fighter-sprite-idle {
@@ -444,9 +446,7 @@
     font-size: 40px;
     line-height: 1;
     color: #fbbf24;
-    text-shadow:
-        0 0 14px rgba(251, 191, 36, 0.7),
-        0 2px 4px #000000;
+    text-shadow: 0 0 14px rgba(251, 191, 36, 0.7), 0 2px 4px #000000;
     letter-spacing: 0.04em;
     min-width: 52px;
     text-align: center;
@@ -456,15 +456,17 @@
 
 .arena___fight-timer--urgent {
     color: #ef4444;
-    text-shadow:
-        0 0 20px rgba(239, 68, 68, 0.9),
-        0 2px 4px #000000;
+    text-shadow: 0 0 20px rgba(239, 68, 68, 0.9), 0 2px 4px #000000;
     animation: timerUrgentPulse 0.5s infinite alternate ease-in-out;
 }
 
 @keyframes timerUrgentPulse {
-    from { transform: scale(1); }
-    to { transform: scale(1.12); }
+    from {
+        transform: scale(1);
+    }
+    to {
+        transform: scale(1.12);
+    }
 }
 
 .arena___super-bar-container {
@@ -505,8 +507,12 @@
 }
 
 @keyframes superReadyPulse {
-    from { filter: brightness(1); }
-    to { filter: brightness(1.35) drop-shadow(0 0 6px rgba(239, 68, 68, 0.9)); }
+    from {
+        filter: brightness(1);
+    }
+    to {
+        filter: brightness(1.35) drop-shadow(0 0 6px rgba(239, 68, 68, 0.9));
+    }
 }
 
 .arena___super-label {
@@ -586,24 +592,63 @@
 }
 
 @keyframes arenaShakeLight {
-    10%, 90% { transform: translate3d(-1.5px, 0, 0); }
-    20%, 80% { transform: translate3d(2px, 0, 0); }
-    30%, 50%, 70% { transform: translate3d(-2px, 1px, 0); }
-    40%, 60% { transform: translate3d(2px, -1px, 0); }
+    10%,
+    90% {
+        transform: translate3d(-1.5px, 0, 0);
+    }
+    20%,
+    80% {
+        transform: translate3d(2px, 0, 0);
+    }
+    30%,
+    50%,
+    70% {
+        transform: translate3d(-2px, 1px, 0);
+    }
+    40%,
+    60% {
+        transform: translate3d(2px, -1px, 0);
+    }
 }
 
 @keyframes arenaShakeMedium {
-    10%, 90% { transform: translate3d(-3.5px, 1.5px, 0); }
-    20%, 80% { transform: translate3d(4.5px, -2px, 0); }
-    30%, 50%, 70% { transform: translate3d(-5px, 2px, 0); }
-    40%, 60% { transform: translate3d(5px, -1.5px, 0); }
+    10%,
+    90% {
+        transform: translate3d(-3.5px, 1.5px, 0);
+    }
+    20%,
+    80% {
+        transform: translate3d(4.5px, -2px, 0);
+    }
+    30%,
+    50%,
+    70% {
+        transform: translate3d(-5px, 2px, 0);
+    }
+    40%,
+    60% {
+        transform: translate3d(5px, -1.5px, 0);
+    }
 }
 
 @keyframes arenaShakeHeavy {
-    10%, 90% { transform: translate3d(-7px, 3px, 0) scale(1.01); }
-    20%, 80% { transform: translate3d(8px, -4px, 0) scale(0.99); }
-    30%, 50%, 70% { transform: translate3d(-9px, 4px, 0) scale(1.02); }
-    40%, 60% { transform: translate3d(9px, -3px, 0) scale(1); }
+    10%,
+    90% {
+        transform: translate3d(-7px, 3px, 0) scale(1.01);
+    }
+    20%,
+    80% {
+        transform: translate3d(8px, -4px, 0) scale(0.99);
+    }
+    30%,
+    50%,
+    70% {
+        transform: translate3d(-9px, 4px, 0) scale(1.02);
+    }
+    40%,
+    60% {
+        transform: translate3d(9px, -3px, 0) scale(1);
+    }
 }
 
 /* Round Win Medallions */
@@ -654,20 +699,14 @@
     color: #ef4444;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    text-shadow:
-        0 0 35px rgba(239, 68, 68, 0.9),
-        0 0 18px rgba(185, 28, 28, 0.8),
-        0 4px 12px #000000;
+    text-shadow: 0 0 35px rgba(239, 68, 68, 0.9), 0 0 18px rgba(185, 28, 28, 0.8), 0 4px 12px #000000;
     animation: bannerPopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .arena___announcement-title--round {
     color: #fbbf24;
     font-size: 48px;
-    text-shadow:
-        0 0 35px rgba(251, 191, 36, 0.9),
-        0 0 18px rgba(245, 158, 11, 0.8),
-        0 4px 12px #000000;
+    text-shadow: 0 0 35px rgba(251, 191, 36, 0.9), 0 0 18px rgba(245, 158, 11, 0.8), 0 4px 12px #000000;
 }
 
 .arena___announcement-title--finish {
@@ -679,10 +718,7 @@
 .arena___announcement-title--winner {
     color: #38bdf8;
     font-size: 52px;
-    text-shadow:
-        0 0 35px rgba(56, 189, 248, 0.9),
-        0 0 18px rgba(2, 132, 199, 0.8),
-        0 4px 12px #000000;
+    text-shadow: 0 0 35px rgba(56, 189, 248, 0.9), 0 0 18px rgba(2, 132, 199, 0.8), 0 4px 12px #000000;
 }
 
 @keyframes finishPulse {
@@ -710,4 +746,3 @@
         opacity: 1;
     }
 }
-

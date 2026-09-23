@@ -33,15 +33,21 @@ export default function showPauseMenu({
         className: 'modal-root pause-menu___container'
     });
 
-    // Top neon accent
+    // Top gold accent line
     const topAccent = createElement({ tagName: 'div', className: 'pause-menu___top-accent' });
+
+    // Corner brackets matching winner-modal aesthetic
+    const cornerTL = createElement({ tagName: 'span', className: 'pause-menu___corner pause-menu___corner--tl' });
+    const cornerTR = createElement({ tagName: 'span', className: 'pause-menu___corner pause-menu___corner--tr' });
+    const cornerBL = createElement({ tagName: 'span', className: 'pause-menu___corner pause-menu___corner--bl' });
+    const cornerBR = createElement({ tagName: 'span', className: 'pause-menu___corner pause-menu___corner--br' });
 
     // Header
     const header = createElement({ tagName: 'div', className: 'pause-menu___header' });
     const badge = createElement({
         tagName: 'div',
         className: 'pause-menu___badge',
-        innerText: 'BATTLE PAUSED · ИГРА НА ПАУЗЕ'
+        innerText: 'BATTLE PAUSED'
     });
     const title = createElement({
         tagName: 'h2',
@@ -53,7 +59,7 @@ export default function showPauseMenu({
     const f1Name = createElement({
         tagName: 'span',
         className: 'pause-menu___fighter-name pause-menu___fighter-name--left',
-        innerText: f1Lore.ruName
+        innerText: f1Lore.name
     });
     f1Name.style.color = f1Lore.color;
 
@@ -66,7 +72,7 @@ export default function showPauseMenu({
     const f2Name = createElement({
         tagName: 'span',
         className: 'pause-menu___fighter-name pause-menu___fighter-name--right',
-        innerText: f2Lore.ruName
+        innerText: f2Lore.name
     });
     f2Name.style.color = f2Lore.color;
 
@@ -114,11 +120,11 @@ export default function showPauseMenu({
     let selectedIndex = 0;
     const buttons = [];
 
-    const resumeBtn = createMenuButton('Продолжить бой', 'ESC', '▶', () => onResume(), 'pause-menu___btn--resume');
-    const moveListBtn = createMenuButton('Список приёмов', 'M', '📖', () => onMoveList());
-    const restartText = isTower ? 'Перезапустить раунд' : 'Начать бой заново';
-    const restartBtn = createMenuButton(restartText, 'R', '🔄', () => onRestart());
-    const quitBtn = createMenuButton('Выход в выбор бойцов', 'Q', '🚪', () => onQuit(), 'pause-menu___btn--quit');
+    const resumeBtn = createMenuButton('Resume Fight', 'ESC', '▶', () => onResume(), 'pause-menu___btn--resume');
+    const moveListBtn = createMenuButton('Move List', 'M', '📖', () => onMoveList(), 'pause-menu___btn--movelist');
+    const restartText = isTower ? 'Restart Stage' : 'Restart Match';
+    const restartBtn = createMenuButton(restartText, 'R', '🔄', () => onRestart(), 'pause-menu___btn--restart');
+    const quitBtn = createMenuButton('Quit to Menu', 'Q', '🚪', () => onQuit(), 'pause-menu___btn--quit');
 
     buttons.push(resumeBtn, moveListBtn, restartBtn, quitBtn);
     buttons.forEach(btn => buttonsList.appendChild(btn));
@@ -130,7 +136,7 @@ export default function showPauseMenu({
     };
     updateSelectedButton();
 
-    container.append(topAccent, header, buttonsList);
+    container.append(topAccent, cornerTL, cornerTR, cornerBL, cornerBR, header, buttonsList);
     layer.append(container);
     root.append(layer);
 
