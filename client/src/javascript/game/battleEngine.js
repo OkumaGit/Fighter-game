@@ -215,16 +215,30 @@ export function setBlocking(fighter, isBlocking = true) {
         fighter.state === 'getup' ||
         fighter.state === 'death' ||
         fighter.health <= 0 ||
-        fighter.isDizzy
+        fighter.isDizzy ||
+        (!fighter.isGrounded && isBlocking)
     ) {
         return fighter;
+    }
+
+    if (fighter.isBlocking === isBlocking) {
+        return fighter;
+    }
+
+    let nextState = 'idle';
+    if (isBlocking) {
+        nextState = 'block';
+    } else if (!fighter.isGrounded) {
+        nextState = 'jump';
     }
 
     return {
         ...fighter,
         isBlocking,
         isCrouching: false,
-        state: isBlocking ? 'block' : 'idle'
+        state: nextState,
+        currentFrame: 0,
+        framesElapsed: 0
     };
 }
 

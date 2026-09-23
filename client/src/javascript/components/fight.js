@@ -376,6 +376,12 @@ function animateFighter(fighter, elapsed) {
         return;
     }
 
+    // While holding block: freeze on the peak guard pose (frame 3, i.e. 4th frame Block_4.png)
+    if (fighter.state === 'block' && fighter.isBlocking && fighter.currentFrame >= 3) {
+        fighter.currentFrame = 3;
+        return;
+    }
+
     if (fighter.currentFrame < config.frames - 1) {
         fighter.currentFrame += 1;
     } else if (config.loop) {
