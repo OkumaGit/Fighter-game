@@ -93,6 +93,7 @@ export default function showMoveListModal({
             className: 'move-list-modal___player-tag',
             innerText: playerLabel
         });
+        const nameRow = createElement({ tagName: 'div', className: 'move-list-modal___fighter-name-row' });
         const fName = createElement({
             tagName: 'h3',
             className: 'move-list-modal___fighter-name',
@@ -106,7 +107,8 @@ export default function showMoveListModal({
         elementPill.style.borderColor = lore.color;
         elementPill.style.color = lore.color;
 
-        info.append(pLabel, fName, elementPill);
+        nameRow.append(fName, elementPill);
+        info.append(pLabel, nameRow);
         badge.append(portraitWrap, info);
         return badge;
     };

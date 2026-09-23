@@ -312,10 +312,11 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    width: 92%;
-    max-width: 860px;
-    max-height: 90vh;
-    padding: 24px 28px 20px;
+    width: 94%;
+    max-width: 880px;
+    height: 94vh;
+    max-height: 94vh;
+    padding: 14px 20px 12px;
     background: linear-gradient(160deg, #0b1120 0%, #172033 60%, #0d1527 100%);
     border: 1px solid rgba(251, 191, 36, 0.45);
     border-radius: 6px;
@@ -332,43 +333,45 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-bottom: 14px;
+    padding-bottom: 8px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
 }
 
 .move-list-modal___subtitle {
     display: block;
     font-family: 'Russo One', sans-serif;
-    font-size: 11px;
-    letter-spacing: 0.22em;
+    font-size: 10px;
+    letter-spacing: 0.2em;
     color: #f59e0b;
     text-transform: uppercase;
+    line-height: 1;
 }
 
 .move-list-modal___title {
-    margin: 4px 0 0;
+    margin: 2px 0 0;
     font-family: 'Russo One', sans-serif;
-    font-size: 26px;
+    font-size: 20px;
     line-height: 1;
     letter-spacing: 0.1em;
     color: #ffffff;
     text-transform: uppercase;
-    text-shadow: 0 0 16px rgba(251, 191, 36, 0.5);
+    text-shadow: 0 0 14px rgba(251, 191, 36, 0.5);
 }
 
 .move-list-modal___close-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     padding: 0;
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 4px;
     color: rgba(255, 255, 255, 0.65);
     font-family: Arial, sans-serif;
-    font-size: 20px;
+    font-size: 18px;
     line-height: 1;
     cursor: pointer;
     transition: background-color 150ms ease, color 150ms ease;
@@ -380,23 +383,24 @@
     color: #ffffff;
 }
 
-/* Matchup Bar */
+/* Matchup Bar - Sleek & Compact */
 .move-list-modal___matchup-bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
-    margin: 14px 0;
-    padding: 12px 18px;
+    gap: 12px;
+    margin: 8px 0 6px;
+    padding: 6px 14px;
     background: rgba(15, 23, 42, 0.7);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 6px;
+    border-radius: 4px;
+    flex-shrink: 0;
 }
 
 .move-list-modal___fighter-card {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     flex: 1;
 }
 
@@ -406,14 +410,14 @@
 }
 
 .move-list-modal___portrait-wrap {
-    width: 52px;
-    height: 52px;
+    width: 36px;
+    height: 36px;
     flex-shrink: 0;
     border-radius: 4px;
     overflow: hidden;
     background: rgba(11, 17, 32, 0.85);
     border: 1px solid rgba(251, 191, 36, 0.35);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
 }
 
 .move-list-modal___portrait {
@@ -423,66 +427,86 @@
     object-position: top center;
 }
 
+.move-list-modal___fighter-info {
+    display: flex;
+    flex-direction: column;
+}
+
 .move-list-modal___player-tag {
     display: block;
     font-family: 'Russo One', sans-serif;
-    font-size: 11px;
+    font-size: 10px;
     color: #94a3b8;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    margin-bottom: 2px;
+}
+
+.move-list-modal___fighter-name-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.move-list-modal___fighter-card--right .move-list-modal___fighter-name-row {
+    justify-content: flex-end;
 }
 
 .move-list-modal___fighter-name {
-    margin: 2px 0 4px;
+    margin: 0;
     font-family: 'Russo One', sans-serif;
-    font-size: 18px;
+    font-size: 15px;
     color: #ffffff;
     letter-spacing: 0.06em;
     text-transform: uppercase;
+    line-height: 1.1;
 }
 
 .move-list-modal___element-pill {
     display: inline-block;
-    padding: 2px 10px;
-    border-radius: 4px;
+    padding: 1px 7px;
+    border-radius: 3px;
     border: 1px solid;
     font-family: 'Russo One', sans-serif;
-    font-size: 11px;
-    letter-spacing: 0.06em;
+    font-size: 10px;
+    letter-spacing: 0.05em;
     background: rgba(11, 17, 32, 0.8);
     text-transform: uppercase;
+    line-height: 1.2;
 }
 
 .move-list-modal___vs-sign {
-    padding: 4px 10px;
+    padding: 2px 8px;
     background: linear-gradient(135deg, #dc2626, #991b1b);
-    border-radius: 4px;
+    border-radius: 3px;
     font-family: 'Russo One', sans-serif;
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 900;
     color: #ffffff;
-    box-shadow: 0 0 10px rgba(220, 38, 38, 0.7);
+    box-shadow: 0 0 8px rgba(220, 38, 38, 0.6);
     flex-shrink: 0;
 }
 
-/* Filter Tabs */
+/* Filter Tabs - Compact */
 .move-list-modal___tabs {
     display: flex;
-    gap: 8px;
-    margin-bottom: 14px;
+    gap: 6px;
+    margin-bottom: 8px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    padding-bottom: 8px;
+    padding-bottom: 6px;
+    flex-shrink: 0;
 }
 
 .move-list-modal___tab {
-    padding: 8px 16px;
+    padding: 5px 12px;
     background: rgba(15, 23, 42, 0.65);
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 4px;
     color: #94a3b8;
     font-family: 'Russo One', sans-serif;
-    font-size: 12px;
-    letter-spacing: 0.08em;
+    font-size: 11px;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     cursor: pointer;
     transition: all 0.15s ease;
@@ -498,18 +522,18 @@
     background: rgba(245, 158, 11, 0.18);
     border-color: #f59e0b;
     color: #fbbf24;
-    box-shadow: 0 0 12px rgba(245, 158, 11, 0.3);
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
 }
 
-/* Moves List Container & Custom Scrollbar */
+/* Moves List Container - EXPANDED VERTICALLY */
 .move-list-modal___moves-list {
-    flex: 1;
+    flex: 1 1 auto;
+    min-height: 0;
     overflow-y: auto;
     padding-right: 6px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    max-height: 52vh;
+    gap: 8px;
 }
 
 .move-list-modal___moves-list::-webkit-scrollbar {
@@ -529,11 +553,12 @@
 
 /* Move Card */
 .move-card {
-    padding: 12px 16px;
+    padding: 10px 14px;
     background: rgba(15, 23, 42, 0.65);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 4px;
     transition: border-color 0.15s ease, background 0.15s ease;
+    flex-shrink: 0;
 }
 
 .move-card:hover {
@@ -561,24 +586,24 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .move-card___name {
     margin: 0;
     font-family: 'Russo One', sans-serif;
-    font-size: 14px;
+    font-size: 13.5px;
     color: #ffffff;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
 }
 
 .move-card___badge {
-    padding: 3px 8px;
-    border-radius: 4px;
+    padding: 2px 7px;
+    border-radius: 3px;
     font-family: 'Russo One', sans-serif;
-    font-size: 10px;
-    letter-spacing: 0.1em;
+    font-size: 9.5px;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
 }
 
@@ -630,10 +655,10 @@
 .move-card___keys-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 16px;
-    margin-bottom: 8px;
-    padding: 6px 12px;
-    background: rgba(11, 17, 32, 0.8);
+    gap: 14px;
+    margin-bottom: 6px;
+    padding: 5px 10px;
+    background: rgba(11, 17, 32, 0.85);
     border-radius: 4px;
     border: 1px solid rgba(255, 255, 255, 0.06);
 }
@@ -642,49 +667,60 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 13px;
+    font-size: 12px;
 }
 
 .move-card___key-label {
     font-family: 'Russo One', sans-serif;
     color: #94a3b8;
-    font-size: 11px;
-    letter-spacing: 0.08em;
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
 }
 
 .move-card___keys kbd {
     display: inline-block;
-    padding: 2px 7px;
+    padding: 1.5px 6px;
     font-family: 'Russo One', sans-serif;
-    font-size: 11px;
+    font-size: 10.5px;
     color: #fbbf24;
     background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
     border: 1px solid rgba(251, 191, 36, 0.45);
-    border-radius: 4px;
+    border-radius: 3px;
     box-shadow: 0 2px 0 #090d16, inset 0 1px 0 rgba(255, 255, 255, 0.2);
     margin: 0 2px;
     text-transform: uppercase;
 }
 
+/* NO SERIF FONTS - Crisp modern sans-serif typography */
 .move-card___desc {
-    margin: 0 0 6px;
+    margin: 0 0 4px;
+    font-family: 'Oswald', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     font-size: 13px;
-    line-height: 1.45;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: 0.02em;
     color: #cbd5e1;
 }
 
 .move-card___fighter-detail {
-    margin-top: 6px;
-    padding: 6px 12px;
-    border-radius: 4px;
+    margin-top: 4px;
+    padding: 4px 10px;
+    border-radius: 3px;
+    font-family: 'Oswald', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     font-size: 12px;
+    font-weight: 500;
+    line-height: 1.35;
+    letter-spacing: 0.02em;
     background: rgba(11, 17, 32, 0.7);
     border-left: 3px solid;
     color: #e2e8f0;
 }
 
 .move-card___fighter-detail strong {
+    font-family: 'Russo One', sans-serif;
+    font-size: 11.5px;
+    letter-spacing: 0.04em;
     color: #ffffff;
 }
 
@@ -696,26 +732,27 @@
     border-left-color: #38bdf8;
 }
 
-/* Footer Actions */
+/* Footer Actions - Compact */
 .move-list-modal___footer {
     display: flex;
     justify-content: space-between;
     gap: 12px;
-    margin-top: 16px;
-    padding-top: 14px;
+    margin-top: 8px;
+    padding-top: 8px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
 }
 
 .move-list-modal___btn {
-    padding: 11px 22px;
+    padding: 8px 18px;
     border-radius: 4px;
     font-family: 'Russo One', sans-serif;
-    font-size: 13px;
-    letter-spacing: 0.1em;
+    font-size: 12px;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     cursor: pointer;
     transition: all 0.15s ease;
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.5);
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
 }
 
 .move-list-modal___btn--back {
@@ -735,11 +772,11 @@
     background: linear-gradient(180deg, #16a34a 0%, #15803d 60%, #166534 100%);
     border: 1px solid rgba(34, 197, 94, 0.7);
     color: #ffffff;
-    box-shadow: 0 0 14px rgba(34, 197, 94, 0.4);
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.4);
 }
 
 .move-list-modal___btn--resume:hover {
     filter: brightness(1.15);
-    box-shadow: 0 0 20px rgba(34, 197, 94, 0.6);
+    box-shadow: 0 0 18px rgba(34, 197, 94, 0.6);
     transform: translateY(-1px);
 }
