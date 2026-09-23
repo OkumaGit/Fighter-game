@@ -3,6 +3,7 @@
 @import 'fighterPreview.css';
 @import 'previewContainer.css';
 @import 'modal.css';
+@import 'components/pauseMenu.css';
 
 html,
 body {

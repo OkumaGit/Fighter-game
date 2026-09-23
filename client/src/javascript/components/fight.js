@@ -13,6 +13,8 @@ import createBotController from '../game/botController';
 import showCountdownOverlay from './modal/countdownModal';
 import createVFXManager from '../game/vfxEngine';
 import { updateRoundMedallions, showMatchAnnouncement, updateSuperBar, updateTimerDisplay } from './arenaUI';
+import showPauseMenu from './modal/pauseMenu';
+import showMoveListModal from './modal/moveListModal';
 
 /* eslint-disable no-param-reassign */
 
@@ -553,6 +555,9 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
     let previousTime = performance.now();
     let lastSyncTime = 0;
     let finished = false;
+    let isPaused = false;
+    let activePauseModal = null;
+    let activeMoveListModal = null;
 
     // Best of 3, Super Meter, & 99s Timer
     const roundScores = { left: 0, right: 0 };
@@ -639,6 +644,16 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
             if (timerInterval) clearInterval(timerInterval);
             if (finishHimTimeout) clearTimeout(finishHimTimeout);
             if (finishHimOverlay) finishHimOverlay.remove();
+            if (activeMoveListModal) {
+                activeMoveListModal.close();
+                activeMoveListModal = null;
+            }
+            if (activePauseModal) {
+                activePauseModal.close();
+                activePauseModal = null;
+            }
+            // eslint-disable-next-line no-use-before-define
+            window.removeEventListener('arena-toggle-pause', handleArenaTogglePause);
             cancelAnimationFrame(animationFrame);
             // eslint-disable-next-line no-use-before-define
             document.removeEventListener('keydown', handleKeyDown);
@@ -709,7 +724,7 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
         };
 
         const handleTimeOver = () => {
-            if (finished || roundTransitionActive || finishHimActive) return;
+            if (finished || roundTransitionActive || finishHimActive || isPaused) return;
             showMatchAnnouncement('TIME OVER!', 'round', 2000);
             vfx.triggerScreenShake('medium');
 
@@ -743,7 +758,7 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
             updateTimerDisplay(matchTimer);
 
             timerInterval = setInterval(() => {
-                if (finished || roundTransitionActive || finishHimActive) return;
+                if (finished || roundTransitionActive || finishHimActive || isPaused) return;
                 matchTimer -= 1;
                 updateTimerDisplay(matchTimer);
 
@@ -1042,7 +1057,111 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
             }
         };
 
+        const resumeFight = () => {
+            if (!isPaused) return;
+            if (activeMoveListModal) {
+                activeMoveListModal.close();
+                activeMoveListModal = null;
+            }
+            if (activePauseModal) {
+                activePauseModal.close();
+                activePauseModal = null;
+            }
+            isPaused = false;
+            pressedKeys.clear();
+            previousTime = performance.now();
+        };
+
+        const openPauseMenu = () => {
+            if (finished || finishHimActive || roundTransitionActive || isPaused) return;
+            if (!isOnline) {
+                isPaused = true;
+            }
+            pressedKeys.clear();
+
+            activePauseModal = showPauseMenu({
+                fighter1: firstFighter,
+                fighter2: secondFighter,
+                round: currentRound,
+                isPvE,
+                isTower: Boolean(options.isTower),
+                isOnline,
+                onResume: () => {
+                    resumeFight();
+                },
+                onMoveList: () => {
+                    if (activePauseModal) {
+                        activePauseModal.hide();
+                    }
+                    activeMoveListModal = showMoveListModal({
+                        fighter1: firstFighter,
+                        fighter2: secondFighter,
+                        isPvE,
+                        isTower: Boolean(options.isTower),
+                        isOnline,
+                        onBack: () => {
+                            if (activeMoveListModal) {
+                                activeMoveListModal.close();
+                                activeMoveListModal = null;
+                            }
+                            if (activePauseModal) {
+                                activePauseModal.show();
+                            }
+                        },
+                        onClose: () => {
+                            resumeFight();
+                        }
+                    });
+                },
+                onRestart: () => {
+                    if (activePauseModal) {
+                        activePauseModal.close();
+                        activePauseModal = null;
+                    }
+                    finishFight({ restart: true });
+                },
+                onQuit: () => {
+                    if (activePauseModal) {
+                        activePauseModal.close();
+                        activePauseModal = null;
+                    }
+                    finishFight({ quit: true });
+                }
+            });
+        };
+
+        const togglePause = () => {
+            if (isPaused || activePauseModal || activeMoveListModal) {
+                if (activeMoveListModal) {
+                    activeMoveListModal.close();
+                    activeMoveListModal = null;
+                    if (activePauseModal) {
+                        activePauseModal.show();
+                    }
+                    return;
+                }
+                resumeFight();
+            } else {
+                openPauseMenu();
+            }
+        };
+
+        const handleArenaTogglePause = () => {
+            togglePause();
+        };
+        window.addEventListener('arena-toggle-pause', handleArenaTogglePause);
+
         const handleKeyDown = event => {
+            if (event.code === 'Escape') {
+                event.preventDefault();
+                togglePause();
+                return;
+            }
+
+            if (isPaused) {
+                return;
+            }
+
             pressedKeys.add(event.code);
             handleCriticalInput(event.code);
 
@@ -1157,6 +1276,9 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
         };
 
         const handleKeyUp = event => {
+            if (isPaused) {
+                return;
+            }
             pressedKeys.delete(event.code);
 
             if (isOnline && socket && roomCode) {
@@ -1166,6 +1288,26 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
 
         const loop = time => {
             if (finished) return;
+            if (isPaused) {
+                const clientW = canvas.clientWidth || canvas.width;
+                const clientH = canvas.clientHeight || 560;
+                if (clientW && (canvas.width !== clientW || canvas.height !== clientH)) {
+                    canvas.width = clientW;
+                    canvas.height = clientH;
+                }
+                const groundY = getGroundY();
+                if (state.left.isGrounded) state.left.position.y = groundY;
+                if (state.right.isGrounded) state.right.position.y = groundY;
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                drawFighterShadow(context, state.left, getGroundY());
+                drawFighterShadow(context, state.right, getGroundY());
+                drawFighter(context, state.left);
+                drawFighter(context, state.right);
+                vfx.draw();
+                previousTime = time;
+                animationFrame = requestAnimationFrame(loop);
+                return;
+            }
             const elapsed = Math.min(40, time - previousTime);
             previousTime = time;
             const clientW = canvas.clientWidth || canvas.width;

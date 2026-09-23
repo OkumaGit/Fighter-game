@@ -169,44 +169,21 @@ function createArena(selectedFighters, options = {}) {
     const healthIndicators = createHealthIndicators(selectedFighters[0], selectedFighters[1], options);
     const fighters = createFighters();
 
-    const hotkeysButton = createElement({
+    const pauseButton = createElement({
         tagName: 'button',
-        className: 'arena___hotkeys-button',
+        className: 'arena___pause-button',
         attributes: {
             type: 'button',
-            'aria-label': 'Show hotkeys',
-            'aria-expanded': 'false',
-            'aria-controls': 'arena-hotkeys'
+            'aria-label': 'Pause fight and show move list',
+            title: 'Пауза и приёмы [ESC]'
         }
     });
-    hotkeysButton.textContent = '?';
-    const hotkeysPanel = createElement({
-        tagName: 'section',
-        className: 'arena___hotkeys-panel',
-        attributes: { id: 'arena-hotkeys', hidden: 'true' }
+    pauseButton.innerHTML = '<span class="arena___pause-icon">⏸</span><span class="arena___pause-label">ESC</span>';
+    pauseButton.addEventListener('click', () => {
+        window.dispatchEvent(new CustomEvent('arena-toggle-pause'));
     });
 
-    let player2Controls =
-        '<strong>Player 2</strong><span>Arrows move (double-tap dash)</span><span>Down crouch / block</span><span>Numpad 1 jab</span><span>Numpad 2 kick</span><span>Numpad 3 special</span><span>Up jump</span><span>Down+Jab uppercut</span><span>Forward+Jab throw</span>';
-    if (options.isOnline) {
-        player2Controls = '<strong>Remote Opponent</strong><span>Synced in real-time over WebSockets</span>';
-    } else if (options.isPvE || options.isTower) {
-        player2Controls =
-            '<strong>Computer (AI)</strong><span>Controlled automatically by AI Bot (combos, duck, special)</span>';
-    }
-
-    hotkeysPanel.innerHTML = `
-        <strong>Player 1</strong><span>A / D move (double-tap dash)</span><span>S crouch / block</span><span>J jab / combos</span><span>K kick</span><span>U special move</span><span>Space jump</span><span>S+J uppercut</span><span>D+J throw</span>
-        ${player2Controls}
-    `;
-    hotkeysButton.addEventListener('click', () => {
-        const isOpen = hotkeysPanel.hasAttribute('hidden');
-        hotkeysPanel.toggleAttribute('hidden', !isOpen);
-        hotkeysButton.setAttribute('aria-expanded', String(isOpen));
-        hotkeysButton.setAttribute('aria-label', isOpen ? 'Hide hotkeys' : 'Show hotkeys');
-    });
-
-    arena.append(healthIndicators, fighters, hotkeysButton, hotkeysPanel);
+    arena.append(healthIndicators, fighters, pauseButton);
     return arena;
 }
 
@@ -260,21 +237,33 @@ export default async function renderArena(selectedFighters, options = {}) {
         root.append(arena);
 
         const winner = await fight(selectedFighters[0], selectedFighters[1], options);
-        if (winner) {
-            if (options.isOnline) {
-                showWinnerModal(winner, () => {
-                    if (options.socket && options.roomCode) {
-                        options.socket.emit('rematch', { roomCode: options.roomCode, role: options.role });
-                        // eslint-disable-next-line no-alert
-                        alert('Rematch requested! Waiting for opponent...');
-                        options.socket.once('rematch-start', () => {
-                            renderArena(selectedFighters, options);
-                        });
-                    }
-                });
-            } else {
-                showWinnerModal(winner);
-            }
+        if (!winner) return;
+
+        if (winner.restart) {
+            renderArena(selectedFighters, options);
+            return;
+        }
+
+        if (winner.quit) {
+            window.dispatchEvent(new CustomEvent('new-fight'));
+            return;
+        }
+
+        if (options.isOnline) {
+            showWinnerModal(winner, () => {
+                if (options.socket && options.roomCode) {
+                    options.socket.emit('rematch', { roomCode: options.roomCode, role: options.role });
+                    // eslint-disable-next-line no-alert
+                    alert('Rematch requested! Waiting for opponent...');
+                    options.socket.once('rematch-start', () => {
+                        renderArena(selectedFighters, options);
+                    });
+                }
+            });
+        } else {
+            showWinnerModal(winner, () => {
+                renderArena(selectedFighters, options);
+            });
         }
         return;
     }
@@ -345,41 +334,48 @@ export default async function renderArena(selectedFighters, options = {}) {
 
         // eslint-disable-next-line no-await-in-loop
         const winner = await fight(champion, opponent, stageOptions);
-        let championWon = false;
-        if (winner) {
+        if (!winner) break;
+
+        if (winner.quit) {
+            window.dispatchEvent(new CustomEvent('new-fight'));
+            break;
+        }
+
+        if (!winner.restart) {
+            let championWon = false;
             if (winner.side) {
                 championWon = winner.side === 'left';
             } else {
                 championWon = winner._id === champion._id;
             }
-        }
 
-        if (championWon) {
-            if (currentStageIndex < 5) {
-                const nextOpponentId = getStageOpponentId(currentStageIndex + 1);
-                // eslint-disable-next-line no-await-in-loop
-                const nextOpponent = await getFighterInfo(nextOpponentId);
+            if (championWon) {
+                if (currentStageIndex < 5) {
+                    const nextOpponentId = getStageOpponentId(currentStageIndex + 1);
+                    // eslint-disable-next-line no-await-in-loop
+                    const nextOpponent = await getFighterInfo(nextOpponentId);
 
-                // eslint-disable-next-line no-await-in-loop
-                await waitForStageCleared(currentStageIndex, opponent, nextOpponent);
+                    // eslint-disable-next-line no-await-in-loop
+                    await waitForStageCleared(currentStageIndex, opponent, nextOpponent);
 
-                currentStageIndex += 1;
+                    currentStageIndex += 1;
+                } else {
+                    showTowerChampionModal({
+                        champion,
+                        onMainMenu: () => {
+                            window.dispatchEvent(new CustomEvent('new-fight'));
+                        }
+                    });
+                    break;
+                }
             } else {
-                showTowerChampionModal({
-                    champion,
-                    onMainMenu: () => {
-                        window.dispatchEvent(new CustomEvent('new-fight'));
-                    }
-                });
-                break;
-            }
-        } else {
-            // eslint-disable-next-line no-await-in-loop
-            const action = await waitForTowerDefeat(currentStageIndex, opponent);
+                // eslint-disable-next-line no-await-in-loop
+                const action = await waitForTowerDefeat(currentStageIndex, opponent);
 
-            if (action === 'menu') {
-                window.dispatchEvent(new CustomEvent('new-fight'));
-                break;
+                if (action === 'menu') {
+                    window.dispatchEvent(new CustomEvent('new-fight'));
+                    break;
+                }
             }
         }
     }

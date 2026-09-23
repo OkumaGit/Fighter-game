@@ -155,44 +155,59 @@
     animation: fighter-critical 320ms ease-out;
 }
 
-.arena___hotkeys-button {
+.arena___pause-button {
     position: absolute;
-    top: 24px;
-    right: 24px;
-    z-index: 3;
-    padding: 9px 14px;
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    border-radius: 5px;
+    top: 22px;
+    right: 22px;
+    z-index: 10;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.88), rgba(30, 41, 59, 0.78));
+    border: 1px solid rgba(250, 204, 21, 0.45);
+    border-radius: 6px;
     color: #f8fafc;
-    background: rgba(15, 23, 42, 0.82);
-    cursor: pointer;
-}
-
-.arena___hotkeys-panel {
-    position: absolute;
-    top: 66px;
-    right: 24px;
-    z-index: 3;
-    display: grid;
-    grid-template-columns: auto auto;
-    gap: 7px 14px;
-    min-width: 250px;
-    padding: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    border-radius: 5px;
-    color: #f8fafc;
-    background: rgba(15, 23, 42, 0.94);
+    font-family: inherit;
     font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 10px rgba(250, 204, 21, 0.15);
+    backdrop-filter: blur(8px);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.arena___hotkeys-panel[hidden] {
-    display: none;
-}
-
-.arena___hotkeys-panel strong {
-    grid-column: 1 / -1;
-    margin-top: 4px;
+.arena___pause-button:hover {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(51, 65, 85, 0.85));
+    border-color: rgba(250, 204, 21, 0.9);
     color: #facc15;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 16px rgba(250, 204, 21, 0.4);
+    transform: translateY(-1px);
+}
+
+.arena___pause-button:active {
+    transform: translateY(1px);
+}
+
+.arena___pause-icon {
+    font-size: 13px;
+    line-height: 1;
+}
+
+.arena___pause-label {
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.arena___pause-button:hover .arena___pause-label {
+    background: rgba(250, 204, 21, 0.2);
+    color: #fef08a;
+    border-color: rgba(250, 204, 21, 0.4);
 }
 
 @keyframes fighter-sprite-idle {
