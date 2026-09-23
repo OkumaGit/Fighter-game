@@ -752,7 +752,8 @@
    ========================================================================== */
 @media (max-height: 520px) and (orientation: landscape) {
     .arena___fight-status {
-        padding: calc(4px + env(safe-area-inset-top, 0px)) calc(50px + env(safe-area-inset-right, 0px)) 2px calc(14px + env(safe-area-inset-left, 0px));
+        padding: calc(4px + env(safe-area-inset-top, 0px)) calc(50px + env(safe-area-inset-right, 0px)) 2px
+            calc(14px + env(safe-area-inset-left, 0px));
         gap: 8px;
     }
 
@@ -832,4 +833,3 @@
         margin-top: 1px;
     }
 }
-

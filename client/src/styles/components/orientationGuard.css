@@ -45,9 +45,7 @@
     background: rgba(15, 23, 42, 0.7);
     border: 1px solid rgba(251, 191, 36, 0.4);
     border-radius: 8px;
-    box-shadow:
-        0 24px 60px rgba(0, 0, 0, 0.9),
-        0 0 30px rgba(251, 191, 36, 0.15);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(251, 191, 36, 0.15);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     position: relative;
@@ -107,13 +105,16 @@
 }
 
 @keyframes rotatePhone {
-    0%, 15% {
+    0%,
+    15% {
         transform: rotate(0deg);
     }
-    45%, 75% {
+    45%,
+    75% {
         transform: rotate(90deg);
     }
-    90%, 100% {
+    90%,
+    100% {
         transform: rotate(0deg);
     }
 }

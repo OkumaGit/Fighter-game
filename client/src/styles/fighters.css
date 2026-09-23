@@ -315,7 +315,8 @@
    ========================================================================== */
 @media (max-height: 520px) and (orientation: landscape) {
     .fighters___root {
-        padding: calc(4px + env(safe-area-inset-top, 0px)) calc(12px + env(safe-area-inset-right, 0px)) calc(4px + env(safe-area-inset-bottom, 0px)) calc(12px + env(safe-area-inset-left, 0px));
+        padding: calc(4px + env(safe-area-inset-top, 0px)) calc(12px + env(safe-area-inset-right, 0px))
+            calc(4px + env(safe-area-inset-bottom, 0px)) calc(12px + env(safe-area-inset-left, 0px));
         justify-content: space-evenly;
     }
 
@@ -397,4 +398,3 @@
         border-radius: 4px;
     }
 }
-
