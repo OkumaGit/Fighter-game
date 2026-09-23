@@ -1,0 +1,155 @@
+/* ==========================================================================
+   Orientation Guard (Rotate to Landscape Prompt)
+   ========================================================================== */
+
+.orientation-guard {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at center, #0f172a 0%, #060913 75%, #020408 100%);
+    color: #ffffff;
+    padding: 24px;
+    box-sizing: border-box;
+    text-align: center;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+}
+
+/* Show in portrait mode on mobile/tablet screens */
+@media (orientation: portrait) and (max-width: 1024px) {
+    .orientation-guard {
+        display: flex;
+    }
+}
+
+/* Also allow JS class override */
+.orientation-guard.orientation-guard--visible {
+    display: flex;
+}
+
+.orientation-guard.orientation-guard--hidden {
+    display: none !important;
+}
+
+.orientation-guard___content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 360px;
+    padding: 30px 24px;
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(251, 191, 36, 0.4);
+    border-radius: 8px;
+    box-shadow:
+        0 24px 60px rgba(0, 0, 0, 0.9),
+        0 0 30px rgba(251, 191, 36, 0.15);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    position: relative;
+    overflow: hidden;
+}
+
+.orientation-guard___top-accent {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #f59e0b, #ef4444, #38bdf8);
+}
+
+.orientation-guard___icon-wrap {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.orientation-guard___phone-icon {
+    width: 44px;
+    height: 68px;
+    border: 2.5px solid #fbbf24;
+    border-radius: 8px;
+    position: relative;
+    background: rgba(11, 17, 32, 0.9);
+    box-shadow: 0 0 16px rgba(251, 191, 36, 0.4);
+    animation: rotatePhone 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.orientation-guard___phone-screen {
+    width: 34px;
+    height: 52px;
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.3) 0%, rgba(245, 158, 11, 0.2) 100%);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.orientation-guard___phone-notch {
+    position: absolute;
+    top: 2px;
+    width: 14px;
+    height: 2px;
+    background: #fbbf24;
+    border-radius: 2px;
+}
+
+@keyframes rotatePhone {
+    0%, 15% {
+        transform: rotate(0deg);
+    }
+    45%, 75% {
+        transform: rotate(90deg);
+    }
+    90%, 100% {
+        transform: rotate(0deg);
+    }
+}
+
+.orientation-guard___title {
+    margin: 0 0 8px;
+    font-family: 'Russo One', sans-serif;
+    font-size: 20px;
+    line-height: 1.2;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #fbbf24;
+    text-shadow: 0 0 12px rgba(251, 191, 36, 0.5);
+}
+
+.orientation-guard___desc {
+    margin: 0 0 16px;
+    font-family: 'Oswald', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.45;
+    letter-spacing: 0.03em;
+    color: #cbd5e1;
+}
+
+.orientation-guard___pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(251, 191, 36, 0.4);
+    font-family: 'Russo One', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: #fbbf24;
+    text-transform: uppercase;
+}

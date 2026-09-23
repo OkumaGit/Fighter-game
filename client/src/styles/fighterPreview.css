@@ -230,3 +230,53 @@
     letter-spacing: 0.05em;
     text-align: center;
 }
+
+/* Mobile Landscape Compact Panels */
+@media (max-height: 520px) and (orientation: landscape) {
+    .fighter-panel {
+        width: 140px;
+        height: 188px;
+        padding: 6px 8px 6px;
+        border-radius: 6px;
+    }
+
+    .fighter-panel___role-tag {
+        font-size: 8px;
+        padding: 2px 6px;
+        margin-bottom: 3px;
+    }
+
+    .fighter-panel___image-box {
+        height: 72px;
+        margin-bottom: 4px;
+        border-radius: 4px;
+    }
+
+    .fighter-panel___image-box .fighter-preview___img {
+        max-height: 66px;
+    }
+
+    .fighter-panel___name {
+        font-size: 11px;
+        margin-bottom: 3px;
+    }
+
+    .fighter-panel___stats {
+        gap: 2px;
+    }
+
+    .fighter-panel___stat-row {
+        gap: 4px;
+    }
+
+    .fighter-panel___stat-label {
+        font-size: 7.5px;
+        width: 18px;
+    }
+
+    .fighter-panel___segment {
+        width: 6px;
+        height: 4px;
+    }
+}
+

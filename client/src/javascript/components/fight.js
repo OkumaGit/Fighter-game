@@ -15,6 +15,7 @@ import createVFXManager from '../game/vfxEngine';
 import { updateRoundMedallions, showMatchAnnouncement, updateSuperBar, updateTimerDisplay } from './arenaUI';
 import showPauseMenu from './modal/pauseMenu';
 import showMoveListModal from './modal/moveListModal';
+import createTouchControls from './touchControls';
 
 /* eslint-disable no-param-reassign */
 
@@ -535,6 +536,20 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
     const canvas = document.querySelector('.arena___canvas');
     const context = canvas.getContext('2d');
     const vfx = createVFXManager(canvas, context);
+    const arenaElement = canvas ? canvas.closest('.arena___root') : null;
+
+    const touchControls = createTouchControls();
+    if (arenaElement) {
+        touchControls.mount(arenaElement);
+    }
+
+    const syncSuperBar = (side, value) => {
+        updateSuperBar(side, value);
+        const localSide = isOnline && role === 'guest' ? 'right' : 'left';
+        if (side === localSide && touchControls) {
+            touchControls.setSuperMeter(value);
+        }
+    };
 
     const pressedKeys = new Set();
     const remoteKeys = new Set();
@@ -571,8 +586,8 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
 
     updateRoundMedallions('left', 0);
     updateRoundMedallions('right', 0);
-    updateSuperBar('left', 0);
-    updateSuperBar('right', 0);
+    syncSuperBar('left', 0);
+    syncSuperBar('right', 0);
     updateTimerDisplay(99);
 
     const sideMargin = 120;
@@ -652,6 +667,9 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                 activePauseModal.close();
                 activePauseModal = null;
             }
+            if (touchControls) {
+                touchControls.destroy();
+            }
             // eslint-disable-next-line no-use-before-define
             window.removeEventListener('arena-toggle-pause', handleArenaTogglePause);
             cancelAnimationFrame(animationFrame);
@@ -670,6 +688,9 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
         };
 
         const onRoundEnd = roundWinnerSide => {
+            if (touchControls) {
+                touchControls.hide();
+            }
             roundScores[roundWinnerSide] += 1;
             updateRoundMedallions(roundWinnerSide, roundScores[roundWinnerSide]);
 
@@ -705,8 +726,8 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                 updateAttackBox(state.right);
                 updateHealthBar('left', state.left);
                 updateHealthBar('right', state.right);
-                updateSuperBar('left', state.left.superMeter || 0);
-                updateSuperBar('right', state.right.superMeter || 0);
+                syncSuperBar('left', state.left.superMeter || 0);
+                syncSuperBar('right', state.right.superMeter || 0);
                 vfx.projectiles.length = 0;
 
                 const nextRoundName =
@@ -719,6 +740,9 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
 
                 setTimeout(() => {
                     roundTransitionActive = false;
+                    if (touchControls) {
+                        touchControls.show();
+                    }
                 }, 1200);
             }, 1800);
         };
@@ -1019,7 +1043,7 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
 
             // Consume 100% Super Meter
             attacker.superMeter = 0;
-            updateSuperBar(side, 0);
+            syncSuperBar(side, 0);
 
             // Trigger Super Move Animation on Attacker (allowing super cancel)
             state[side].isAttacking = false;
@@ -1069,6 +1093,9 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
             }
             isPaused = false;
             pressedKeys.clear();
+            if (touchControls) {
+                touchControls.show();
+            }
             previousTime = performance.now();
         };
 
@@ -1078,6 +1105,9 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                 isPaused = true;
             }
             pressedKeys.clear();
+            if (touchControls) {
+                touchControls.hide();
+            }
 
             activePauseModal = showPauseMenu({
                 fighter1: firstFighter,
@@ -1486,7 +1516,7 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
 
                         if (blocked) {
                             target.superMeter = Math.min(100, (target.superMeter || 0) + 5);
-                            updateSuperBar(targetSide, target.superMeter);
+                            syncSuperBar(targetSide, target.superMeter);
                             vfx.spawnHitSparks(proj.x, proj.y, true, false);
                             vfx.triggerHitStop(40);
                             vfx.triggerScreenShake('light');
@@ -1496,9 +1526,9 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                                 100,
                                 (state[proj.ownerSide].superMeter || 0) + 14
                             );
-                            updateSuperBar(proj.ownerSide, state[proj.ownerSide].superMeter);
+                            syncSuperBar(proj.ownerSide, state[proj.ownerSide].superMeter);
                             target.superMeter = Math.min(100, (target.superMeter || 0) + 8);
-                            updateSuperBar(targetSide, target.superMeter);
+                            syncSuperBar(targetSide, target.superMeter);
 
                             vfx.spawnBlood(proj.x, proj.y, target.position.x >= proj.x ? 1 : -1);
                             vfx.spawnHitSparks(proj.x, proj.y, false, true);
@@ -1552,16 +1582,16 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
 
                         if (defenderWasBlocking) {
                             state[defenderSide].superMeter = Math.min(100, (state[defenderSide].superMeter || 0) + 6);
-                            updateSuperBar(defenderSide, state[defenderSide].superMeter);
+                            syncSuperBar(defenderSide, state[defenderSide].superMeter);
                             vfx.spawnHitSparks(impactX, impactY, true, false);
                             vfx.triggerHitStop(40);
                             vfx.triggerScreenShake('light');
                             vfx.spawnFloatingText(impactX, impactY, 'BLOCKED', 'block');
                         } else {
                             fighter.superMeter = Math.min(100, (fighter.superMeter || 0) + 16);
-                            updateSuperBar(side, fighter.superMeter);
+                            syncSuperBar(side, fighter.superMeter);
                             state[defenderSide].superMeter = Math.min(100, (state[defenderSide].superMeter || 0) + 9);
-                            updateSuperBar(defenderSide, state[defenderSide].superMeter);
+                            syncSuperBar(defenderSide, state[defenderSide].superMeter);
 
                             fighter.comboStreak += 1;
                             fighter.comboTimer = 1400;

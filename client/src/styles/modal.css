@@ -29,12 +29,13 @@
     flex-direction: column;
     width: 360px;
     max-width: 90vw;
+    max-height: 94vh;
+    overflow-y: auto;
     background: linear-gradient(160deg, #0f172a 0%, #1e293b 60%, #0f1a2e 100%);
     border: 0.8px solid rgba(251, 191, 36, 0.35);
     border-radius: 6px;
     box-shadow: 0px 24px 64px 0px rgba(0, 0, 0, 0.7), 0px 0px 40px 0px rgba(251, 191, 36, 0.15),
         0px 0px 0px 1px rgba(0, 0, 0, 0.8);
-    overflow: hidden;
     animation: modal-zoom-in 250ms cubic-bezier(0.16, 1, 0.3, 1);
     color: #ffffff;
 }
@@ -866,3 +867,67 @@
         opacity: 1;
     }
 }
+
+/* ==========================================================================
+   Mobile Landscape Modals Adjustments
+   ========================================================================== */
+@media (max-height: 520px) and (orientation: landscape) {
+    .modal-root {
+        max-height: 96vh;
+        width: 380px;
+    }
+
+    .winner-modal___header,
+    .tower-modal___header {
+        padding: 10px 16px 8px;
+    }
+
+    .winner-modal___title,
+    .tower-modal___title {
+        font-size: 20px;
+        line-height: 20px;
+    }
+
+    .winner-modal___body,
+    .tower-modal___body {
+        padding: 10px 16px;
+    }
+
+    .winner-modal___avatar-frame {
+        width: 54px;
+        height: 54px;
+    }
+
+    .winner-modal___footer,
+    .tower-modal___footer {
+        padding: 8px 16px 10px;
+    }
+
+    .winner-modal___btn,
+    .tower-modal___btn {
+        padding: 8px 20px;
+        font-size: 13px;
+    }
+
+    .online-lobby-modal {
+        max-width: 480px;
+    }
+
+    .online-lobby-modal___header {
+        padding: 10px 16px 8px;
+    }
+
+    .online-lobby-modal___body {
+        padding: 10px 16px;
+        gap: 10px;
+    }
+
+    .online-countdown-text {
+        font-size: 72px;
+    }
+
+    .online-countdown-text--fight {
+        font-size: 64px;
+    }
+}
+

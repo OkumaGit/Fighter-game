@@ -780,3 +780,146 @@
     box-shadow: 0 0 18px rgba(34, 197, 94, 0.6);
     transform: translateY(-1px);
 }
+
+/* ==========================================================================
+   Mobile Landscape Pause Menu & Move List Adjustments
+   ========================================================================== */
+@media (max-height: 520px) and (orientation: landscape) {
+    .pause-menu___container {
+        padding: 10px 18px 8px;
+        max-width: 360px;
+        max-height: 96vh;
+    }
+
+    .pause-menu___badge {
+        font-size: 8px;
+        padding: 2px 8px;
+        margin-bottom: 2px;
+    }
+
+    .pause-menu___title {
+        font-size: 16px;
+        margin: 2px 0 4px;
+    }
+
+    .pause-menu___matchup {
+        margin-bottom: 4px;
+        gap: 8px;
+    }
+
+    .pause-menu___fighter-name {
+        font-size: 13px;
+    }
+
+    .pause-menu___round-info {
+        font-size: 9px;
+        margin-bottom: 6px;
+    }
+
+    .pause-menu___buttons {
+        gap: 5px;
+    }
+
+    .pause-menu___btn {
+        padding: 6px 12px;
+        font-size: 11px;
+    }
+
+    .pause-menu___btn-shortcut {
+        font-size: 8.5px;
+        padding: 1.5px 5px;
+    }
+
+    /* Move List Modal Mobile Landscape */
+    .move-list-modal___container {
+        height: 96vh;
+        max-height: 96vh;
+        padding: 8px 14px 6px;
+    }
+
+    .move-list-modal___header {
+        padding-bottom: 4px;
+    }
+
+    .move-list-modal___title {
+        font-size: 16px;
+    }
+
+    .move-list-modal___subtitle {
+        font-size: 8px;
+    }
+
+    .move-list-modal___matchup-bar {
+        margin: 4px 0 3px;
+        padding: 3px 10px;
+        gap: 8px;
+    }
+
+    .move-list-modal___portrait-wrap {
+        width: 26px;
+        height: 26px;
+    }
+
+    .move-list-modal___fighter-name {
+        font-size: 12px;
+    }
+
+    .move-list-modal___player-tag {
+        font-size: 8.5px;
+    }
+
+    .move-list-modal___element-pill {
+        font-size: 8.5px;
+        padding: 1px 5px;
+    }
+
+    .move-list-modal___tabs {
+        margin-bottom: 4px;
+        padding-bottom: 3px;
+        gap: 4px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .move-list-modal___tab {
+        padding: 3px 8px;
+        font-size: 9.5px;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .move-card {
+        padding: 6px 10px;
+    }
+
+    .move-card___name {
+        font-size: 11.5px;
+    }
+
+    .move-card___desc {
+        font-size: 11px;
+        line-height: 1.3;
+    }
+
+    .move-card___fighter-detail {
+        font-size: 10.5px;
+        padding: 2px 8px;
+    }
+
+    .move-card___keys-row {
+        gap: 8px;
+        padding: 3px 8px;
+        margin-bottom: 3px;
+    }
+
+    .move-list-modal___footer {
+        margin-top: 4px;
+        padding-top: 4px;
+    }
+
+    .move-list-modal___btn {
+        padding: 5px 14px;
+        font-size: 10.5px;
+    }
+}
+
