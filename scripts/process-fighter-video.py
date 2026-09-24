@@ -36,7 +36,7 @@ ANIM_CONFIG = {
     'block': {'range': (104, 118), 'folder': 'Block', 'prefix': 'Block'},
     'special': {'range': (120, 138), 'folder': 'Special', 'prefix': 'Special'},
     'super': {'range': (140, 162), 'folder': 'Super', 'prefix': 'Super'},
-    'hit': {'range': (160, 172), 'folder': 'Hit', 'prefix': 'Hit'},
+    'hit': {'frames': [159, 160, 161, 162, 163, 163, 162, 161, 160, 159, 0, 1], 'folder': 'Hit', 'prefix': 'Hit'},
     'fall': {'range': (164, 178), 'folder': 'Fall', 'prefix': 'Fall'},
     'getup': {'range': (177, 191), 'folder': 'GetUp', 'prefix': 'GetUp'},
     'dizzy': {'range': (192, 216), 'folder': 'Dizzy', 'prefix': 'Dizzy'},
@@ -98,11 +98,14 @@ def process_video():
     manifest_animations = {}
 
     for pose_name, cfg in ANIM_CONFIG.items():
-        start, end = cfg['range']
         folder = cfg['folder']
         prefix = cfg['prefix']
 
-        indices = np.linspace(start, end, NUM_FRAMES).round().astype(int)
+        if 'frames' in cfg:
+            indices = np.array(cfg['frames'], dtype=int)
+        else:
+            start, end = cfg['range']
+            indices = np.linspace(start, end, NUM_FRAMES).round().astype(int)
         indices = np.clip(indices, 0, total_video_frames - 1)
         print(f"Processing '{pose_name}' ({folder}): frames {list(indices)}...")
 

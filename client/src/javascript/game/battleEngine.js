@@ -319,7 +319,7 @@ export function takeDamage(fighter, amount, attackerPositionX = fighter.position
         ...fighter,
         health: Math.max(0, fighter.health - damage),
         velocity: { x: velocityX, y: velocityY },
-        isGrounded: false,
+        isGrounded: isKnockdown ? false : fighter.isGrounded,
         isBlocking: false,
         isAttacking: false,
         isCrouching: false,
