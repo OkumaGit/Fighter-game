@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Virtual On-Screen Touch Controls (Mobile Arcade Gamepad)
+   Virtual On-Screen Touch Controls (Translucent Shadow Fight Style)
    ========================================================================== */
 
 .touch-controls {
@@ -24,319 +24,336 @@
     display: none !important;
 }
 
-/* --- Left D-Pad (Movement & Defense) --- */
-.touch-dpad {
+/* ==========================================================================
+   1. LEFT VIRTUAL ANALOG JOYSTICK (+20% Larger & Fully Translucent)
+   ========================================================================== */
+.touch-joystick {
     position: absolute;
-    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
-    left: calc(12px + env(safe-area-inset-left, 0px));
-    width: 144px;
-    height: 144px;
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    left: calc(16px + env(safe-area-inset-left, 0px));
+    width: 176px;
+    height: 176px;
     pointer-events: auto;
+    touch-action: none;
 }
 
-.touch-dpad___hub {
-    position: absolute;
-    top: 50px;
-    left: 50px;
-    width: 44px;
-    height: 44px;
+.touch-joystick___base {
+    position: relative;
+    width: 100%;
+    height: 100%;
     border-radius: 50%;
-    background: rgba(11, 17, 32, 0.85);
-    border: 1px solid rgba(251, 191, 36, 0.25);
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8);
-    pointer-events: none;
+    background: radial-gradient(circle, rgba(15, 23, 42, 0.12) 0%, rgba(15, 23, 42, 0.36) 80%, rgba(6, 11, 22, 0.45) 100%);
+    border: 1.5px solid rgba(255, 255, 255, 0.28);
+    box-shadow:
+        0 4px 20px rgba(0, 0, 0, 0.35),
+        inset 0 0 24px rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
+    box-sizing: border-box;
 }
 
-.touch-dpad___hub-dot {
-    width: 14px;
-    height: 14px;
+/* Directional Arrow Indicators */
+.touch-joystick___arrow {
+    position: absolute;
+    font-size: 15px;
+    line-height: 1;
+    color: rgba(255, 255, 255, 0.38);
+    pointer-events: none;
+    transition: color 0.1s ease, transform 0.1s ease, text-shadow 0.1s ease;
+}
+
+.touch-joystick___arrow--up {
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.touch-joystick___arrow--down {
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.touch-joystick___arrow--left {
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.touch-joystick___arrow--right {
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.touch-joystick___arrow--active {
+    color: #ffffff !important;
+    text-shadow: 0 0 10px rgba(251, 191, 36, 0.9), 0 0 20px rgba(251, 191, 36, 0.6);
+    transform: scale(1.25);
+}
+
+.touch-joystick___arrow--up.touch-joystick___arrow--active {
+    transform: translateX(-50%) scale(1.25);
+}
+
+.touch-joystick___arrow--down.touch-joystick___arrow--active {
+    transform: translateX(-50%) scale(1.25);
+    color: #38bdf8 !important;
+    text-shadow: 0 0 10px rgba(56, 189, 248, 0.9);
+}
+
+.touch-joystick___arrow--left.touch-joystick___arrow--active {
+    transform: translateY(-50%) scale(1.25);
+}
+
+.touch-joystick___arrow--right.touch-joystick___arrow--active {
+    transform: translateY(-50%) scale(1.25);
+}
+
+/* Translucent 3D Thumb Knob */
+.touch-joystick___knob {
+    width: 70px;
+    height: 70px;
     border-radius: 50%;
-    background: radial-gradient(circle, #f59e0b 0%, #78350f 100%);
-    box-shadow: 0 0 6px rgba(245, 158, 11, 0.6);
+    background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.12) 50%, rgba(15, 23, 42, 0.55) 100%);
+    border: 1.5px solid rgba(255, 255, 255, 0.45);
+    box-shadow:
+        0 4px 14px rgba(0, 0, 0, 0.45),
+        inset 0 2px 4px rgba(255, 255, 255, 0.35);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    pointer-events: none;
+    transition: transform 0.06s ease-out;
+    will-change: transform;
 }
 
+.touch-joystick___knob--active {
+    background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.6) 0%, rgba(251, 191, 36, 0.25) 50%, rgba(15, 23, 42, 0.65) 100%);
+    border-color: rgba(251, 191, 36, 0.7);
+    box-shadow:
+        0 4px 16px rgba(0, 0, 0, 0.5),
+        0 0 12px rgba(251, 191, 36, 0.4),
+        inset 0 2px 5px rgba(255, 255, 255, 0.5);
+}
+
+/* ==========================================================================
+   2. RIGHT ACTION BUTTON CLUSTER (Radial Fan Arc +20% Larger)
+   ========================================================================== */
+.touch-actions {
+    position: absolute;
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    right: calc(16px + env(safe-area-inset-right, 0px));
+    width: 220px;
+    height: 190px;
+    pointer-events: auto;
+    touch-action: none;
+}
+
+/* Translucent Action Button Base */
 .touch-btn {
     position: absolute;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, rgba(30, 41, 59, 0.78) 0%, rgba(15, 23, 42, 0.88) 100%);
-    border: 1.2px solid rgba(251, 191, 36, 0.4);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(15, 23, 42, 0.4) 100%);
+    border: 1.5px solid rgba(255, 255, 255, 0.32);
+    box-shadow:
+        0 4px 16px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     color: #ffffff;
     cursor: pointer;
     touch-action: none;
     -webkit-tap-highlight-color: transparent;
-    transition: transform 0.08s ease, filter 0.08s ease, box-shadow 0.08s ease;
+    transition: transform 0.08s ease, background 0.08s ease, border-color 0.08s ease, box-shadow 0.08s ease;
     box-sizing: border-box;
+    padding: 0;
 }
 
-.touch-btn--active,
-.touch-btn:active {
-    transform: scale(0.92) !important;
-    filter: brightness(1.3) !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.8), inset 0 0 8px rgba(251, 191, 36, 0.4) !important;
-}
-
-/* Directional Buttons */
-.touch-btn--up {
-    top: 0;
-    left: 48px;
-    width: 48px;
-    height: 46px;
-    border-radius: 12px 12px 4px 4px;
-}
-
-.touch-btn--down {
-    bottom: 0;
-    left: 48px;
-    width: 48px;
-    height: 46px;
-    border-radius: 4px 4px 12px 12px;
-}
-
-.touch-btn--left {
-    top: 48px;
-    left: 0;
-    width: 46px;
-    height: 48px;
-    border-radius: 12px 4px 4px 12px;
-}
-
-.touch-btn--right {
-    top: 48px;
-    right: 0;
-    width: 46px;
-    height: 48px;
-    border-radius: 4px 12px 12px 4px;
-}
-
-.touch-btn___icon {
-    font-size: 15px;
-    line-height: 1;
-    color: #fbbf24;
-    text-shadow: 0 0 6px rgba(251, 191, 36, 0.5);
+.touch-btn___svg {
+    display: block;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
     pointer-events: none;
 }
 
-.touch-btn___sub {
+.touch-btn___label {
     font-family: 'Russo One', sans-serif;
     font-size: 8px;
     line-height: 1;
-    letter-spacing: 0.04em;
-    color: #94a3b8;
+    letter-spacing: 0.08em;
+    color: #cbd5e1;
     margin-top: 2px;
     text-transform: uppercase;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
     pointer-events: none;
 }
 
-.touch-btn--down .touch-btn___icon {
-    color: #38bdf8;
-    text-shadow: 0 0 6px rgba(56, 189, 248, 0.5);
+/* Active Press State */
+.touch-btn--active,
+.touch-btn:active {
+    transform: scale(0.92) !important;
+    background: rgba(255, 255, 255, 0.22) !important;
+    border-color: rgba(255, 255, 255, 0.75) !important;
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.6),
+        inset 0 0 12px rgba(255, 255, 255, 0.3) !important;
 }
 
-.touch-btn--down .touch-btn___sub {
-    color: #38bdf8;
-}
-
-/* --- Right Action Cluster --- */
-.touch-actions {
-    position: absolute;
-    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
-    right: calc(12px + env(safe-area-inset-right, 0px));
-    width: 196px;
-    height: 156px;
-    pointer-events: auto;
-}
-
-/* Punch (J) */
+/* Punch (J) - Bottom-Right Anchor */
 .touch-btn--punch {
     bottom: 8px;
-    left: 14px;
-    width: 54px;
-    height: 54px;
-    border-radius: 50%;
-    border-color: rgba(239, 68, 68, 0.6);
-    background: linear-gradient(135deg, rgba(30, 20, 25, 0.85) 0%, rgba(15, 23, 42, 0.9) 100%);
+    right: 8px;
+    width: 70px;
+    height: 70px;
 }
 
-.touch-btn--punch .touch-btn___icon {
-    color: #ef4444;
-    font-size: 18px;
-    text-shadow: 0 0 8px rgba(239, 68, 68, 0.8);
+.touch-btn--punch .touch-btn___svg {
+    color: #f87171;
 }
 
 .touch-btn--punch.touch-btn--active {
-    box-shadow: 0 0 16px rgba(239, 68, 68, 0.8) !important;
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.85) !important;
+    border-color: #f87171 !important;
 }
 
-/* Kick (K) */
+/* Kick (K) - Bottom-Left of Punch */
 .touch-btn--kick {
     bottom: 8px;
-    right: 14px;
-    width: 54px;
-    height: 54px;
-    border-radius: 50%;
-    border-color: rgba(56, 189, 248, 0.6);
-    background: linear-gradient(135deg, rgba(15, 25, 40, 0.85) 0%, rgba(15, 23, 42, 0.9) 100%);
+    right: 94px;
+    width: 70px;
+    height: 70px;
 }
 
-.touch-btn--kick .touch-btn___icon {
+.touch-btn--kick .touch-btn___svg {
     color: #38bdf8;
-    font-size: 18px;
-    text-shadow: 0 0 8px rgba(56, 189, 248, 0.8);
 }
 
 .touch-btn--kick.touch-btn--active {
-    box-shadow: 0 0 16px rgba(56, 189, 248, 0.8) !important;
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.85) !important;
+    border-color: #38bdf8 !important;
 }
 
-/* Special (U) */
+/* Special Magic (U) - Above Kick */
 .touch-btn--special {
-    top: 36px;
-    right: 48px;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    border-color: rgba(168, 85, 247, 0.6);
-    background: linear-gradient(135deg, rgba(35, 15, 45, 0.85) 0%, rgba(15, 23, 42, 0.9) 100%);
+    bottom: 88px;
+    right: 94px;
+    width: 60px;
+    height: 60px;
 }
 
-.touch-btn--special .touch-btn___icon {
+.touch-btn--special .touch-btn___svg {
     color: #c084fc;
-    font-size: 17px;
-    text-shadow: 0 0 8px rgba(168, 85, 247, 0.8);
 }
 
 .touch-btn--special.touch-btn--active {
-    box-shadow: 0 0 16px rgba(168, 85, 247, 0.8) !important;
+    box-shadow: 0 0 18px rgba(168, 85, 247, 0.85) !important;
+    border-color: #c084fc !important;
 }
 
-/* Super (QWE) */
+/* Super Combo (QWE) - Above Punch */
 .touch-btn--super {
-    top: 2px;
-    left: 20px;
-    width: 72px;
-    height: 40px;
-    border-radius: 20px;
-    border: 1.5px solid #fbbf24;
-    background: linear-gradient(135deg, #78350f 0%, #b45309 50%, #d97706 100%);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7), 0 0 12px rgba(251, 191, 36, 0.45);
+    bottom: 88px;
+    right: 8px;
+    width: 66px;
+    height: 66px;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(120, 53, 15, 0.4) 100%);
+    border-color: rgba(251, 191, 36, 0.55);
 }
 
-.touch-btn--super .touch-btn___icon {
-    color: #ffffff;
-    font-family: 'Russo One', sans-serif;
-    font-size: 11px;
-    letter-spacing: 0.08em;
-    text-shadow: 0 0 8px rgba(251, 191, 36, 0.9);
+.touch-btn--super .touch-btn___svg {
+    color: #fbbf24;
 }
 
-.touch-btn--super .touch-btn___sub {
+.touch-btn--super .touch-btn___label {
     color: #fef08a;
-    font-size: 7.5px;
-    letter-spacing: 0.1em;
 }
 
 .touch-btn--super.touch-btn--active {
-    box-shadow: 0 0 24px rgba(251, 191, 36, 0.9) !important;
-    filter: brightness(1.35) !important;
+    box-shadow: 0 0 24px rgba(251, 191, 36, 0.95) !important;
+    border-color: #fbbf24 !important;
+    background: rgba(245, 158, 11, 0.45) !important;
 }
 
-/* Full meter pulse on Super Button */
+/* Super Charged Glow (100% Meter) */
 .touch-btn--super.touch-btn--super-charged {
     animation: superBtnPulse 1.2s ease-in-out infinite alternate;
 }
 
 @keyframes superBtnPulse {
     0% {
-        box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+        box-shadow: 0 0 10px rgba(251, 191, 36, 0.5), inset 0 0 8px rgba(251, 191, 36, 0.3);
         border-color: #fbbf24;
     }
     100% {
-        box-shadow: 0 0 24px rgba(251, 191, 36, 0.95), 0 0 40px rgba(245, 158, 11, 0.6);
+        box-shadow: 0 0 24px rgba(251, 191, 36, 0.95), 0 0 40px rgba(245, 158, 11, 0.6), inset 0 0 14px rgba(255, 255, 255, 0.5);
         border-color: #ffffff;
     }
 }
 
-/* Compact Mobile Landscape adjustments */
+/* ==========================================================================
+   Compact Viewport Scaling (Small Phones: e.g. iPhone SE / 360-390px Height)
+   ========================================================================== */
 @media (max-height: 460px) and (orientation: landscape) {
-    .touch-dpad {
-        bottom: calc(6px + env(safe-area-inset-bottom, 0px));
-        left: calc(8px + env(safe-area-inset-left, 0px));
-        width: 126px;
-        height: 126px;
+    .touch-joystick {
+        bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+        left: calc(10px + env(safe-area-inset-left, 0px));
+        width: 154px;
+        height: 154px;
     }
 
-    .touch-dpad___hub {
-        top: 44px;
-        left: 44px;
-        width: 38px;
-        height: 38px;
-    }
-
-    .touch-btn--up {
-        left: 42px;
-        width: 42px;
-        height: 40px;
-    }
-
-    .touch-btn--down {
-        left: 42px;
-        width: 42px;
-        height: 40px;
-    }
-
-    .touch-btn--left {
-        top: 42px;
-        width: 40px;
-        height: 42px;
-    }
-
-    .touch-btn--right {
-        top: 42px;
-        width: 40px;
-        height: 42px;
+    .touch-joystick___knob {
+        width: 60px;
+        height: 60px;
     }
 
     .touch-actions {
-        bottom: calc(6px + env(safe-area-inset-bottom, 0px));
-        right: calc(8px + env(safe-area-inset-right, 0px));
-        width: 172px;
-        height: 136px;
+        bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+        right: calc(10px + env(safe-area-inset-right, 0px));
+        width: 196px;
+        height: 168px;
     }
 
     .touch-btn--punch {
-        width: 48px;
-        height: 48px;
+        width: 60px;
+        height: 60px;
         bottom: 6px;
-        left: 10px;
+        right: 6px;
     }
 
     .touch-btn--kick {
-        width: 48px;
-        height: 48px;
+        width: 60px;
+        height: 60px;
         bottom: 6px;
-        right: 10px;
+        right: 80px;
     }
 
     .touch-btn--special {
-        width: 42px;
-        height: 42px;
-        top: 30px;
-        right: 42px;
+        width: 52px;
+        height: 52px;
+        bottom: 76px;
+        right: 80px;
     }
 
     .touch-btn--super {
-        width: 64px;
-        height: 36px;
-        top: 2px;
-        left: 16px;
+        width: 56px;
+        height: 56px;
+        bottom: 76px;
+        right: 6px;
+    }
+
+    .touch-btn___svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .touch-btn___label {
+        font-size: 7px;
     }
 }
