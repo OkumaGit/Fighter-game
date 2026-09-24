@@ -190,7 +190,7 @@ function drawFighterShadow(context, fighter, groundY) {
         baseRadiusX = 65;
         baseRadiusY = 16;
     } else if (pose === 'walk') {
-        const walkBob = Math.sin((fighter.currentFrame || 0) * (Math.PI / 4)) * 4;
+        const walkBob = Math.sin((fighter.currentFrame || 0) * (Math.PI / 6)) * 4;
         baseRadiusX = 85 + walkBob;
     }
 
@@ -273,7 +273,7 @@ function drawFighter(context, fighter) {
         const config = getBattleSpriteConfig(fighter).poses[pose] || getBattleSpriteConfig(fighter).poses.idle;
         const frameWidth = spriteSheet.naturalHeight || 820;
         const frameHeight = spriteSheet.naturalHeight || 820;
-        const maxFrames = config.frames || 8;
+        const maxFrames = config.frames || 12;
         const currentFrameIndex = Math.min(Math.max(0, fighter.currentFrame || 0), maxFrames - 1);
         const sourceX = currentFrameIndex * frameWidth;
 
@@ -373,15 +373,15 @@ function animateFighter(fighter, elapsed) {
 
     fighter.framesElapsed = 0;
 
-    // During knockdown fall: hold frame 3 (airborne pose) while airborne until landing on ground
-    if (fighter.state === 'fall' && !fighter.isGrounded && fighter.currentFrame >= 3) {
-        fighter.currentFrame = 3;
+    // During knockdown fall: hold frame 5 (airborne pose) while airborne until landing on ground
+    if (fighter.state === 'fall' && !fighter.isGrounded && fighter.currentFrame >= 5) {
+        fighter.currentFrame = 5;
         return;
     }
 
-    // While holding block: freeze on the peak guard pose (frame 3, i.e. 4th frame Block_4.png)
-    if (fighter.state === 'block' && fighter.isBlocking && fighter.currentFrame >= 3) {
-        fighter.currentFrame = 3;
+    // While holding block: freeze on the peak guard pose (frame 5, i.e. 6th frame Block_6.png)
+    if (fighter.state === 'block' && fighter.isBlocking && fighter.currentFrame >= 5) {
+        fighter.currentFrame = 5;
         return;
     }
 

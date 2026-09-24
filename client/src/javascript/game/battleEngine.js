@@ -181,15 +181,15 @@ export function startAttack(fighter, type) {
     }
 
     const attackConfig = {
-        jab: { damage: 6.5, activeHitFrame: 3, duration: 320, state: 'jab' },
-        jab2: { damage: 7.5, activeHitFrame: 2, duration: 280, state: 'jab' },
-        kick: { damage: 11.5, activeHitFrame: 5, duration: 420, state: 'kick' },
-        uppercut: { damage: 15.5, activeHitFrame: 4, duration: 450, state: 'uppercut' },
-        sweep: { damage: 13.0, activeHitFrame: 4, duration: 450, state: 'sweep' },
-        jumpkick: { damage: 14.0, activeHitFrame: 4, duration: 420, state: 'jumpkick' },
-        throw: { damage: 16.5, activeHitFrame: 3, duration: 480, state: 'jab' },
-        special: { damage: fighter.specialMove?.damage || 14, activeHitFrame: 4, duration: 500, state: 'special' },
-        super: { damage: 24.0, activeHitFrame: 5, duration: 800, state: 'super' }
+        jab: { damage: 6.5, activeHitFrame: 5, duration: 320, state: 'jab' },
+        jab2: { damage: 7.5, activeHitFrame: 4, duration: 280, state: 'jab' },
+        kick: { damage: 11.5, activeHitFrame: 7, duration: 420, state: 'kick' },
+        uppercut: { damage: 15.5, activeHitFrame: 6, duration: 450, state: 'uppercut' },
+        sweep: { damage: 13.0, activeHitFrame: 6, duration: 450, state: 'sweep' },
+        jumpkick: { damage: 14.0, activeHitFrame: 6, duration: 420, state: 'jumpkick' },
+        throw: { damage: 16.5, activeHitFrame: 5, duration: 480, state: 'jab' },
+        special: { damage: fighter.specialMove?.damage || 14, activeHitFrame: 6, duration: 500, state: 'special' },
+        super: { damage: 24.0, activeHitFrame: 7, duration: 800, state: 'super' }
     }[type];
 
     if (!attackConfig) return fighter;

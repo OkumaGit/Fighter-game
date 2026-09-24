@@ -1,117 +1,117 @@
 {
-  "fighter": "fighter_3",
+  "fighter": "fighter_1",
   "animations": {
-    "block": {
-      "file": "block.webp",
-      "frames": 8,
-      "frameWidth": 820,
-      "frameHeight": 820,
-      "totalWidth": 6560
-    },
-    "death": {
-      "file": "death.webp",
-      "frames": 8,
-      "frameWidth": 820,
-      "frameHeight": 820,
-      "totalWidth": 6560
-    },
-    "dizzy": {
-      "file": "dizzy.webp",
-      "frames": 8,
-      "frameWidth": 820,
-      "frameHeight": 820,
-      "totalWidth": 6560
-    },
-    "fall": {
-      "file": "fall.webp",
-      "frames": 8,
-      "frameWidth": 820,
-      "frameHeight": 820,
-      "totalWidth": 6560
-    },
-    "getup": {
-      "file": "getup.webp",
-      "frames": 8,
-      "frameWidth": 820,
-      "frameHeight": 820,
-      "totalWidth": 6560
-    },
-    "hit": {
-      "file": "hit.webp",
-      "frames": 8,
-      "frameWidth": 820,
-      "frameHeight": 820,
-      "totalWidth": 6560
-    },
     "idle": {
       "file": "idle.webp",
-      "frames": 8,
+      "frames": 12,
       "frameWidth": 820,
       "frameHeight": 820,
-      "totalWidth": 6560
-    },
-    "jab": {
-      "file": "jab.webp",
-      "frames": 8,
-      "frameWidth": 820,
-      "frameHeight": 820,
-      "totalWidth": 6560
-    },
-    "jump": {
-      "file": "jump.webp",
-      "frames": 8,
-      "frameWidth": 820,
-      "frameHeight": 820,
-      "totalWidth": 6560
-    },
-    "jumpkick": {
-      "file": "jumpkick.webp",
-      "frames": 8,
-      "frameWidth": 820,
-      "frameHeight": 820,
-      "totalWidth": 6560
-    },
-    "kick": {
-      "file": "kick.webp",
-      "frames": 8,
-      "frameWidth": 820,
-      "frameHeight": 820,
-      "totalWidth": 6560
-    },
-    "special": {
-      "file": "special.webp",
-      "frames": 8,
-      "frameWidth": 820,
-      "frameHeight": 820,
-      "totalWidth": 6560
-    },
-    "super": {
-      "file": "super.webp",
-      "frames": 8,
-      "frameWidth": 820,
-      "frameHeight": 820,
-      "totalWidth": 6560
-    },
-    "sweep": {
-      "file": "sweep.webp",
-      "frames": 8,
-      "frameWidth": 820,
-      "frameHeight": 820,
-      "totalWidth": 6560
-    },
-    "uppercut": {
-      "file": "uppercut.webp",
-      "frames": 8,
-      "frameWidth": 820,
-      "frameHeight": 820,
-      "totalWidth": 6560
+      "totalWidth": 9840
     },
     "walk": {
       "file": "walk.webp",
-      "frames": 8,
+      "frames": 12,
       "frameWidth": 820,
       "frameHeight": 820,
-      "totalWidth": 6560
+      "totalWidth": 9840
+    },
+    "jab": {
+      "file": "jab.webp",
+      "frames": 12,
+      "frameWidth": 820,
+      "frameHeight": 820,
+      "totalWidth": 9840
+    },
+    "kick": {
+      "file": "kick.webp",
+      "frames": 12,
+      "frameWidth": 820,
+      "frameHeight": 820,
+      "totalWidth": 9840
+    },
+    "uppercut": {
+      "file": "uppercut.webp",
+      "frames": 12,
+      "frameWidth": 820,
+      "frameHeight": 820,
+      "totalWidth": 9840
+    },
+    "sweep": {
+      "file": "sweep.webp",
+      "frames": 12,
+      "frameWidth": 820,
+      "frameHeight": 820,
+      "totalWidth": 9840
+    },
+    "jump": {
+      "file": "jump.webp",
+      "frames": 12,
+      "frameWidth": 820,
+      "frameHeight": 820,
+      "totalWidth": 9840
+    },
+    "jumpkick": {
+      "file": "jumpkick.webp",
+      "frames": 12,
+      "frameWidth": 820,
+      "frameHeight": 820,
+      "totalWidth": 9840
+    },
+    "block": {
+      "file": "block.webp",
+      "frames": 12,
+      "frameWidth": 820,
+      "frameHeight": 820,
+      "totalWidth": 9840
+    },
+    "special": {
+      "file": "special.webp",
+      "frames": 12,
+      "frameWidth": 820,
+      "frameHeight": 820,
+      "totalWidth": 9840
+    },
+    "super": {
+      "file": "super.webp",
+      "frames": 12,
+      "frameWidth": 820,
+      "frameHeight": 820,
+      "totalWidth": 9840
+    },
+    "hit": {
+      "file": "hit.webp",
+      "frames": 12,
+      "frameWidth": 820,
+      "frameHeight": 820,
+      "totalWidth": 9840
+    },
+    "fall": {
+      "file": "fall.webp",
+      "frames": 12,
+      "frameWidth": 820,
+      "frameHeight": 820,
+      "totalWidth": 9840
+    },
+    "getup": {
+      "file": "getup.webp",
+      "frames": 12,
+      "frameWidth": 820,
+      "frameHeight": 820,
+      "totalWidth": 9840
+    },
+    "dizzy": {
+      "file": "dizzy.webp",
+      "frames": 12,
+      "frameWidth": 820,
+      "frameHeight": 820,
+      "totalWidth": 9840
+    },
+    "death": {
+      "file": "death.webp",
+      "frames": 12,
+      "frameWidth": 820,
+      "frameHeight": 820,
+      "totalWidth": 9840
     }
   }
 }
