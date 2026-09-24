@@ -26,10 +26,10 @@ VIDEO_CENTER_X = 612
 
 ANIM_CONFIG = {
     'idle': {'range': (0, 15), 'folder': 'Idle', 'prefix': 'Idle'},
-    'walk': {'range': (22, 44), 'folder': 'Walk', 'prefix': 'Walk'},
-    'jab': {'range': (14, 28), 'folder': 'Jab', 'prefix': 'Jab'},
-    'kick': {'range': (54, 72), 'folder': 'Kick', 'prefix': 'Kick'},
-    'uppercut': {'range': (44, 58), 'folder': 'Uppercut', 'prefix': 'Uppercut'},
+    'walk': {'range': (16, 34), 'folder': 'Walk', 'prefix': 'Walk'},
+    'jab': {'range': (36, 47), 'folder': 'Jab', 'prefix': 'Jab'},
+    'uppercut': {'range': (48, 58), 'folder': 'Uppercut', 'prefix': 'Uppercut'},
+    'kick': {'range': (58, 72), 'folder': 'Kick', 'prefix': 'Kick'},
     'sweep': {'range': (72, 86), 'folder': 'Sweep', 'prefix': 'Sweep'},
     'jump': {'range': (86, 98), 'folder': 'Jump', 'prefix': 'Jump'},
     'jumpkick': {'range': (90, 103), 'folder': 'JumpKick', 'prefix': 'JumpKick'},
@@ -155,26 +155,10 @@ def process_video():
 
     print("Manifest files generated successfully.")
 
-    # Clone assets to fighters 2-6 for consistency until user supplies their videos
+    # Sync WebP assets to fighters 2-6 for Vite builds until their unique videos are processed
     for fighter_id in range(2, 7):
-        target_res = os.path.join(BASE_RESOURCES_DIR, f"fighter_{fighter_id}_sprite")
         target_src = os.path.join(BASE_SRC_ASSETS_DIR, f"fighter_{fighter_id}")
-
-        print(f"Copying fighter_1 assets to fighter_{fighter_id}...")
-        # Copy webp files and manifest to target_res
-        os.makedirs(target_res, exist_ok=True)
         os.makedirs(target_src, exist_ok=True)
-
-        for item in os.listdir(f1_res_dir):
-            s = os.path.join(f1_res_dir, item)
-            d = os.path.join(target_res, item)
-            if os.path.isdir(s):
-                if os.path.exists(d):
-                    shutil.rmtree(d)
-                shutil.copytree(s, d)
-            else:
-                shutil.copy2(s, d)
-
         for item in os.listdir(f1_src_dir):
             s = os.path.join(f1_src_dir, item)
             d = os.path.join(target_src, item)

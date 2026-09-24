@@ -22,15 +22,15 @@
       "frameHeight": 820,
       "totalWidth": 9840
     },
-    "kick": {
-      "file": "kick.webp",
+    "uppercut": {
+      "file": "uppercut.webp",
       "frames": 12,
       "frameWidth": 820,
       "frameHeight": 820,
       "totalWidth": 9840
     },
-    "uppercut": {
-      "file": "uppercut.webp",
+    "kick": {
+      "file": "kick.webp",
       "frames": 12,
       "frameWidth": 820,
       "frameHeight": 820,
