@@ -141,21 +141,30 @@
 }
 
 /* ==========================================================================
-   2. RIGHT ACTION BUTTON CLUSTER (Radial Fan Arc +20% Larger)
+   2. RIGHT ACTION BUTTON CLUSTER (Symmetrical 2x2 Grid Matching Joystick Height)
    ========================================================================== */
 .touch-actions {
     position: absolute;
     bottom: calc(14px + env(safe-area-inset-bottom, 0px));
     right: calc(16px + env(safe-area-inset-right, 0px));
-    width: 220px;
-    height: 190px;
+    width: 176px;
+    height: 176px;
+    display: grid;
+    grid-template-columns: repeat(2, 72px);
+    grid-template-rows: repeat(2, 72px);
+    gap: 16px;
+    justify-content: center;
+    align-content: center;
     pointer-events: auto;
     touch-action: none;
+    box-sizing: border-box;
 }
 
-/* Translucent Action Button Base */
+/* Translucent Action Button Base (Equal 72x72 Round Buttons) */
 .touch-btn {
-    position: absolute;
+    position: relative;
+    width: 72px;
+    height: 72px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -179,6 +188,8 @@
 
 .touch-btn___svg {
     display: block;
+    width: 28px;
+    height: 28px;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
     pointer-events: none;
 }
@@ -189,7 +200,7 @@
     line-height: 1;
     letter-spacing: 0.08em;
     color: #cbd5e1;
-    margin-top: 2px;
+    margin-top: 3px;
     text-transform: uppercase;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
     pointer-events: none;
@@ -206,46 +217,10 @@
         inset 0 0 12px rgba(255, 255, 255, 0.3) !important;
 }
 
-/* Punch (J) - Bottom-Right Anchor */
-.touch-btn--punch {
-    bottom: 8px;
-    right: 8px;
-    width: 70px;
-    height: 70px;
-}
-
-.touch-btn--punch .touch-btn___svg {
-    color: #f87171;
-}
-
-.touch-btn--punch.touch-btn--active {
-    box-shadow: 0 0 20px rgba(239, 68, 68, 0.85) !important;
-    border-color: #f87171 !important;
-}
-
-/* Kick (K) - Bottom-Left of Punch */
-.touch-btn--kick {
-    bottom: 8px;
-    right: 94px;
-    width: 70px;
-    height: 70px;
-}
-
-.touch-btn--kick .touch-btn___svg {
-    color: #38bdf8;
-}
-
-.touch-btn--kick.touch-btn--active {
-    box-shadow: 0 0 20px rgba(56, 189, 248, 0.85) !important;
-    border-color: #38bdf8 !important;
-}
-
-/* Special Magic (U) - Above Kick */
+/* Magic / Special (U) - Top-Left */
 .touch-btn--special {
-    bottom: 88px;
-    right: 94px;
-    width: 60px;
-    height: 60px;
+    grid-row: 1;
+    grid-column: 1;
 }
 
 .touch-btn--special .touch-btn___svg {
@@ -253,16 +228,14 @@
 }
 
 .touch-btn--special.touch-btn--active {
-    box-shadow: 0 0 18px rgba(168, 85, 247, 0.85) !important;
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.85) !important;
     border-color: #c084fc !important;
 }
 
-/* Super Combo (QWE) - Above Punch */
+/* Super Combo (QWE) - Top-Right */
 .touch-btn--super {
-    bottom: 88px;
-    right: 8px;
-    width: 66px;
-    height: 66px;
+    grid-row: 1;
+    grid-column: 2;
     background: linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(120, 53, 15, 0.4) 100%);
     border-color: rgba(251, 191, 36, 0.55);
 }
@@ -279,6 +252,36 @@
     box-shadow: 0 0 24px rgba(251, 191, 36, 0.95) !important;
     border-color: #fbbf24 !important;
     background: rgba(245, 158, 11, 0.45) !important;
+}
+
+/* Kick (K) - Bottom-Left */
+.touch-btn--kick {
+    grid-row: 2;
+    grid-column: 1;
+}
+
+.touch-btn--kick .touch-btn___svg {
+    color: #38bdf8;
+}
+
+.touch-btn--kick.touch-btn--active {
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.85) !important;
+    border-color: #38bdf8 !important;
+}
+
+/* Punch (J) - Bottom-Right */
+.touch-btn--punch {
+    grid-row: 2;
+    grid-column: 2;
+}
+
+.touch-btn--punch .touch-btn___svg {
+    color: #f87171;
+}
+
+.touch-btn--punch.touch-btn--active {
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.85) !important;
+    border-color: #f87171 !important;
 }
 
 /* Super Charged Glow (100% Meter) */
@@ -316,36 +319,16 @@
     .touch-actions {
         bottom: calc(8px + env(safe-area-inset-bottom, 0px));
         right: calc(10px + env(safe-area-inset-right, 0px));
-        width: 196px;
-        height: 168px;
+        width: 154px;
+        height: 154px;
+        grid-template-columns: repeat(2, 60px);
+        grid-template-rows: repeat(2, 60px);
+        gap: 12px;
     }
 
-    .touch-btn--punch {
+    .touch-btn {
         width: 60px;
         height: 60px;
-        bottom: 6px;
-        right: 6px;
-    }
-
-    .touch-btn--kick {
-        width: 60px;
-        height: 60px;
-        bottom: 6px;
-        right: 80px;
-    }
-
-    .touch-btn--special {
-        width: 52px;
-        height: 52px;
-        bottom: 76px;
-        right: 80px;
-    }
-
-    .touch-btn--super {
-        width: 56px;
-        height: 56px;
-        bottom: 76px;
-        right: 6px;
     }
 
     .touch-btn___svg {
