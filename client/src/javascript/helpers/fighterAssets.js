@@ -32,7 +32,7 @@ const battleSpritePaths = {
     '3': '/resources/fighters/fighter_1_sprite',
     '4': '/resources/fighters/fighter_1_sprite',
     '5': '/resources/fighters/fighter_1_sprite',
-    '6': '/resources/fighters/fighter_1_sprite'
+    '6': '/resources/fighters/fighter_6_sprite'
 };
 
 const defaultBattleSprite = {

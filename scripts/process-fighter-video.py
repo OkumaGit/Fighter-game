@@ -2,8 +2,13 @@
 Process AI-generated fighter video into game-ready 12-frame spritesheets.
 Keys out green background, despills edges, centers and grounds character,
 extracts exactly 12 frames per animation, and generates WebP spritesheet strips.
+
+Usage:
+    python scripts/process-fighter-video.py 6
+    python scripts/process-fighter-video.py 1
 """
 
+import sys
 import os
 import shutil
 import json
@@ -11,40 +16,76 @@ import numpy as np
 from PIL import Image
 import imageio.v3 as iio
 
-VIDEO_PATH = "C:/Users/Student/Dev/fighter-game-assets/Videos/fighter_1.mp4"
 BASE_RESOURCES_DIR = "client/resources/fighters"
 BASE_SRC_ASSETS_DIR = "client/src/assets/fighters"
 
 FRAME_WIDTH = 820
 FRAME_HEIGHT = 820
 NUM_FRAMES = 12
-SCALE = 1.20
-TARGET_GROUND_Y = 805
-TARGET_CENTER_X = 410
-VIDEO_GROUND_Y = 682
-VIDEO_CENTER_X = 612
 
-ANIM_CONFIG = {
-    'idle': {'range': (0, 15), 'folder': 'Idle', 'prefix': 'Idle'},
-    'walk': {'range': (16, 34), 'folder': 'Walk', 'prefix': 'Walk'},
-    'jab': {'range': (36, 47), 'folder': 'Jab', 'prefix': 'Jab'},
-    'uppercut': {'range': (48, 58), 'folder': 'Uppercut', 'prefix': 'Uppercut'},
-    'kick': {'range': (58, 72), 'folder': 'Kick', 'prefix': 'Kick'},
-    'sweep': {'range': (72, 86), 'folder': 'Sweep', 'prefix': 'Sweep'},
-    'jump': {'range': (86, 98), 'folder': 'Jump', 'prefix': 'Jump'},
-    'jumpkick': {'range': (90, 103), 'folder': 'JumpKick', 'prefix': 'JumpKick'},
-    'block': {'range': (104, 118), 'folder': 'Block', 'prefix': 'Block'},
-    'special': {'range': (120, 138), 'folder': 'Special', 'prefix': 'Special'},
-    'super': {'range': (140, 162), 'folder': 'Super', 'prefix': 'Super'},
-    'hit': {'frames': [159, 160, 161, 162, 163, 163, 162, 161, 160, 159, 0, 1], 'folder': 'Hit', 'prefix': 'Hit'},
-    'fall': {'range': (164, 178), 'folder': 'Fall', 'prefix': 'Fall'},
-    'getup': {'range': (177, 191), 'folder': 'GetUp', 'prefix': 'GetUp'},
-    'dizzy': {'range': (192, 216), 'folder': 'Dizzy', 'prefix': 'Dizzy'},
-    'death': {'range': (218, 239), 'folder': 'Death', 'prefix': 'Death'}
+FIGHTER_CONFIGS = {
+    1: {
+        'video_candidates': [
+            "client/resources/fighters/fighter-game-assets/Videos/fighter_1.mp4",
+            "C:/Users/Student/Dev/fighter-game-assets/Videos/fighter_1.mp4"
+        ],
+        'scale': 1.20,
+        'video_ground_y': 682,
+        'video_center_x': 612,
+        'target_ground_y': 805,
+        'target_center_x': 410,
+        'anims': {
+            'idle': {'range': (0, 15), 'folder': 'Idle', 'prefix': 'Idle'},
+            'walk': {'range': (16, 34), 'folder': 'Walk', 'prefix': 'Walk'},
+            'jab': {'range': (36, 47), 'folder': 'Jab', 'prefix': 'Jab'},
+            'uppercut': {'range': (48, 58), 'folder': 'Uppercut', 'prefix': 'Uppercut'},
+            'kick': {'range': (58, 72), 'folder': 'Kick', 'prefix': 'Kick'},
+            'sweep': {'range': (72, 86), 'folder': 'Sweep', 'prefix': 'Sweep'},
+            'jump': {'range': (86, 98), 'folder': 'Jump', 'prefix': 'Jump'},
+            'jumpkick': {'range': (90, 103), 'folder': 'JumpKick', 'prefix': 'JumpKick'},
+            'block': {'range': (104, 118), 'folder': 'Block', 'prefix': 'Block'},
+            'special': {'range': (120, 138), 'folder': 'Special', 'prefix': 'Special'},
+            'super': {'range': (140, 162), 'folder': 'Super', 'prefix': 'Super'},
+            'hit': {'frames': [159, 160, 161, 162, 163, 163, 162, 161, 160, 159, 0, 1], 'folder': 'Hit', 'prefix': 'Hit'},
+            'fall': {'range': (164, 178), 'folder': 'Fall', 'prefix': 'Fall'},
+            'getup': {'range': (177, 191), 'folder': 'GetUp', 'prefix': 'GetUp'},
+            'dizzy': {'range': (192, 216), 'folder': 'Dizzy', 'prefix': 'Dizzy'},
+            'death': {'range': (218, 239), 'folder': 'Death', 'prefix': 'Death'}
+        }
+    },
+    6: {
+        'video_candidates': [
+            "client/resources/fighters/fighter-game-assets/Videos/fighter_6.mp4",
+            "C:/Users/Student/Dev/fighter-game-assets/Videos/fighter_6.mp4"
+        ],
+        'scale': 1.20,
+        'video_ground_y': 681,
+        'video_center_x': 610,
+        'target_ground_y': 805,
+        'target_center_x': 410,
+        'anims': {
+            'idle': {'range': (0, 14), 'folder': 'Idle', 'prefix': 'Idle'},
+            'walk': {'range': (15, 32), 'folder': 'Walk', 'prefix': 'Walk'},
+            'jab': {'range': (34, 44), 'folder': 'Jab', 'prefix': 'Jab'},
+            'uppercut': {'range': (44, 54), 'folder': 'Uppercut', 'prefix': 'Uppercut'},
+            'kick': {'range': (56, 70), 'folder': 'Kick', 'prefix': 'Kick'},
+            'sweep': {'range': (72, 82), 'folder': 'Sweep', 'prefix': 'Sweep'},
+            'jump': {'range': (84, 92), 'folder': 'Jump', 'prefix': 'Jump'},
+            'jumpkick': {'range': (90, 99), 'folder': 'JumpKick', 'prefix': 'JumpKick'},
+            'block': {'range': (102, 118), 'folder': 'Block', 'prefix': 'Block'},
+            'special': {'range': (120, 136), 'folder': 'Special', 'prefix': 'Special'},
+            'super': {'range': (138, 158), 'folder': 'Super', 'prefix': 'Super'},
+            'hit': {'frames': [159, 160, 161, 162, 163, 163, 162, 161, 160, 159, 0, 1], 'folder': 'Hit', 'prefix': 'Hit'},
+            'fall': {'range': (166, 178), 'folder': 'Fall', 'prefix': 'Fall'},
+            'getup': {'range': (178, 190), 'folder': 'GetUp', 'prefix': 'GetUp'},
+            'dizzy': {'range': (192, 218), 'folder': 'Dizzy', 'prefix': 'Dizzy'},
+            'death': {'range': (220, 239), 'folder': 'Death', 'prefix': 'Death'}
+        }
+    }
 }
 
 
-def key_and_transform_frame(raw_frame):
+def key_and_transform_frame(raw_frame, scale, v_ground_y, v_center_x, t_ground_y, t_center_x):
     """Applies chroma-key, despill, and grounds/centers into 820x820 frame."""
     arr = raw_frame.astype(np.float32)
     r = arr[:, :, 0]
@@ -70,52 +111,82 @@ def key_and_transform_frame(raw_frame):
     keyed_img = Image.fromarray(rgba, 'RGBA')
 
     # Scaling
-    new_w = int(arr.shape[1] * SCALE)
-    new_h = int(arr.shape[0] * SCALE)
+    new_w = int(arr.shape[1] * scale)
+    new_h = int(arr.shape[0] * scale)
     scaled = keyed_img.resize((new_w, new_h), Image.Resampling.LANCZOS)
 
     # Offsets based on video camera baseline
-    paste_x = int(TARGET_CENTER_X - VIDEO_CENTER_X * SCALE)
-    paste_y = int(TARGET_GROUND_Y - VIDEO_GROUND_Y * SCALE)
+    paste_x = int(t_center_x - v_center_x * scale)
+    paste_y = int(t_ground_y - v_ground_y * scale)
 
     canvas = Image.new('RGBA', (FRAME_WIDTH, FRAME_HEIGHT), (0, 0, 0, 0))
     canvas.paste(scaled, (paste_x, paste_y), scaled)
     return canvas
 
 
-def process_video():
-    print(f"Loading video: {VIDEO_PATH}")
-    # Read all video frames into memory
-    frames = list(iio.imiter(VIDEO_PATH))
+def process_fighter(fighter_id):
+    if fighter_id not in FIGHTER_CONFIGS:
+        print(f"Error: Unknown fighter ID {fighter_id}. Configured IDs: {list(FIGHTER_CONFIGS.keys())}")
+        sys.exit(1)
+
+    cfg = FIGHTER_CONFIGS[fighter_id]
+
+    video_path = None
+    for cand in cfg['video_candidates']:
+        if os.path.exists(cand):
+            video_path = cand
+            break
+
+    if not video_path:
+        print(f"Error: Video file not found for Fighter {fighter_id}. Checked paths: {cfg['video_candidates']}")
+        sys.exit(1)
+
+    print(f"--- Processing Fighter {fighter_id} ---")
+    print(f"Loading video: {video_path}")
+    frames = list(iio.imiter(video_path))
     total_video_frames = len(frames)
     print(f"Total video frames loaded: {total_video_frames}")
 
-    f1_res_dir = os.path.join(BASE_RESOURCES_DIR, "fighter_1_sprite")
-    f1_src_dir = os.path.join(BASE_SRC_ASSETS_DIR, "fighter_1")
-    os.makedirs(f1_res_dir, exist_ok=True)
-    os.makedirs(f1_src_dir, exist_ok=True)
+    res_dir = os.path.join(BASE_RESOURCES_DIR, f"fighter_{fighter_id}_sprite")
+    src_dir = os.path.join(BASE_SRC_ASSETS_DIR, f"fighter_{fighter_id}")
+    os.makedirs(res_dir, exist_ok=True)
+    os.makedirs(src_dir, exist_ok=True)
+
+    scale = cfg['scale']
+    v_ground_y = cfg['video_ground_y']
+    v_center_x = cfg['video_center_x']
+    t_ground_y = cfg['target_ground_y']
+    t_center_x = cfg['target_center_x']
 
     manifest_animations = {}
 
-    for pose_name, cfg in ANIM_CONFIG.items():
-        folder = cfg['folder']
-        prefix = cfg['prefix']
+    for pose_name, anim_cfg in cfg['anims'].items():
+        folder = anim_cfg['folder']
+        prefix = anim_cfg['prefix']
 
-        if 'frames' in cfg:
-            indices = np.array(cfg['frames'], dtype=int)
+        if 'frames' in anim_cfg:
+            indices = np.array(anim_cfg['frames'], dtype=int)
         else:
-            start, end = cfg['range']
+            start, end = anim_cfg['range']
             indices = np.linspace(start, end, NUM_FRAMES).round().astype(int)
         indices = np.clip(indices, 0, total_video_frames - 1)
         print(f"Processing '{pose_name}' ({folder}): frames {list(indices)}...")
 
-        folder_path = os.path.join(f1_res_dir, folder)
+        folder_path = os.path.join(res_dir, folder)
+        # Clear existing individual frame PNGs to avoid stale files
+        if os.path.exists(folder_path):
+            for old_f in os.listdir(folder_path):
+                if old_f.endswith('.png'):
+                    try:
+                        os.remove(os.path.join(folder_path, old_f))
+                    except Exception:
+                        pass
         os.makedirs(folder_path, exist_ok=True)
 
         processed_frames = []
         for i, frame_idx in enumerate(indices):
             raw = frames[frame_idx]
-            canvas = key_and_transform_frame(raw)
+            canvas = key_and_transform_frame(raw, scale, v_ground_y, v_center_x, t_ground_y, t_center_x)
             processed_frames.append(canvas)
 
             # Save individual PNG frame
@@ -128,8 +199,8 @@ def process_video():
             strip.paste(canvas, (i * FRAME_WIDTH, 0), canvas)
 
         webp_filename = f"{pose_name.lower()}.webp"
-        res_webp_path = os.path.join(f1_res_dir, webp_filename)
-        src_webp_path = os.path.join(f1_src_dir, webp_filename)
+        res_webp_path = os.path.join(res_dir, webp_filename)
+        src_webp_path = os.path.join(src_dir, webp_filename)
 
         strip.save(res_webp_path, "WEBP", quality=95, method=6)
         strip.save(src_webp_path, "WEBP", quality=95, method=6)
@@ -145,31 +216,26 @@ def process_video():
 
     # Save manifest.json
     manifest_data = {
-        "fighter": "fighter_1",
+        "fighter": f"fighter_{fighter_id}",
         "animations": manifest_animations
     }
 
-    manifest_res_path = os.path.join(f1_res_dir, "manifest.json")
-    manifest_src_path = os.path.join(f1_src_dir, "manifest.json")
+    manifest_res_path = os.path.join(res_dir, "manifest.json")
+    manifest_src_path = os.path.join(src_dir, "manifest.json")
     with open(manifest_res_path, "w", encoding="utf-8") as f:
         json.dump(manifest_data, f, indent=2)
     with open(manifest_src_path, "w", encoding="utf-8") as f:
         json.dump(manifest_data, f, indent=2)
 
-    print("Manifest files generated successfully.")
-
-    # Sync WebP assets to fighters 2-6 for Vite builds until their unique videos are processed
-    for fighter_id in range(2, 7):
-        target_src = os.path.join(BASE_SRC_ASSETS_DIR, f"fighter_{fighter_id}")
-        os.makedirs(target_src, exist_ok=True)
-        for item in os.listdir(f1_src_dir):
-            s = os.path.join(f1_src_dir, item)
-            d = os.path.join(target_src, item)
-            if not os.path.isdir(s):
-                shutil.copy2(s, d)
-
-    print("All fighters 1-6 synchronized with 12-frame spritesheets.")
+    print(f"Fighter {fighter_id} processed successfully!")
 
 
 if __name__ == "__main__":
-    process_video()
+    target_id = 6
+    if len(sys.argv) > 1:
+        try:
+            target_id = int(sys.argv[1])
+        except ValueError:
+            print(f"Usage: python scripts/process-fighter-video.py [1|6]")
+            sys.exit(1)
+    process_fighter(target_id)
