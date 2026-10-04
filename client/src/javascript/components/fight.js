@@ -340,7 +340,7 @@ function animateFighter(fighter, elapsed) {
             if (fighter.isBlocking) {
                 fighter.state = 'block';
             } else {
-                fighter.state = fighter.isGrounded ? 'idle' : 'jump';
+                fighter.state = 'idle';
             }
             fighter.hitTimer = 0;
             fighter.currentFrame = 0;
@@ -406,7 +406,7 @@ function animateFighter(fighter, elapsed) {
         } else if (fighter.isBlocking) {
             fighter.state = 'block';
         } else {
-            fighter.state = fighter.isGrounded ? 'idle' : 'jump';
+            fighter.state = 'idle';
         }
         fighter.currentFrame = 0;
         fighter.framesElapsed = 0;

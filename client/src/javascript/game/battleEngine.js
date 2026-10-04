@@ -228,8 +228,6 @@ export function setBlocking(fighter, isBlocking = true) {
     let nextState = 'idle';
     if (isBlocking) {
         nextState = 'block';
-    } else if (!fighter.isGrounded) {
-        nextState = 'jump';
     }
 
     return {
