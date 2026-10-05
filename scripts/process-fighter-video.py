@@ -53,6 +53,35 @@ FIGHTER_CONFIGS = {
             'death': {'range': (218, 239), 'folder': 'Death', 'prefix': 'Death'}
         }
     },
+    2: {
+        'video_candidates': [
+            "client/resources/fighters/fighter-game-assets/Videos/fighter_2.mp4",
+            "C:/Users/Student/Dev/fighter-game-assets/Videos/fighter_2.mp4"
+        ],
+        'scale': 1.20,
+        'video_ground_y': 685,
+        'video_center_x': 608,
+        'target_ground_y': 805,
+        'target_center_x': 410,
+        'anims': {
+            'idle': {'range': (0, 10), 'folder': 'Idle', 'prefix': 'Idle'},
+            'walk': {'range': (11, 32), 'folder': 'Walk', 'prefix': 'Walk'},
+            'jab': {'range': (33, 45), 'folder': 'Jab', 'prefix': 'Jab'},
+            'uppercut': {'range': (46, 54), 'folder': 'Uppercut', 'prefix': 'Uppercut'},
+            'kick': {'range': (55, 71), 'folder': 'Kick', 'prefix': 'Kick'},
+            'sweep': {'range': (78, 85), 'folder': 'Sweep', 'prefix': 'Sweep'},
+            'jump': {'range': (86, 96), 'folder': 'Jump', 'prefix': 'Jump'},
+            'jumpkick': {'range': (90, 101), 'folder': 'JumpKick', 'prefix': 'JumpKick'},
+            'block': {'range': (104, 125), 'folder': 'Block', 'prefix': 'Block'},
+            'special': {'range': (128, 146), 'folder': 'Special', 'prefix': 'Special'},
+            'super': {'range': (147, 165), 'folder': 'Super', 'prefix': 'Super'},
+            'hit': {'frames': [166, 167, 168, 169, 170, 170, 169, 168, 167, 166, 0, 1], 'folder': 'Hit', 'prefix': 'Hit'},
+            'fall': {'range': (171, 180), 'folder': 'Fall', 'prefix': 'Fall'},
+            'getup': {'range': (180, 192), 'folder': 'GetUp', 'prefix': 'GetUp'},
+            'dizzy': {'range': (193, 213), 'folder': 'Dizzy', 'prefix': 'Dizzy'},
+            'death': {'range': (214, 239), 'folder': 'Death', 'prefix': 'Death'}
+        }
+    },
     6: {
         'video_candidates': [
             "client/resources/fighters/fighter-game-assets/Videos/fighter_6.mp4",
@@ -236,6 +265,6 @@ if __name__ == "__main__":
         try:
             target_id = int(sys.argv[1])
         except ValueError:
-            print(f"Usage: python scripts/process-fighter-video.py [1|6]")
+            print(f"Usage: python scripts/process-fighter-video.py [1|2|6]")
             sys.exit(1)
     process_fighter(target_id)

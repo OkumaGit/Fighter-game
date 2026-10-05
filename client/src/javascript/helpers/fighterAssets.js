@@ -28,7 +28,7 @@ const battleSpritePoses = {
 
 const battleSpritePaths = {
     '1': '/resources/fighters/fighter_1_sprite',
-    '2': '/resources/fighters/fighter_1_sprite',
+    '2': '/resources/fighters/fighter_2_sprite',
     '3': '/resources/fighters/fighter_1_sprite',
     '4': '/resources/fighters/fighter_1_sprite',
     '5': '/resources/fighters/fighter_1_sprite',
