@@ -437,7 +437,7 @@ function moveFighter(fighter, direction, elapsed, canvasWidth, groundY, vfx) {
 
     if (fighter.velocity.x) {
         fighter.position.x += fighter.velocity.x * timeScale;
-        fighter.velocity.x *= fighter.isDashing ? 0.94 : 0.82;
+        fighter.velocity.x *= fighter.isDashing ? 0.88 : 0.82;
         if (Math.abs(fighter.velocity.x) < 0.2) {
             fighter.velocity.x = 0;
         }
@@ -519,9 +519,9 @@ function executeSpecialMove(side, state, vfx) {
         vfx.triggerScreenShake('light');
     } else if (special.type === 'dash_strike') {
         const dir = fighter.facingLeft ? -1 : 1;
-        fighter.velocity.x = dir * 16;
+        fighter.velocity.x = dir * 10.5;
         fighter.isDashing = true;
-        fighter.dashTimer = 220;
+        fighter.dashTimer = 160;
         vfx.triggerScreenShake('medium');
         vfx.spawnHitSparks(fighter.position.x + fighterWidth / 2, fighter.position.y + fighterHeight / 2, false, true);
     }
@@ -604,8 +604,8 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
     state.right.position = { x: canvas.width - fighterWidth - sideMargin, y: getGroundY() };
     state.left.facingLeft = false;
     state.right.facingLeft = true;
-    state.left.speed = 4;
-    state.right.speed = 4;
+    state.left.speed = 3.5;
+    state.right.speed = 3.5;
     state.left.isGrounded = true;
     state.right.isGrounded = true;
     state.left.bodyBox.width = bodyWidth;

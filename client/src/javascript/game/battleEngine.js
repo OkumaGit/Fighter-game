@@ -276,8 +276,8 @@ export function startDash(fighter, direction = 1) {
     return {
         ...fighter,
         isDashing: true,
-        dashTimer: 180,
-        velocity: { ...fighter.velocity, x: direction * 12 }
+        dashTimer: 140,
+        velocity: { ...fighter.velocity, x: direction * 6.5 }
     };
 }
 
