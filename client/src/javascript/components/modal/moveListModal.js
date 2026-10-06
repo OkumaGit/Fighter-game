@@ -7,6 +7,7 @@ export default function showMoveListModal({
     isPvE = false,
     isTower = false,
     isOnline = false,
+    isTestMode = false,
     onBack = () => {},
     onClose = () => {}
 }) {
@@ -16,7 +17,8 @@ export default function showMoveListModal({
     const f2Lore = getFighterLore(fighter2);
 
     let p2Label = 'Player 2 (P2)';
-    if (isOnline) p2Label = 'Online Opponent';
+    if (isTestMode) p2Label = 'Target Dummy';
+    else if (isOnline) p2Label = 'Online Opponent';
     else if (isPvE || isTower) p2Label = 'Computer (AI)';
 
     const layer = createElement({
@@ -206,6 +208,15 @@ export default function showMoveListModal({
             p1Keys: '<kbd>J</kbd> then immediately <kbd>J</kbd>',
             p2Keys: '<kbd>Num 1</kbd> then <kbd>Num 1</kbd>',
             desc: 'Fast double-jab combination with changing animation. Accelerates Super Meter build!'
+        },
+        {
+            category: 'airjab',
+            name: 'AIR PUNCH (JUMP JAB)',
+            badge: 'AERIAL STRIKE',
+            badgeClass: 'aerial',
+            p1Keys: '<kbd>Space</kbd> + <kbd>J</kbd>',
+            p2Keys: '<kbd>↑</kbd> + <kbd>Num 1</kbd>',
+            desc: 'Quick mid-air punch with rapid recovery and downward hitbox reach.'
         },
         {
             category: 'jumpkick',

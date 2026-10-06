@@ -6,7 +6,8 @@ import {
     setBlocking,
     startDash,
     takeDamage,
-    updateAttackBox
+    updateAttackBox,
+    getFighterSpecialMove
 } from '../game/battleEngine';
 import { getBattleFrameSource, getBattleSpriteConfig, getBattleSpriteSheetSource } from '../helpers/fighterAssets';
 import createBotController from '../game/botController';
@@ -16,6 +17,7 @@ import { updateRoundMedallions, showMatchAnnouncement, updateSuperBar, updateTim
 import showPauseMenu from './modal/pauseMenu';
 import showMoveListModal from './modal/moveListModal';
 import createTouchControls from './touchControls';
+import { getFighterInfo } from '../game/arcadeManager';
 
 /* eslint-disable no-param-reassign */
 
@@ -271,16 +273,27 @@ function drawFighter(context, fighter) {
 
     if (spriteSheet && spriteSheet.complete && spriteSheet.naturalWidth > 0) {
         const config = getBattleSpriteConfig(fighter).poses[pose] || getBattleSpriteConfig(fighter).poses.idle;
-        const frameWidth = spriteSheet.naturalHeight || 820;
         const frameHeight = spriteSheet.naturalHeight || 820;
-        const maxFrames = config.frames || 12;
+        const sheetFrames = config.frames || 12;
+        const frameWidth = Math.round(spriteSheet.naturalWidth / sheetFrames) || frameHeight;
+        const maxFrames = Math.min(config.frames || 12, sheetFrames);
         const currentFrameIndex = Math.min(Math.max(0, fighter.currentFrame || 0), maxFrames - 1);
         const sourceX = currentFrameIndex * frameWidth;
+
+        const baseWidth = 820;
+        const widthScale = fighterWidth / baseWidth;
+        const renderWidth = frameWidth * widthScale;
+        const renderHeight = fighterHeight;
+
+        const baseCenterX = 410;
+        const frameCenterX =
+            config.targetCenterX || (frameWidth > baseWidth ? Math.round(frameWidth / 2) : baseCenterX);
+        const offsetX = (frameCenterX - baseCenterX) * widthScale;
 
         if (fighter.facingLeft) {
             context.translate(fighter.position.x + fighterWidth, fighter.position.y);
             context.scale(-1, 1);
-            context.drawImage(spriteSheet, sourceX, 0, frameWidth, frameHeight, 0, 0, fighterWidth, fighterHeight);
+            context.drawImage(spriteSheet, sourceX, 0, frameWidth, frameHeight, -offsetX, 0, renderWidth, renderHeight);
         } else {
             context.drawImage(
                 spriteSheet,
@@ -288,10 +301,10 @@ function drawFighter(context, fighter) {
                 0,
                 frameWidth,
                 frameHeight,
-                fighter.position.x,
+                fighter.position.x - offsetX,
                 fighter.position.y,
-                fighterWidth,
-                fighterHeight
+                renderWidth,
+                renderHeight
             );
         }
     } else {
@@ -301,21 +314,34 @@ function drawFighter(context, fighter) {
             return;
         }
 
+        const config = getBattleSpriteConfig(fighter).poses[pose] || getBattleSpriteConfig(fighter).poses.idle;
+        const frameWidth = image.naturalWidth || 820;
+        const frameHeight = image.naturalHeight || 820;
+        const baseWidth = 820;
+        const widthScale = fighterWidth / baseWidth;
+        const renderWidth = frameWidth * widthScale;
+        const renderHeight = fighterHeight;
+
+        const baseCenterX = 410;
+        const frameCenterX =
+            config.targetCenterX || (frameWidth > baseWidth ? Math.round(frameWidth / 2) : baseCenterX);
+        const offsetX = (frameCenterX - baseCenterX) * widthScale;
+
         if (fighter.facingLeft) {
             context.translate(fighter.position.x + fighterWidth, fighter.position.y);
             context.scale(-1, 1);
-            context.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight, 0, 0, fighterWidth, fighterHeight);
+            context.drawImage(image, 0, 0, frameWidth, frameHeight, -offsetX, 0, renderWidth, renderHeight);
         } else {
             context.drawImage(
                 image,
                 0,
                 0,
-                image.naturalWidth,
-                image.naturalHeight,
-                fighter.position.x,
+                frameWidth,
+                frameHeight,
+                fighter.position.x - offsetX,
                 fighter.position.y,
-                fighterWidth,
-                fighterHeight
+                renderWidth,
+                renderHeight
             );
         }
     }
@@ -340,7 +366,7 @@ function animateFighter(fighter, elapsed) {
             if (fighter.isBlocking) {
                 fighter.state = 'block';
             } else {
-                fighter.state = 'idle';
+                fighter.state = fighter.isGrounded ? 'idle' : 'jump';
             }
             fighter.hitTimer = 0;
             fighter.currentFrame = 0;
@@ -379,6 +405,12 @@ function animateFighter(fighter, elapsed) {
         return;
     }
 
+    // While airborne in jump: hold descent frame until landing on ground
+    if (fighter.state === 'jump' && !fighter.isGrounded && fighter.currentFrame >= config.frames - 2) {
+        fighter.currentFrame = config.frames - 2;
+        return;
+    }
+
     // While holding block: freeze on the peak guard pose (frame 5, i.e. 6th frame Block_6.png)
     if (fighter.state === 'block' && fighter.isBlocking && fighter.currentFrame >= 5) {
         fighter.currentFrame = 5;
@@ -406,9 +438,14 @@ function animateFighter(fighter, elapsed) {
         } else if (fighter.isBlocking) {
             fighter.state = 'block';
         } else {
-            fighter.state = 'idle';
+            fighter.state = fighter.isGrounded ? 'idle' : 'jump';
         }
-        fighter.currentFrame = 0;
+        if (fighter.state === 'jump' && !fighter.isGrounded) {
+            const jumpCfg = getBattleSpriteConfig(fighter).poses.jump || getBattleSpriteConfig(fighter).poses.idle;
+            fighter.currentFrame = Math.max(0, jumpCfg.frames - 2);
+        } else {
+            fighter.currentFrame = 0;
+        }
         fighter.framesElapsed = 0;
     }
 }
@@ -470,8 +507,23 @@ function moveFighter(fighter, direction, elapsed, canvasWidth, groundY, vfx) {
         fighter.velocity.y = 0;
         fighter.isGrounded = true;
         fighter.isJuggled = false;
-        if (!prevGrounded && vfx) {
-            vfx.spawnDust(fighter.position.x + fighterWidth / 2, groundY + fighterHeight - 20, 0);
+        if (!prevGrounded) {
+            if (vfx) {
+                vfx.spawnDust(fighter.position.x + fighterWidth / 2, groundY + fighterHeight - 20, 0);
+            }
+            if (
+                fighter.state === 'jump' ||
+                fighter.state === 'jumpkick' ||
+                fighter.attackType === 'jumpkick' ||
+                fighter.attackType === 'airjab' ||
+                fighter.isAttacking
+            ) {
+                fighter.state = 'idle';
+                fighter.isAttacking = false;
+                fighter.attackType = null;
+                fighter.currentFrame = 0;
+                fighter.framesElapsed = 0;
+            }
         }
     } else {
         fighter.isGrounded = false;
@@ -481,14 +533,14 @@ function moveFighter(fighter, direction, elapsed, canvasWidth, groundY, vfx) {
     updateAttackBox(fighter);
 }
 
-function executeSpecialMove(side, state, vfx) {
+function executeSpecialMove(side, state, vfx, isTestMode = false) {
     const fighter = state[side];
     const opponentSide = side === 'left' ? 'right' : 'left';
     const opponent = state[opponentSide];
     const special = fighter.specialMove;
     if (!special) return;
 
-    fighter.specialCooldownTimer = special.cooldown || 4000;
+    fighter.specialCooldownTimer = isTestMode ? 0 : special.cooldown || 4000;
     vfx.spawnFloatingText(
         fighter.position.x + fighterWidth / 2,
         fighter.position.y + 40,
@@ -528,10 +580,24 @@ function executeSpecialMove(side, state, vfx) {
 }
 
 export default async function fight(firstFighter, secondFighter, options = {}) {
-    const { isPvE = false, isOnline = false, role = 'host', roomCode = null, socket = null } = options;
+    const {
+        isPvE = false,
+        isOnline = false,
+        role = 'host',
+        roomCode = null,
+        socket = null,
+        isTestMode = false
+    } = options;
     await preloadFighterSprites([firstFighter, secondFighter]);
     const state = createBattleState(firstFighter, secondFighter);
-    const bot = isPvE ? createBotController('right', options) : null;
+    const bot = isPvE && !isTestMode ? createBotController('right', options) : null;
+
+    if (isTestMode) {
+        state.left.superMeter = 100;
+        state.right.superMeter = 100;
+        state.left.specialCooldownTimer = 0;
+        state.right.specialCooldownTimer = 0;
+    }
 
     const canvas = document.querySelector('.arena___canvas');
     const context = canvas.getContext('2d');
@@ -566,6 +632,9 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
         right: { step: 0, timer: 0 }
     };
 
+    let currentFighter1 = firstFighter;
+    let currentFighter2 = secondFighter;
+
     let animationFrame;
     let previousTime = performance.now();
     let lastSyncTime = 0;
@@ -586,9 +655,9 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
 
     updateRoundMedallions('left', 0);
     updateRoundMedallions('right', 0);
-    syncSuperBar('left', 0);
-    syncSuperBar('right', 0);
-    updateTimerDisplay(99);
+    syncSuperBar('left', isTestMode ? 100 : 0);
+    syncSuperBar('right', isTestMode ? 100 : 0);
+    updateTimerDisplay(isTestMode ? '∞' : 99);
 
     const sideMargin = 120;
     const initialCanvasWidth = canvas.clientWidth || 1200;
@@ -597,6 +666,81 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
     canvas.height = initialCanvasHeight;
 
     const getGroundY = () => canvas.height - fighterHeight - 20;
+
+    const swapFighter = async (side, fighterId) => {
+        if (finished || roundTransitionActive) return;
+        const idStr = String(fighterId);
+        const target = state[side];
+        if (!target || String(target._id ?? target.id) === idStr) {
+            return;
+        }
+
+        const newFighter = await getFighterInfo(idStr);
+        if (!newFighter) return;
+
+        await preloadFighterSprites([newFighter]);
+
+        if (side === 'left') {
+            currentFighter1 = newFighter;
+        } else {
+            currentFighter2 = newFighter;
+        }
+
+        target._id = newFighter._id ?? newFighter.id ?? idStr;
+        target.id = target._id;
+        target.name = newFighter.name;
+        target.source = newFighter.source;
+        target.specialMove = getFighterSpecialMove(newFighter);
+
+        target.state = 'idle';
+        target.currentFrame = 0;
+        target.framesElapsed = 0;
+        target.isAttacking = false;
+        target.attackType = null;
+        target.attackHit = false;
+        target.isBlocking = false;
+        target.isDashing = false;
+        target.isDizzy = false;
+        target.velocity = { x: 0, y: 0 };
+        target.isGrounded = true;
+        target.position.y = getGroundY();
+        target.health = 100;
+        target.superMeter = 100;
+        target.specialCooldownTimer = 0;
+        updateAttackBox(target);
+        updateHealthBar(side, target);
+        syncSuperBar(side, 100);
+
+        const selectEl = document.getElementById(`${side}-fighter-select`);
+        if (selectEl) {
+            selectEl.value = String(newFighter._id ?? newFighter.id ?? idStr);
+        }
+
+        const nameEl = document.querySelector(`.arena___fighter-indicator--${side} .arena___fighter-name`);
+        if (nameEl) {
+            nameEl.textContent = `${newFighter.name}${side === 'left' ? ' [TESTER]' : ' [DUMMY]'}`;
+        }
+
+        const centerX = target.position.x + fighterWidth / 2;
+        const centerY = target.position.y + fighterHeight / 2;
+        vfx.spawnDust(centerX, target.position.y + fighterHeight - 20, 0);
+        vfx.spawnHitSparks(centerX, centerY, false, true);
+        vfx.spawnFloatingText(centerX, centerY - 20, `SWAPPED: ${newFighter.name.toUpperCase()}`, 'special');
+        vfx.triggerScreenShake('light');
+    };
+
+    if (isTestMode) {
+        ['left', 'right'].forEach(side => {
+            const selectEl = document.getElementById(`${side}-fighter-select`);
+            if (selectEl) {
+                selectEl.addEventListener('change', event => {
+                    const chosenId = event.target.value;
+                    swapFighter(side, chosenId);
+                    selectEl.blur();
+                });
+            }
+        });
+    }
 
     state.left.side = 'left';
     state.right.side = 'right';
@@ -645,7 +789,7 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
     updateAttackBox(state.left);
     updateAttackBox(state.right);
 
-    showMatchAnnouncement('ROUND 1 · FIGHT!', 'round', 1300);
+    showMatchAnnouncement(isTestMode ? 'TEST MODE · FIGHT!' : 'ROUND 1 · FIGHT!', 'round', 1300);
     previousTime = performance.now();
 
     return new Promise(resolve => {
@@ -778,6 +922,10 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
 
         const startRoundTimer = () => {
             if (timerInterval) clearInterval(timerInterval);
+            if (isTestMode) {
+                updateTimerDisplay('∞');
+                return;
+            }
             matchTimer = 99;
             updateTimerDisplay(matchTimer);
 
@@ -824,9 +972,17 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
             const dist = Math.abs(state[side].position.x - state[oppSide].position.x);
             const isHoldingForward = pressedKeys.has(forwardKey);
             const isHoldingBlock = pressedKeys.has(blockKey) || state[side].isBlocking;
+            const jumpKey = side === 'left' ? controls.PlayerOneJump : controls.PlayerTwoJump;
+            const isHoldingJump = pressedKeys.has(jumpKey);
 
             if (attackType === 'jab') {
-                if (isHoldingBlock || state[side].isCrouching) {
+                if (!state[side].isGrounded || isHoldingJump) {
+                    if (state[side].isGrounded) {
+                        state[side].velocity.y = -13;
+                        state[side].isGrounded = false;
+                    }
+                    beginAttack(side, 'airjab');
+                } else if (isHoldingBlock || state[side].isCrouching) {
                     beginAttack(side, 'uppercut');
                 } else if (dist < 88 && isHoldingForward) {
                     beginAttack(side, 'throw');
@@ -840,7 +996,11 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                     comboChain[side].timer = 360;
                 }
             } else if (attackType === 'kick') {
-                if (!state[side].isGrounded) {
+                if (!state[side].isGrounded || isHoldingJump) {
+                    if (state[side].isGrounded) {
+                        state[side].velocity.y = -13;
+                        state[side].isGrounded = false;
+                    }
                     beginAttack(side, 'jumpkick');
                 } else if (isHoldingBlock || state[side].isCrouching) {
                     beginAttack(side, 'sweep');
@@ -850,14 +1010,20 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                 comboChain[side].step = 0;
                 comboChain[side].timer = 0;
             } else if (attackType === 'special') {
-                if ((state[side].specialCooldownTimer || 0) <= 0) {
+                if (isTestMode) {
+                    state[side].isAttacking = false;
+                    state[side].specialCooldownTimer = 0;
                     beginAttack(side, 'special');
-                    executeSpecialMove(side, state, vfx);
+                    executeSpecialMove(side, state, vfx, true);
+                } else if ((state[side].specialCooldownTimer || 0) <= 0) {
+                    beginAttack(side, 'special');
+                    executeSpecialMove(side, state, vfx, false);
                 }
             }
         };
 
         const onFatalKnockout = (winner, loserSide) => {
+            if (isTestMode) return;
             if (finishHimTimeout) clearTimeout(finishHimTimeout);
             let actualLoserSide = 'right';
             if (typeof loserSide === 'string') {
@@ -907,7 +1073,7 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
         };
 
         const handleFighterHealthDepleted = (winnerSide, loserSide) => {
-            if (finished) return;
+            if (finished || isTestMode) return;
             const isMatchDeciding = roundScores[winnerSide] + 1 >= 2;
 
             if (isMatchDeciding && !finishHimActive) {
@@ -956,6 +1122,10 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                     }
                     if (isJump && state[remoteSide].isGrounded && state[remoteSide].state !== 'hit') {
                         state[remoteSide].velocity.y = -13;
+                        state[remoteSide].state = 'jump';
+                        state[remoteSide].isGrounded = false;
+                        state[remoteSide].currentFrame = 0;
+                        state[remoteSide].framesElapsed = 0;
                     }
                 } else if (type === 'keyup') {
                     remoteKeys.delete(code);
@@ -1006,7 +1176,26 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
             const combination = combinations[side];
             criticalSequence[side].push(key);
             if (criticalSequence[side].length > combination.length) criticalSequence[side].shift();
-            const isReady = combination.every((value, index) => criticalSequence[side][index] === value);
+
+            const isQWEPressedTogether =
+                isTestMode &&
+                side === 'left' &&
+                pressedKeys.has('KeyQ') &&
+                pressedKeys.has('KeyW') &&
+                pressedKeys.has('KeyE');
+            const isNumpadComboPressedTogether =
+                isTestMode &&
+                side === 'right' &&
+                pressedKeys.has('Numpad7') &&
+                pressedKeys.has('Numpad8') &&
+                pressedKeys.has('Numpad9');
+
+            const isReady =
+                combination.every((value, index) => criticalSequence[side][index] === value) ||
+                (isTestMode && combination.every(k => criticalSequence[side].includes(k))) ||
+                isQWEPressedTogether ||
+                isNumpadComboPressedTogether;
+
             if (!isReady) return;
 
             const attacker = state[side];
@@ -1015,69 +1204,93 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
 
             if (roundTransitionActive || attacker.health <= 0 || attacker.isDizzy || defender.health <= 0) return;
 
-            // Check Super Meter: requires full 100% meter
-            const currentMeter = attacker.superMeter || 0;
-            if (currentMeter < 100) {
-                vfx.spawnFloatingText(
-                    attacker.position.x + fighterWidth / 2,
-                    attacker.position.y + 40,
-                    'METER NOT FULL',
-                    'block'
-                );
-                return;
+            if (!isTestMode) {
+                // Check Super Meter: requires full 100% meter
+                const currentMeter = attacker.superMeter || 0;
+                if (currentMeter < 100) {
+                    vfx.spawnFloatingText(
+                        attacker.position.x + fighterWidth / 2,
+                        attacker.position.y + 40,
+                        'METER NOT FULL',
+                        'block'
+                    );
+                    return;
+                }
+
+                // Check Melee Distance: must be in close melee proximity (<= 140px)
+                const distance = Math.abs(attacker.position.x - defender.position.x);
+                if (distance > 140) {
+                    vfx.spawnFloatingText(
+                        attacker.position.x + fighterWidth / 2,
+                        attacker.position.y + 40,
+                        'TOO FAR!',
+                        'block'
+                    );
+                    return;
+                }
+
+                if (Date.now() - lastCriticalHit[side] < 2000) return;
+
+                // Consume 100% Super Meter
+                attacker.superMeter = 0;
+                syncSuperBar(side, 0);
+                lastCriticalHit[side] = Date.now();
+            } else {
+                attacker.superMeter = 100;
+                syncSuperBar(side, 100);
+                lastCriticalHit[side] = 0;
             }
-
-            // Check Melee Distance: must be in close melee proximity (<= 140px)
-            const distance = Math.abs(attacker.position.x - defender.position.x);
-            if (distance > 140) {
-                vfx.spawnFloatingText(
-                    attacker.position.x + fighterWidth / 2,
-                    attacker.position.y + 40,
-                    'TOO FAR!',
-                    'block'
-                );
-                return;
-            }
-
-            if (Date.now() - lastCriticalHit[side] < 2000) return;
-
-            // Consume 100% Super Meter
-            attacker.superMeter = 0;
-            syncSuperBar(side, 0);
 
             // Trigger Super Move Animation on Attacker (allowing super cancel)
             state[side].isAttacking = false;
             state[side] = startAttack(state[side], 'super');
             state[side].attackHit = true;
 
-            // Execute Critical Super Strike (24 damage, unblockable MK3 super strike)
-            state[defenderSide] = takeDamage(state[defenderSide], 24, attacker.position.x, {
-                isUnblockable: true
-            });
-            updateHealthBar(defenderSide, state[defenderSide]);
-            setStatus(defenderSide, 'arena___fighter--critical');
-            vfx.triggerScreenShake('heavy');
-            vfx.triggerHitStop(130);
-            vfx.spawnFloatingText(
-                defender.position.x + fighterWidth / 2,
-                defender.position.y + 40,
-                'CRITICAL SUPER!',
-                'crit'
-            );
-            vfx.spawnBlood(
-                defender.position.x + fighterWidth / 2,
-                defender.position.y + 70,
-                defender.position.x >= attacker.position.x ? 1 : -1,
-                'heavy'
-            );
-            vfx.spawnHitSparks(defender.position.x + fighterWidth / 2, defender.position.y + 100, false, true);
-            lastCriticalHit[side] = Date.now();
+            const distance = Math.abs(attacker.position.x - defender.position.x);
+            const inRange = distance <= 180;
+
+            if (inRange) {
+                // Execute Critical Super Strike (24 damage, unblockable MK3 super strike)
+                state[defenderSide] = takeDamage(state[defenderSide], isTestMode ? 0 : 24, attacker.position.x, {
+                    isUnblockable: true
+                });
+                if (isTestMode) {
+                    state[defenderSide].health = 100;
+                }
+                updateHealthBar(defenderSide, state[defenderSide]);
+                setStatus(defenderSide, 'arena___fighter--critical');
+                vfx.triggerScreenShake('heavy');
+                vfx.triggerHitStop(130);
+                vfx.spawnFloatingText(
+                    defender.position.x + fighterWidth / 2,
+                    defender.position.y + 40,
+                    'CRITICAL SUPER!',
+                    'crit'
+                );
+                vfx.spawnBlood(
+                    defender.position.x + fighterWidth / 2,
+                    defender.position.y + 70,
+                    defender.position.x >= attacker.position.x ? 1 : -1,
+                    'heavy'
+                );
+                vfx.spawnHitSparks(defender.position.x + fighterWidth / 2, defender.position.y + 100, false, true);
+            } else {
+                vfx.spawnFloatingText(
+                    attacker.position.x + fighterWidth / 2,
+                    attacker.position.y + 40,
+                    'SUPER MOVE!',
+                    'crit'
+                );
+            }
+
             criticalSequence[side] = [];
 
-            if (finishHimActive || state[defenderSide].isDizzy || defender.isDizzy) {
-                onFatalKnockout(attacker, defenderSide);
-            } else if (state[defenderSide].health <= 0) {
-                handleFighterHealthDepleted(side, defenderSide);
+            if (!isTestMode) {
+                if (finishHimActive || state[defenderSide].isDizzy || defender.isDizzy) {
+                    onFatalKnockout(attacker, defenderSide);
+                } else if (state[defenderSide].health <= 0) {
+                    handleFighterHealthDepleted(side, defenderSide);
+                }
             }
         };
 
@@ -1110,12 +1323,13 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
             }
 
             activePauseModal = showPauseMenu({
-                fighter1: firstFighter,
-                fighter2: secondFighter,
+                fighter1: currentFighter1,
+                fighter2: currentFighter2,
                 round: currentRound,
                 isPvE,
                 isTower: Boolean(options.isTower),
                 isOnline,
+                isTestMode,
                 onResume: () => {
                     resumeFight();
                 },
@@ -1124,11 +1338,12 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                         activePauseModal.hide();
                     }
                     activeMoveListModal = showMoveListModal({
-                        fighter1: firstFighter,
-                        fighter2: secondFighter,
+                        fighter1: currentFighter1,
+                        fighter2: currentFighter2,
                         isPvE,
                         isTower: Boolean(options.isTower),
                         isOnline,
+                        isTestMode,
                         onBack: () => {
                             if (activeMoveListModal) {
                                 activeMoveListModal.close();
@@ -1190,6 +1405,16 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
 
             if (isPaused) {
                 return;
+            }
+
+            if (isTestMode) {
+                const digitMatch = event.code.match(/^Digit([1-6])$/);
+                if (digitMatch) {
+                    const fighterId = digitMatch[1];
+                    const targetSide = event.shiftKey ? 'right' : 'left';
+                    swapFighter(targetSide, fighterId);
+                    return;
+                }
             }
 
             pressedKeys.add(event.code);
@@ -1269,12 +1494,18 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
             if (
                 event.code === controls.PlayerOneJump &&
                 state.left.isGrounded &&
+                state.left.state !== 'jumpkick' &&
+                !state.left.isAttacking &&
                 state.left.state !== 'hit' &&
                 state.left.state !== 'fall' &&
                 state.left.state !== 'getup' &&
                 state.left.state !== 'death'
             ) {
                 state.left.velocity.y = -13;
+                state.left.state = 'jump';
+                state.left.isGrounded = false;
+                state.left.currentFrame = 0;
+                state.left.framesElapsed = 0;
             }
 
             // Player 2 Local Attacks
@@ -1291,12 +1522,18 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                 if (
                     event.code === controls.PlayerTwoJump &&
                     state.right.isGrounded &&
+                    state.right.state !== 'jumpkick' &&
+                    !state.right.isAttacking &&
                     state.right.state !== 'hit' &&
                     state.right.state !== 'fall' &&
                     state.right.state !== 'getup' &&
                     state.right.state !== 'death'
                 ) {
                     state.right.velocity.y = -13;
+                    state.right.state = 'jump';
+                    state.right.isGrounded = false;
+                    state.right.currentFrame = 0;
+                    state.right.framesElapsed = 0;
                 }
             }
 
@@ -1460,6 +1697,10 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                             !state.right.isDizzy
                         ) {
                             state.right.velocity.y = -13;
+                            state.right.state = 'jump';
+                            state.right.isGrounded = false;
+                            state.right.currentFrame = 0;
+                            state.right.framesElapsed = 0;
                         }
                     },
                     dash: direction => {
@@ -1483,6 +1724,13 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
 
             moveFighter(state.left, leftMovement, elapsed, canvas.width, groundY, vfx);
             moveFighter(state.right, rightMovement, elapsed, canvas.width, groundY, vfx);
+
+            if (isTestMode) {
+                state.left.specialCooldownTimer = 0;
+                state.right.specialCooldownTimer = 0;
+                state.left.superMeter = 100;
+                state.right.superMeter = 100;
+            }
 
             if (!state.left.isAttacking && state.left.state !== 'hit' && !state.left.isDizzy) {
                 state.left.facingLeft = state.left.position.x > state.right.position.x;
@@ -1542,7 +1790,10 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                             }
                         }
 
-                        if (state[targetSide].health <= 0) {
+                        if (isTestMode) {
+                            state[targetSide].health = 100;
+                            updateHealthBar(targetSide, state[targetSide]);
+                        } else if (state[targetSide].health <= 0) {
                             handleFighterHealthDepleted(proj.ownerSide, targetSide);
                         }
                     }
@@ -1554,8 +1805,11 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                 if (roundTransitionActive) return;
                 const fighter = state[side];
                 const defenderSide = side === 'left' ? 'right' : 'left';
-                if (fighter.isAttacking && fighter.currentFrame === fighter.activeHitFrame && !fighter.attackHit) {
-                    fighter.attackHit = true;
+                const startHitFrame = Math.max(1, (fighter.activeHitFrame || 5) - 1);
+                const endHitFrame = (fighter.activeHitFrame || 5) + 2;
+                const inHitWindow = fighter.currentFrame >= startHitFrame && fighter.currentFrame <= endHitFrame;
+
+                if (fighter.isAttacking && inHitWindow && !fighter.attackHit) {
                     const defender = state[defenderSide];
                     const isDefenderDowned =
                         defender.health <= 0 ||
@@ -1565,6 +1819,7 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                         !isDefenderDowned &&
                         rectangularCollision({ rectangle1: fighter.attackBox, rectangle2: defender.bodyBox })
                     ) {
+                        fighter.attackHit = true;
                         const isUnblockable = fighter.attackType === 'throw';
                         const isUppercut = fighter.attackType === 'uppercut';
                         const isSweep = fighter.attackType === 'sweep';
@@ -1626,6 +1881,10 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                                     fighter.attackType === 'jumpkick' ? 'JUMP KICK!' : `${fighter.comboStreak} HITS!`,
                                     'hit'
                                 );
+                            } else if (fighter.attackType === 'airjab') {
+                                vfx.triggerScreenShake('medium');
+                                vfx.triggerHitStop(55);
+                                vfx.spawnFloatingText(impactX, impactY, 'AIR PUNCH!', 'hit');
                             } else {
                                 vfx.triggerScreenShake('light');
                                 vfx.triggerHitStop(45);
@@ -1638,7 +1897,10 @@ export default async function fight(firstFighter, secondFighter, options = {}) {
                             }
                         }
 
-                        if (state[defenderSide].health <= 0) {
+                        if (isTestMode) {
+                            state[defenderSide].health = 100;
+                            updateHealthBar(defenderSide, state[defenderSide]);
+                        } else if (state[defenderSide].health <= 0) {
                             handleFighterHealthDepleted(side, defenderSide);
                         }
                     }

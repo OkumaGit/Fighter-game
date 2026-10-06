@@ -79,6 +79,11 @@ export function updateSuperBar(position, percent) {
 export function updateTimerDisplay(seconds) {
     const timerElement = document.getElementById('arena-fight-timer');
     if (!timerElement) return;
+    if (seconds === '∞' || seconds === 'INF' || typeof seconds === 'string') {
+        timerElement.innerText = seconds;
+        timerElement.classList.remove('arena___fight-timer--urgent');
+        return;
+    }
     const formatted = Math.max(0, Math.floor(seconds));
     timerElement.innerText = formatted < 10 ? `0${formatted}` : `${formatted}`;
     if (formatted <= 10) {

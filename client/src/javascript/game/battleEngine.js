@@ -155,10 +155,44 @@ export function updateAttackBox(fighter) {
         y: fighter.position.y + bodyOffset.y
     };
 
-    if (fighter.facingLeft) {
-        attackBox.position.x = fighter.bodyBox.position.x - attackBox.width + attackBox.offset.x;
+    if (fighter.attackType === 'super') {
+        attackBox.width = 200;
+        attackBox.height = 120;
+        attackBox.offset.y = 40;
+    } else if (fighter.attackType === 'jumpkick') {
+        attackBox.width = 135;
+        attackBox.height = 180;
+        attackBox.offset.y = 50;
+    } else if (fighter.attackType === 'airjab' || !fighter.isGrounded) {
+        attackBox.width = 125;
+        attackBox.height = 170;
+        attackBox.offset.y = 50;
+    } else if (fighter.attackType === 'sweep') {
+        attackBox.width = 135;
+        attackBox.height = 80;
+        attackBox.offset.y = 170;
+    } else if (fighter.attackType === 'kick') {
+        attackBox.width = 125;
+        attackBox.height = 65;
+        attackBox.offset.y = 50;
+    } else if (fighter.attackType === 'uppercut') {
+        attackBox.width = 115;
+        attackBox.height = 95;
+        attackBox.offset.y = 20;
+    } else if (fighter.attackType === 'throw') {
+        attackBox.width = 100;
+        attackBox.height = 60;
+        attackBox.offset.y = 40;
     } else {
-        attackBox.position.x = fighter.bodyBox.position.x + fighter.bodyBox.width - attackBox.offset.x;
+        attackBox.width = 110;
+        attackBox.height = 55;
+        attackBox.offset.y = 35;
+    }
+
+    if (fighter.facingLeft) {
+        attackBox.position.x = fighter.bodyBox.position.x + 15 - attackBox.width;
+    } else {
+        attackBox.position.x = fighter.bodyBox.position.x + fighter.bodyBox.width - 15;
     }
 
     attackBox.position.y = fighter.position.y + attackBox.offset.y;
@@ -183,6 +217,7 @@ export function startAttack(fighter, type) {
     const attackConfig = {
         jab: { damage: 6.5, activeHitFrame: 5, duration: 320, state: 'jab' },
         jab2: { damage: 7.5, activeHitFrame: 4, duration: 280, state: 'jab' },
+        airjab: { damage: 8.5, activeHitFrame: 4, duration: 320, state: 'jab' },
         kick: { damage: 11.5, activeHitFrame: 7, duration: 420, state: 'kick' },
         uppercut: { damage: 15.5, activeHitFrame: 6, duration: 450, state: 'uppercut' },
         sweep: { damage: 13.0, activeHitFrame: 6, duration: 450, state: 'sweep' },
@@ -228,6 +263,8 @@ export function setBlocking(fighter, isBlocking = true) {
     let nextState = 'idle';
     if (isBlocking) {
         nextState = 'block';
+    } else if (!fighter.isGrounded) {
+        nextState = 'jump';
     }
 
     return {
@@ -277,7 +314,7 @@ export function startDash(fighter, direction = 1) {
         ...fighter,
         isDashing: true,
         dashTimer: 140,
-        velocity: { ...fighter.velocity, x: direction * 6.5 }
+        velocity: { ...fighter.velocity, x: direction * 3.25 }
     };
 }
 

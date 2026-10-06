@@ -50,43 +50,97 @@ function createHealthIndicator(fighter, position, options = {}) {
         className: `arena___fighter-indicator arena___fighter-indicator--${position}`
     });
     const headerRow = createElement({ tagName: 'div', className: 'arena___fighter-header' });
-    const fighterName = createElement({ tagName: 'span', className: 'arena___fighter-name' });
+    let nameElement;
+    if (options.isTestMode) {
+        const selectContainer = createElement({
+            tagName: 'div',
+            className: `arena___test-fighter-picker arena___test-fighter-picker--${position}`
+        });
+
+        const roleTag = createElement({
+            tagName: 'span',
+            className: `arena___test-role-badge arena___test-role-badge--${position}`,
+            innerText: position === 'left' ? 'TESTER' : 'DUMMY'
+        });
+
+        const select = createElement({
+            tagName: 'select',
+            className: `arena___fighter-select arena___fighter-select--${position}`,
+            attributes: {
+                id: `${position}-fighter-select`,
+                'aria-label': `Select ${position === 'left' ? 'Tester' : 'Dummy'} fighter`
+            }
+        });
+
+        const roster = [
+            { id: '1', name: 'Astra' },
+            { id: '2', name: 'Kite' },
+            { id: '3', name: 'Vex' },
+            { id: '4', name: 'Brute' },
+            { id: '5', name: 'Nova' },
+            { id: '6', name: 'Rift' }
+        ];
+
+        const currentId = String(fighter._id ?? fighter.id ?? (position === 'left' ? '1' : '2'));
+
+        roster.forEach(r => {
+            const opt = createElement({
+                tagName: 'option',
+                attributes: { value: r.id },
+                innerText: r.name
+            });
+            if (r.id === currentId) {
+                opt.selected = true;
+            }
+            select.appendChild(opt);
+        });
+
+        if (position === 'left') {
+            selectContainer.append(roleTag, select);
+        } else {
+            selectContainer.append(select, roleTag);
+        }
+        nameElement = selectContainer;
+    } else {
+        const fighterName = createElement({ tagName: 'span', className: 'arena___fighter-name' });
+        let diffLabel = ' [BOT]';
+        if (options.isTower) {
+            if (position === 'right') {
+                const stageNum = (options.stageIndex ?? 0) + 1;
+                const diffName = options.difficulty || 'Easy';
+                diffLabel = ` [STAGE ${stageNum} · ${diffName}]`;
+            } else {
+                diffLabel = ' [CHAMPION]';
+            }
+        } else if (options.isOnline) {
+            const isSelf =
+                (options.role === 'host' && position === 'left') || (options.role === 'guest' && position === 'right');
+            diffLabel = isSelf ? ' [YOU]' : ' [OPPONENT]';
+        } else if (options.difficulty) {
+            diffLabel = ` [BOT · ${options.difficulty}]`;
+        }
+
+        if (options.isTower && position === 'left') {
+            fighterName.innerText = `${name}${diffLabel}`;
+        } else if (options.isOnline) {
+            fighterName.innerText = `${name}${diffLabel}`;
+        } else {
+            fighterName.innerText = isBot ? `${name}${diffLabel}` : name;
+        }
+        nameElement = fighterName;
+    }
+
     const healthPercent = createElement({
         tagName: 'span',
         className: 'arena___health-percent',
         attributes: { id: `${position}-health-percent` }
     });
-
-    let diffLabel = ' [BOT]';
-    if (options.isTower) {
-        if (position === 'right') {
-            const stageNum = (options.stageIndex ?? 0) + 1;
-            const diffName = options.difficulty || 'Easy';
-            diffLabel = ` [STAGE ${stageNum} · ${diffName}]`;
-        } else {
-            diffLabel = ' [CHAMPION]';
-        }
-    } else if (options.isOnline) {
-        const isSelf =
-            (options.role === 'host' && position === 'left') || (options.role === 'guest' && position === 'right');
-        diffLabel = isSelf ? ' [YOU]' : ' [OPPONENT]';
-    } else if (options.difficulty) {
-        diffLabel = ` [BOT · ${options.difficulty}]`;
-    }
-
-    if (options.isTower && position === 'left') {
-        fighterName.innerText = `${name}${diffLabel}`;
-    } else if (options.isOnline) {
-        fighterName.innerText = `${name}${diffLabel}`;
-    } else {
-        fighterName.innerText = isBot ? `${name}${diffLabel}` : name;
-    }
     healthPercent.innerText = '100%';
 
     if (position === 'right') {
-        headerRow.append(healthPercent, fighterName);
+        headerRow.append(healthPercent, nameElement);
     } else {
-        headerRow.append(fighterName, healthPercent);
+        headerRow.append(nameElement, healthPercent);
     }
 
     const indicator = createElement({ tagName: 'div', className: 'arena___health-indicator' });
@@ -131,7 +185,7 @@ function createHealthIndicators(leftFighter, rightFighter, options = {}) {
         className: 'arena___fight-timer',
         attributes: { id: 'arena-fight-timer' }
     });
-    timerElement.innerText = '99';
+    timerElement.innerText = options.isTestMode ? '∞' : '99';
     centerBlock.appendChild(timerElement);
 
     const versusSign = createElement({ tagName: 'div', className: 'arena___versus-sign' });
@@ -155,6 +209,14 @@ function createHealthIndicators(leftFighter, rightFighter, options = {}) {
         });
         onlinePill.innerText = `ROOM: ${options.roomCode}`;
         centerBlock.appendChild(onlinePill);
+    } else if (options.isTestMode) {
+        const testPill = createElement({
+            tagName: 'div',
+            className: 'arena___stage-pill arena___test-pill',
+            attributes: { id: 'arena-test-pill' }
+        });
+        testPill.innerText = 'TEST MODE · NO COOLDOWNS';
+        centerBlock.appendChild(testPill);
     }
 
     const leftFighterIndicator = createHealthIndicator(leftFighter, 'left', options);

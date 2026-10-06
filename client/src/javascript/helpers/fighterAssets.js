@@ -23,15 +23,25 @@ const battleSpritePoses = {
     getup: { file: 'getup.webp', folder: 'GetUp', prefix: 'GetUp', frames: 12, duration: 500, loop: false },
     death: { file: 'death.webp', folder: 'Death', prefix: 'Death', frames: 12, duration: 800, loop: false },
     dizzy: { file: 'dizzy.webp', folder: 'Dizzy', prefix: 'Dizzy', frames: 12, duration: 900, loop: true },
-    super: { file: 'super.webp', folder: 'Super', prefix: 'Super', frames: 12, duration: 800, loop: false }
+    super: {
+        file: 'super.webp',
+        folder: 'Super',
+        prefix: 'Super',
+        frames: 12,
+        duration: 800,
+        loop: false,
+        frameWidth: 1160,
+        frameHeight: 820,
+        targetCenterX: 510
+    }
 };
 
 const battleSpritePaths = {
     '1': '/resources/fighters/fighter_1_sprite',
     '2': '/resources/fighters/fighter_2_sprite',
-    '3': '/resources/fighters/fighter_1_sprite',
-    '4': '/resources/fighters/fighter_1_sprite',
-    '5': '/resources/fighters/fighter_1_sprite',
+    '3': '/resources/fighters/fighter_3_sprite',
+    '4': '/resources/fighters/fighter_4_sprite',
+    '5': '/resources/fighters/fighter_5_sprite',
     '6': '/resources/fighters/fighter_6_sprite'
 };
 
@@ -90,23 +100,35 @@ export function getBattleSpriteConfig(fighter = {}) {
     const fighterId = String(fighter._id ?? fighter.id ?? fighterNameToId[fighter.name] ?? '1');
     const basePath = battleSpritePaths[fighterId] || defaultBattleSprite.basePath;
 
+    const poses = { ...battleSpritePoses };
+    if (fighterId === '5') {
+        poses.sweep = {
+            ...battleSpritePoses.sweep,
+            frameWidth: 1000,
+            frameHeight: 820,
+            targetCenterX: 500
+        };
+    }
+
     return {
         basePath,
-        poses: battleSpritePoses
+        poses
     };
 }
+
+const SPRITE_VERSION = '20261006_v11';
 
 export function getBattleSpriteSheetSource(fighter, pose) {
     const config = getBattleSpriteConfig(fighter);
     const animation = config.poses[pose] || config.poses.idle;
     const filename = animation.file || `${pose.toLowerCase()}.webp`;
-    return `${config.basePath}/${filename}`;
+    return `${config.basePath}/${filename}?v=${SPRITE_VERSION}`;
 }
 
 export function getBattleFrameSource(fighter, pose, frame) {
     const config = getBattleSpriteConfig(fighter);
     const animation = config.poses[pose] || config.poses.idle;
-    return `${config.basePath}/${animation.folder}/${animation.prefix}_${frame + 1}.png`;
+    return `${config.basePath}/${animation.folder}/${animation.prefix}_${frame + 1}.png?v=${SPRITE_VERSION}`;
 }
 
 export function getRandomBattleBackground() {

@@ -24,7 +24,8 @@ function createModeSelector(gameMode, onSelectMode) {
         { id: 'pvp', icon: 'pvp', label: 'Player vs Player' },
         { id: 'pve', icon: 'pve', label: 'Player vs AI' },
         { id: 'tower', icon: 'tower', label: 'Tower Mode' },
-        { id: 'online', icon: 'online', label: 'Online 1v1' }
+        { id: 'online', icon: 'online', label: 'Online 1v1' },
+        { id: 'test', icon: 'test', label: 'Test Mode' }
     ];
 
     modes.forEach(({ id, icon, label }) => {
@@ -114,7 +115,10 @@ function updateFighterCards(
 
         let slot1Label = 'P1';
         let slot2Label = 'P2';
-        if (gameMode === 'pve') {
+        if (gameMode === 'test') {
+            slot1Label = 'TEST';
+            slot2Label = 'DUMMY';
+        } else if (gameMode === 'pve') {
             slot2Label = 'BOT';
         } else if (gameMode === 'tower') {
             slot1Label = 'HERO';
@@ -138,7 +142,7 @@ function updateFighterCards(
             badgeText = slot1Label;
         } else if (isP2) {
             badgeText = slot2Label;
-            isBotBadge = slot2Label === 'BOT';
+            isBotBadge = slot2Label === 'BOT' || slot2Label === 'DUMMY';
         } else if (isHovered) {
             if (gameMode === 'online') {
                 if (!isLocalReady) {
@@ -227,6 +231,14 @@ function renderSelectedFighters({
             } else if (gameMode === 'online') {
                 const localChosen = onlineRole === 'host' ? selectedFighters[0] : selectedFighters[1];
                 title.innerText = localChosen ? 'READY TO FIGHT' : 'CHOOSE YOUR FIGHTER';
+            } else if (gameMode === 'test') {
+                if (selectedFighters.every(Boolean)) {
+                    title.innerText = 'READY FOR TEST BATTLE';
+                } else if (selectedFighters[0]) {
+                    title.innerText = 'CHOOSE DUMMY OPPONENT';
+                } else {
+                    title.innerText = 'CHOOSE FIGHTER TO TEST';
+                }
             } else if (selectedFighters.every(Boolean)) {
                 title.innerText = gameMode === 'pve' ? `READY TO FIGHT (VS AI · ${difficulty})` : 'READY TO FIGHT';
             } else if (selectedFighters[0] && !selectedFighters[1]) {
@@ -241,7 +253,37 @@ function renderSelectedFighters({
                 className: 'fighters___header-sub'
             });
 
-            if (gameMode === 'pve' && typeof onSelectDifficulty === 'function') {
+            if (gameMode === 'test') {
+                const subControls = createElement({
+                    tagName: 'div',
+                    className: 'preview-container___subcontrols'
+                });
+                const testPill = createElement({
+                    tagName: 'div',
+                    className: 'preview-container___tower-badge'
+                });
+                const testIcon = createIcon('test');
+                const pillText = createElement({
+                    tagName: 'span',
+                    innerText: 'TEST MODE · NO COOLDOWNS · INSTANT QWE & U · INFINITE HP'
+                });
+                testPill.append(testIcon, pillText);
+                subControls.appendChild(testPill);
+
+                if (selectedFighters[0] && !selectedFighters[1] && typeof onPickRandomBot === 'function') {
+                    const randomDummyBtn = createElement({
+                        tagName: 'button',
+                        className: 'preview-container___random-btn',
+                        attributes: { type: 'button' }
+                    });
+                    const diceIcon = createIcon('dice');
+                    const btnText = createElement({ tagName: 'span', innerText: 'Random Dummy' });
+                    randomDummyBtn.append(diceIcon, btnText);
+                    randomDummyBtn.addEventListener('click', onPickRandomBot);
+                    subControls.appendChild(randomDummyBtn);
+                }
+                subContainer.appendChild(subControls);
+            } else if (gameMode === 'pve' && typeof onSelectDifficulty === 'function') {
                 const subControls = createElement({
                     tagName: 'div',
                     className: 'preview-container___subcontrols'
@@ -316,7 +358,9 @@ function renderSelectedFighters({
     // 2. Render Left Panel (Slot P1)
     if (slotP1) {
         let p1Tag = 'PLAYER 1';
-        if (gameMode === 'tower') {
+        if (gameMode === 'test') {
+            p1Tag = 'TESTER (P1)';
+        } else if (gameMode === 'tower') {
             p1Tag = 'CHAMPION';
         } else if (gameMode === 'online') {
             const readyStr = isLocalReady && onlineRole === 'host' ? ' [READY]' : '';
@@ -331,7 +375,9 @@ function renderSelectedFighters({
     // 3. Render Right Panel (Slot P2)
     if (slotP2) {
         let p2Tag = 'PLAYER 2';
-        if (gameMode === 'pve') {
+        if (gameMode === 'test') {
+            p2Tag = 'DUMMY (P2)';
+        } else if (gameMode === 'pve') {
             p2Tag = `BOT [${difficulty}]`;
         } else if (gameMode === 'tower') {
             p2Tag = 'STAGE 1 · EASY';
@@ -347,7 +393,15 @@ function renderSelectedFighters({
 
     // 4. Render Turn Indicator
     if (turnIndicator) {
-        if (gameMode === 'tower') {
+        if (gameMode === 'test') {
+            if (selectedFighters.every(Boolean)) {
+                turnIndicator.innerText = '▸ READY FOR TEST BATTLE';
+            } else if (selectedFighters[0]) {
+                turnIndicator.innerText = '▸ CHOOSE DUMMY OPPONENT OR CLICK START TEST';
+            } else {
+                turnIndicator.innerText = '▸ CHOOSE FIGHTER TO TEST';
+            }
+        } else if (gameMode === 'tower') {
             turnIndicator.innerText = selectedFighters[0] ? '▸ READY TO ENTER THE TOWER' : '▸ CHOOSE YOUR CHAMPION';
         } else if (gameMode === 'online') {
             if (isLocalReady && isOpponentReady) {
@@ -398,6 +452,22 @@ function renderSelectedFighters({
                 });
             } else {
                 fightBtn.innerText = 'CHOOSE CHAMPION';
+                fightBtn.disabled = true;
+                fightBtn.classList.add('fighters___fight-btn--disabled');
+            }
+        } else if (gameMode === 'test') {
+            if (selectedFighters[0]) {
+                fightBtn.innerText = 'START TEST';
+                fightBtn.addEventListener('click', async () => {
+                    const fightersToTest = [...selectedFighters];
+                    if (!fightersToTest[1]) {
+                        const dummyId = fightersToTest[0]._id === '2' ? '1' : '2';
+                        fightersToTest[1] = await getFighterInfo(dummyId);
+                    }
+                    startFight(fightersToTest, { isTestMode: true });
+                });
+            } else {
+                fightBtn.innerText = 'CHOOSE FIGHTER';
                 fightBtn.disabled = true;
                 fightBtn.classList.add('fighters___fight-btn--disabled');
             }

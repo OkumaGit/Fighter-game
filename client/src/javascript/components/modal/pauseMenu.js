@@ -8,6 +8,7 @@ export default function showPauseMenu({
     isPvE = false,
     isTower = false,
     isOnline = false,
+    isTestMode = false,
     onResume = () => {},
     onMoveList = () => {},
     onRestart = () => {},
@@ -19,7 +20,8 @@ export default function showPauseMenu({
     const f2Lore = getFighterLore(fighter2);
 
     let modeLabel = 'VS BATTLE';
-    if (isTower) modeLabel = 'TOWER CAMPAIGN';
+    if (isTestMode) modeLabel = 'TEST MODE (PRACTICE)';
+    else if (isTower) modeLabel = 'TOWER CAMPAIGN';
     else if (isPvE) modeLabel = 'VS COMPUTER';
     else if (isOnline) modeLabel = 'ONLINE CLASH';
 
@@ -78,10 +80,11 @@ export default function showPauseMenu({
 
     matchup.append(f1Name, vsPill, f2Name);
 
+    const roundText = isTestMode ? modeLabel : `${modeLabel} · ROUND ${round}`;
     const roundInfo = createElement({
         tagName: 'div',
         className: 'pause-menu___round-info',
-        innerText: `${modeLabel} · ROUND ${round}`
+        innerText: roundText
     });
 
     header.append(badge, title, matchup, roundInfo);

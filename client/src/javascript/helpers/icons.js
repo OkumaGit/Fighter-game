@@ -30,6 +30,13 @@ export const ICONS = {
 <path d="M11 5C12.1046 5 13 4.10457 13 3C13 1.89543 12.1046 1 11 1C9.89543 1 9 1.89543 9 3C9 4.10457 9.89543 5 11 5Z" fill="#22C55E"/>
 </svg>`,
 
+    test: `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M5 1.5H9M6 1.5V5L2.8 10.8C2.3 11.7 3 12.5 4 12.5H10C11 12.5 11.7 11.7 11.2 10.8L8 5V1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M4.3 8.5H9.7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+<circle cx="6" cy="10.5" r="0.75" fill="currentColor"/>
+<circle cx="8" cy="10" r="0.5" fill="currentColor"/>
+</svg>`,
+
     dice: `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
 <rect x="1.5" y="1.5" width="11" height="11" rx="2.5" stroke="currentColor" stroke-width="1.2"/>
 <circle cx="4.5" cy="4.5" r="1" fill="currentColor"/>
