@@ -1,8 +1,15 @@
 import createElement from '../../helpers/domHelper';
 import { createFighterImage } from '../fighterPreview';
 
-export default function showWinnerModal(fighter, onRestart) {
+export default function showWinnerModal(fighter, optionsOrRestart, maybeOnMainMenu) {
     const root = document.getElementById('root');
+
+    const handlers =
+        typeof optionsOrRestart === 'function'
+            ? { onRestart: optionsOrRestart, onMainMenu: maybeOnMainMenu }
+            : optionsOrRestart || {};
+
+    const { onRestart, onMainMenu } = handlers;
 
     const layer = createElement({ tagName: 'div', className: 'modal-layer' });
     const modalContainer = createElement({ tagName: 'div', className: 'modal-root winner-modal' });
@@ -33,10 +40,16 @@ export default function showWinnerModal(fighter, onRestart) {
     });
     closeButton.innerText = '×';
 
-    const closeModal = () => {
+    const returnToMenu = () => {
         layer.remove();
+        if (typeof onMainMenu === 'function') {
+            onMainMenu();
+        } else {
+            window.dispatchEvent(new CustomEvent('new-fight'));
+        }
     };
-    closeButton.addEventListener('click', closeModal);
+
+    closeButton.addEventListener('click', returnToMenu);
     headerElement.append(headerLeft, closeButton);
 
     // Body
@@ -58,15 +71,17 @@ export default function showWinnerModal(fighter, onRestart) {
     const cornerBR = createElement({ tagName: 'span', className: 'winner-modal___corner winner-modal___corner--br' });
     imageContainer.append(imageElement, cornerTL, cornerTR, cornerBL, cornerBR);
 
-    // Action button (New Fight)
-    const newFightButton = createElement({
+    // Action buttons row (Rematch + Choose Fighters)
+    const btnRow = createElement({ tagName: 'div', className: 'winner-modal___btn-row' });
+
+    const rematchBtn = createElement({
         tagName: 'button',
-        className: 'winner-modal___action-btn',
+        className: 'winner-modal___action-btn winner-modal___action-btn--rematch',
         attributes: { type: 'button' }
     });
-    newFightButton.innerText = 'New Fight';
-    newFightButton.addEventListener('click', () => {
-        closeModal();
+    rematchBtn.innerText = '🔄 Rematch';
+    rematchBtn.addEventListener('click', () => {
+        layer.remove();
         if (typeof onRestart === 'function') {
             onRestart();
         } else {
@@ -74,7 +89,16 @@ export default function showWinnerModal(fighter, onRestart) {
         }
     });
 
-    bodyElement.append(nameElement, imageContainer, newFightButton);
+    const menuBtn = createElement({
+        tagName: 'button',
+        className: 'winner-modal___action-btn winner-modal___action-btn--menu',
+        attributes: { type: 'button' }
+    });
+    menuBtn.innerText = '👥 Choose Fighters';
+    menuBtn.addEventListener('click', returnToMenu);
+
+    btnRow.append(rematchBtn, menuBtn);
+    bodyElement.append(nameElement, imageContainer, btnRow);
 
     // Bottom accent line
     const bottomAccent = createElement({ tagName: 'div', className: 'winner-modal___bottom-accent' });

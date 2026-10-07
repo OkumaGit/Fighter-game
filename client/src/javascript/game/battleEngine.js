@@ -85,7 +85,8 @@ export function getDamage(attacker, defender) {
     return hitPower - blockPower;
 }
 
-export function rectangularCollision({ rectangle1, rectangle2 }) {
+export function rectangularCollision({ rectangle1, rectangle2 } = {}) {
+    if (!rectangle1?.position || !rectangle2?.position) return false;
     return (
         rectangle1.position.x + rectangle1.width >= rectangle2.position.x &&
         rectangle1.position.x <= rectangle2.position.x + rectangle2.width &&
@@ -229,12 +230,16 @@ export function startAttack(fighter, type) {
 
     if (!attackConfig) return fighter;
 
+    const attackStat = Number(fighter.attack ?? 3);
+    const attackMultiplier = 1 + (attackStat - 3) * 0.08;
+    const scaledDamage = Math.round(attackConfig.damage * attackMultiplier * 10) / 10;
+
     return {
         ...fighter,
         isAttacking: true,
         attackHit: false,
         attackType: type,
-        damage: attackConfig.damage,
+        damage: scaledDamage,
         activeHitFrame: attackConfig.activeHitFrame,
         currentFrame: 0,
         framesElapsed: 0,
@@ -320,8 +325,11 @@ export function startDash(fighter, direction = 1) {
 
 export function takeDamage(fighter, amount, attackerPositionX = fighter.position.x, options = {}) {
     const { isUnblockable = false, isUppercut = false, isSweep = false } = options;
+    const defenseStat = Number(fighter.defense ?? 3);
+    const defenseMultiplier = Math.max(0.7, 1 - (defenseStat - 3) * 0.06);
+    const mitigatedAmount = amount * defenseMultiplier;
     const blocked = fighter.isBlocking && !isUnblockable && !fighter.isDizzy;
-    const damage = blocked ? Math.max(1, Math.floor(amount * 0.15)) : amount;
+    const damage = blocked ? Math.max(1, Math.floor(mitigatedAmount * 0.15)) : Math.round(mitigatedAmount * 10) / 10;
     const direction = fighter.position.x >= attackerPositionX ? 1 : -1;
 
     const isFatal = fighter.health - damage <= 0;
@@ -352,7 +360,7 @@ export function takeDamage(fighter, amount, attackerPositionX = fighter.position
 
     return {
         ...fighter,
-        health: Math.max(0, fighter.health - damage),
+        health: Math.max(0, Math.round((fighter.health - damage) * 10) / 10),
         velocity: { x: velocityX, y: velocityY },
         isGrounded: isKnockdown ? false : fighter.isGrounded,
         isBlocking: false,

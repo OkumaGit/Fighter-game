@@ -14,7 +14,7 @@ import shutil
 import json
 import numpy as np
 from PIL import Image, ImageFilter
-from scipy.ndimage import label
+from scipy.ndimage import label, binary_fill_holes
 import imageio.v3 as iio
 
 BASE_RESOURCES_DIR = "client/resources/fighters"
@@ -269,10 +269,29 @@ FIGHTER_CONFIGS = {
                 'prefix': 'Super'
             },
             'hit': {'frames': [184, 185, 186, 187, 188, 189, 190, 189, 188, 186, 185, 184], 'folder': 'Hit', 'prefix': 'Hit'},
-            'fall': {'range': (156, 165), 'clean_sand': True, 'mirror': True, 'folder': 'Fall', 'prefix': 'Fall'},
+            'fall': {
+                'range': (156, 165),
+                'frame_width': 1000,
+                'frame_height': 820,
+                'target_center_x': 500,
+                'target_ground_y': 805,
+                'clean_sand': True,
+                'mirror': True,
+                'folder': 'Fall',
+                'prefix': 'Fall'
+            },
             'getup': {'range': (172, 184), 'folder': 'GetUp', 'prefix': 'GetUp'},
             'dizzy': {'range': (193, 215), 'folder': 'Dizzy', 'prefix': 'Dizzy'},
-            'death': {'range': (216, 239), 'mirror': True, 'folder': 'Death', 'prefix': 'Death'}
+            'death': {
+                'range': (216, 239),
+                'frame_width': 1000,
+                'frame_height': 820,
+                'target_center_x': 500,
+                'target_ground_y': 805,
+                'mirror': True,
+                'folder': 'Death',
+                'prefix': 'Death'
+            }
         }
     },
     6: {
@@ -318,22 +337,59 @@ def clean_sand_filter(arr, alpha, frame_idx=None):
 
     # Special handling for fall animation (frames 150-170)
     if frame_idx is not None and 150 <= frame_idx <= 170:
-        is_sand_tan = (r > 80) & (g > 65) & (b < 95) & (np.abs(r - g) < 30) & (r > b + 15)
-        if frame_idx >= 160:
-            side_sand = (np.arange(arr.shape[0])[:, None] > 510) & (
-                (np.arange(arr.shape[1])[None, :] < 430) | (np.arange(arr.shape[1])[None, :] > 890)
+        is_dark = (r < 95) & (g < 95) & (b < 95)
+        is_skin = (r > 90) & (r > g + 8) & (r > b + 12)
+        is_hair = (r > 75) & (r > g + 8)
+        is_pants = (r < 130) & (g < 115) & (b < 90)
+        is_char = is_dark | is_skin | is_hair | is_pants
+        char_mask_solid = binary_fill_holes(is_char)
+
+        y_grid = np.arange(arr.shape[0])[:, None]
+        x_grid = np.arange(arr.shape[1])[None, :]
+
+        # Outer camera borders
+        alpha[714:, :] = 0.0
+        alpha[:, :240] = 0.0
+        alpha[:, 1050:] = 0.0
+
+        if frame_idx == 156:
+            # Airborne start: eliminate ground sand decal, side dirt, and low streaks
+            sand_mask = (
+                ((y_grid > 654) & (x_grid < 450)) |
+                ((y_grid >= 640) & (x_grid >= 390) & (x_grid <= 517)) |
+                ((y_grid >= 640) & (x_grid >= 560)) |
+                (y_grid > 678) |
+                ((y_grid > 674) & (x_grid <= 520))
             )
-            alpha[side_sand] = 0.0
-            alpha[708:, :] = 0.0
-            skin = (r > g + 25) & (r > b + 25)
-            alpha[is_sand_tan & ~skin] = 0.0
+            alpha[sand_mask] = 0.0
+        elif frame_idx == 157:
+            # Airborne: eliminate ground sand ring below boots
+            sand_mask = (
+                ((y_grid > 615) & (x_grid < 380)) |
+                ((y_grid > 630) & ((x_grid < 395) | (x_grid > 435))) |
+                (y_grid >= 660) |
+                ((y_grid >= 658) & (x_grid < 411))
+            )
+            alpha[sand_mask] = 0.0
+        elif frame_idx in [158, 159]:
+            # Airborne apex: clean floor sand streak
+            sand_mask = (y_grid >= 640) | ((y_grid > 635) & (x_grid > 420))
+            alpha[sand_mask] = 0.0
+        else:
+            # Landing and lying frames (160-170):
+            # Clean only the bright yellow/tan ground sand decal and floor dirt below y > 684 outside character
+            is_sand_color = (r > 135) & (g > 125) & (b > 85) & (np.abs(r - g) < 28)
+            is_floor_sand = (y_grid > 684) & ~char_mask_solid
+            alpha[is_floor_sand | (is_sand_color & ~char_mask_solid & (y_grid > 580))] = 0.0
 
         lbl, num = label(alpha > 0.15)
         if num > 0:
             sizes = np.bincount(lbl.ravel())
-            sizes[0] = 0
-            largest = sizes.argmax()
+            largest = sizes[1:].argmax() + 1
             alpha = np.where(lbl == largest, alpha, 0.0)
+            holes = binary_fill_holes(alpha > 0.15)
+            alpha = np.where(holes & (alpha == 0), 1.0, alpha)
+
         return alpha
 
     # Sand color signatures
@@ -485,7 +541,7 @@ def key_and_transform_frame(
     return canvas
 
 
-def process_fighter(fighter_id):
+def process_fighter(fighter_id, anim_filter=None):
     if fighter_id not in FIGHTER_CONFIGS:
         print(f"Error: Unknown fighter ID {fighter_id}. Configured IDs: {list(FIGHTER_CONFIGS.keys())}")
         sys.exit(1)
@@ -524,6 +580,8 @@ def process_fighter(fighter_id):
     sharpen = cfg.get('sharpen', False)
 
     for pose_name, anim_cfg in cfg['anims'].items():
+        if anim_filter and pose_name.lower() != anim_filter.lower():
+            continue
         folder = anim_cfg['folder']
         prefix = anim_cfg['prefix']
 
@@ -596,13 +654,21 @@ def process_fighter(fighter_id):
         }
 
     # Save manifest.json
+    manifest_res_path = os.path.join(res_dir, "manifest.json")
+    manifest_src_path = os.path.join(src_dir, "manifest.json")
     manifest_data = {
         "fighter": f"fighter_{fighter_id}",
         "animations": manifest_animations
     }
+    if anim_filter and os.path.exists(manifest_res_path):
+        try:
+            with open(manifest_res_path, "r", encoding="utf-8") as f:
+                existing_manifest = json.load(f)
+            existing_manifest.setdefault("animations", {}).update(manifest_animations)
+            manifest_data = existing_manifest
+        except Exception:
+            pass
 
-    manifest_res_path = os.path.join(res_dir, "manifest.json")
-    manifest_src_path = os.path.join(src_dir, "manifest.json")
     with open(manifest_res_path, "w", encoding="utf-8") as f:
         json.dump(manifest_data, f, indent=2)
     with open(manifest_src_path, "w", encoding="utf-8") as f:
@@ -613,10 +679,13 @@ def process_fighter(fighter_id):
 
 if __name__ == "__main__":
     target_id = 6
+    target_anim = None
     if len(sys.argv) > 1:
         try:
             target_id = int(sys.argv[1])
         except ValueError:
-            print(f"Usage: python scripts/process-fighter-video.py [1|2|3|5|6]")
+            print("Usage: python scripts/process-fighter-video.py [1|2|3|5|6] [anim_name]")
             sys.exit(1)
-    process_fighter(target_id)
+    if len(sys.argv) > 2:
+        target_anim = sys.argv[2]
+    process_fighter(target_id, target_anim)

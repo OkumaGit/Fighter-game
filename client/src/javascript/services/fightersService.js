@@ -1,4 +1,4 @@
-import callApi from '../helpers/apiHelper';
+import callApi from '../helpers/apiHelper.js';
 
 class FighterService {
     #endpoint = 'fighters.json';

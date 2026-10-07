@@ -88,9 +88,9 @@
     "fall": {
       "file": "fall.webp",
       "frames": 12,
-      "frameWidth": 820,
+      "frameWidth": 1000,
       "frameHeight": 820,
-      "totalWidth": 9840
+      "totalWidth": 12000
     },
     "getup": {
       "file": "getup.webp",
@@ -109,9 +109,9 @@
     "death": {
       "file": "death.webp",
       "frames": 12,
-      "frameWidth": 820,
+      "frameWidth": 1000,
       "frameHeight": 820,
-      "totalWidth": 9840
+      "totalWidth": 12000
     }
   }
 }

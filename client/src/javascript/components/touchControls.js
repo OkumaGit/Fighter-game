@@ -311,9 +311,21 @@ export default function createTouchControls() {
         </svg>
         <span class="touch-btn___label">SUPER</span>
     `;
-    bindTouchButton(btnSuper, 'SUPER', true);
+    // Block Guard Button (Shield) - To the left of Kick
+    const btnBlock = createElement({
+        tagName: 'button',
+        className: 'touch-btn touch-btn--block',
+        attributes: { type: 'button', 'aria-label': 'Guard Block' }
+    });
+    btnBlock.innerHTML = `
+        <svg viewBox="0 0 24 24" class="touch-btn___svg" width="28" height="28" fill="currentColor">
+            <path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm0 2.18l6 2.25v4.66c0 4.14-2.73 8.01-6 9.08-3.27-1.07-6-4.94-6-9.08V6.43l6-2.25z"/>
+        </svg>
+        <span class="touch-btn___label">BLOCK</span>
+    `;
+    bindTouchButton(btnBlock, 'KeyS');
 
-    actions.append(btnSpecial, btnSuper, btnKick, btnPunch);
+    actions.append(btnSpecial, btnSuper, btnBlock, btnKick, btnPunch);
     container.append(joystickWrap, actions);
 
     return {

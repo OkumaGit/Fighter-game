@@ -198,28 +198,40 @@
     border-right: 1.6px solid #f59e0b;
 }
 
+.winner-modal___btn-row {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+}
+
 .winner-modal___action-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100%;
+    flex: 1;
     padding: 12px 0;
     background: linear-gradient(180deg, #dc2626 0%, #b91c1c 60%, #991b1b 100%);
     border: 0.8px solid rgba(0, 0, 0, 0.4);
     border-radius: 4px;
     box-shadow: 0px 4px 12px 0px rgba(185, 28, 28, 0.5), inset 0px 1px 0px 0px rgba(255, 255, 255, 0.15);
     font-family: 'Russo One', sans-serif;
-    font-size: 16px;
-    line-height: 24px;
-    letter-spacing: 0.12em;
+    font-size: 14px;
+    line-height: 22px;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     color: #ffffff;
     cursor: pointer;
     transition: transform 100ms ease, filter 100ms ease;
 }
 
+.winner-modal___action-btn--menu {
+    background: linear-gradient(180deg, #334155 0%, #1e293b 60%, #0f172a 100%);
+    border: 0.8px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0px 4px 12px 0px rgba(0, 0, 0, 0.5), inset 0px 1px 0px 0px rgba(255, 255, 255, 0.1);
+}
+
 .winner-modal___action-btn:hover {
-    filter: brightness(1.1);
+    filter: brightness(1.15);
 }
 
 .winner-modal___action-btn:active {

@@ -157,7 +157,7 @@ export default function showMoveListModal({
             badge: '100% SUPER · UNBLOCKABLE',
             badgeClass: 'super',
             p1Keys: '<kbd>Q</kbd> + <kbd>W</kbd> + <kbd>E</kbd>',
-            p2Keys: '<kbd>Num 7</kbd> + <kbd>Num 8</kbd> + <kbd>Num 9</kbd>',
+            p2Keys: '<kbd>Num 7,8,9</kbd> / <kbd>Y</kbd>+<kbd>U</kbd>+<kbd>I</kbd>',
             desc: 'Devastating unblockable elemental surge! Requires 100% Super Meter at point-blank range (<= 140px). Breaks through any guard, cancels from normal strikes, and deals 24 flat damage.',
             p1Detail: `${f1Lore.elementIcon} ${f1Lore.name}: <strong>${f1Lore.superName}</strong> — ${f1Lore.superDesc}`,
             p2Detail: `${f2Lore.elementIcon} ${f2Lore.name}: <strong>${f2Lore.superName}</strong> — ${f2Lore.superDesc}`
@@ -168,7 +168,7 @@ export default function showMoveListModal({
             badge: 'SIGNATURE MAGIC · COOLDOWN',
             badgeClass: 'special',
             p1Keys: '<kbd>U</kbd>',
-            p2Keys: '<kbd>Num 3</kbd>',
+            p2Keys: '<kbd>Num 3</kbd> / <kbd>P</kbd>',
             desc: 'Fighter signature elemental technique on cooldown (~4 sec).',
             p1Detail: `${f1Lore.elementIcon} ${f1Lore.name}: <strong>${f1Lore.specialName}</strong> — ${f1Lore.specialDesc}`,
             p2Detail: `${f2Lore.elementIcon} ${f2Lore.name}: <strong>${f2Lore.specialName}</strong> — ${f2Lore.specialDesc}`
@@ -179,7 +179,7 @@ export default function showMoveListModal({
             badge: 'UNBLOCKABLE · POINT BLANK',
             badgeClass: 'unblockable',
             p1Keys: '<kbd>D</kbd> + <kbd>J</kbd> (Forward + Jab)',
-            p2Keys: '<kbd>←</kbd> + <kbd>Num 1</kbd> (Forward + Jab)',
+            p2Keys: '<kbd>←</kbd> + <kbd>Num 1</kbd> / <kbd>I</kbd>',
             desc: 'Slam the opponent overhead at point-blank range (< 88px). Pierces directly through enemy guard!'
         },
         {
@@ -188,7 +188,7 @@ export default function showMoveListModal({
             badge: 'LAUNCHER · HEAVY HIT',
             badgeClass: 'launcher',
             p1Keys: '<kbd>S</kbd> + <kbd>J</kbd> (Block + Jab)',
-            p2Keys: '<kbd>↓</kbd> + <kbd>Num 1</kbd> (Block + Jab)',
+            p2Keys: '<kbd>↓</kbd> + <kbd>Num 1</kbd> / <kbd>I</kbd>',
             desc: 'Heavy rising strike from crouch. Launches the foe skyward, opening up juggle follow-ups!'
         },
         {
@@ -197,7 +197,7 @@ export default function showMoveListModal({
             badge: 'LOW ATTACK · KNOCKDOWN',
             badgeClass: 'sweep',
             p1Keys: '<kbd>S</kbd> + <kbd>K</kbd> (Block + Kick)',
-            p2Keys: '<kbd>↓</kbd> + <kbd>Num 2</kbd> (Block + Kick)',
+            p2Keys: '<kbd>↓</kbd> + <kbd>Num 2</kbd> / <kbd>O</kbd>',
             desc: 'Low sweeping leg kick. Knocks the opponent off their feet onto the ground.'
         },
         {
@@ -399,6 +399,13 @@ export default function showMoveListModal({
     backBtn.addEventListener('click', () => {
         close();
         onBack();
+    });
+
+    layer.addEventListener('click', event => {
+        if (event.target === layer) {
+            close();
+            onClose();
+        }
     });
 
     return { close };

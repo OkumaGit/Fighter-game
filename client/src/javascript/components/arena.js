@@ -312,19 +312,31 @@ export default async function renderArena(selectedFighters, options = {}) {
         }
 
         if (options.isOnline) {
-            showWinnerModal(winner, () => {
-                if (options.socket && options.roomCode) {
-                    options.socket.emit('rematch', { roomCode: options.roomCode, role: options.role });
-                    // eslint-disable-next-line no-alert
-                    alert('Rematch requested! Waiting for opponent...');
-                    options.socket.once('rematch-start', () => {
-                        renderArena(selectedFighters, options);
-                    });
+            showWinnerModal(winner, {
+                onRestart: () => {
+                    if (options.socket && options.roomCode) {
+                        options.socket.emit('rematch', { roomCode: options.roomCode, role: options.role });
+                        showMatchAnnouncement('REMATCH REQUESTED · WAITING', 'round', 2500);
+                        options.socket.once('rematch-start', () => {
+                            renderArena(selectedFighters, options);
+                        });
+                    }
+                },
+                onMainMenu: () => {
+                    if (options.socket && options.roomCode) {
+                        options.socket.emit('leave-room', { roomCode: options.roomCode });
+                    }
+                    window.dispatchEvent(new CustomEvent('new-fight'));
                 }
             });
         } else {
-            showWinnerModal(winner, () => {
-                renderArena(selectedFighters, options);
+            showWinnerModal(winner, {
+                onRestart: () => {
+                    renderArena(selectedFighters, options);
+                },
+                onMainMenu: () => {
+                    window.dispatchEvent(new CustomEvent('new-fight'));
+                }
             });
         }
         return;
@@ -332,7 +344,8 @@ export default async function renderArena(selectedFighters, options = {}) {
 
     // --- Tower Campaign Mode ---
     const champion = options.champion || selectedFighters[0];
-    const initialOpponent = selectedFighters[1] || (await getFighterInfo(getStageOpponentId(0)));
+    const championId = champion?._id ?? champion?.id;
+    const initialOpponent = selectedFighters[1] || (await getFighterInfo(getStageOpponentId(0, championId)));
     const initialProfile = getStageProfile(0);
 
     const initialOptions = {
@@ -368,7 +381,7 @@ export default async function renderArena(selectedFighters, options = {}) {
 
     while (currentStageIndex < 6) {
         const profile = getStageProfile(currentStageIndex);
-        const opponentId = getStageOpponentId(currentStageIndex);
+        const opponentId = getStageOpponentId(currentStageIndex, championId);
         // eslint-disable-next-line no-await-in-loop
         const opponent = await getFighterInfo(opponentId);
 
@@ -413,7 +426,7 @@ export default async function renderArena(selectedFighters, options = {}) {
 
             if (championWon) {
                 if (currentStageIndex < 5) {
-                    const nextOpponentId = getStageOpponentId(currentStageIndex + 1);
+                    const nextOpponentId = getStageOpponentId(currentStageIndex + 1, championId);
                     // eslint-disable-next-line no-await-in-loop
                     const nextOpponent = await getFighterInfo(nextOpponentId);
 

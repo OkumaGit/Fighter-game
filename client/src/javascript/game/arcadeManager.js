@@ -1,4 +1,4 @@
-import fighterService from '../services/fightersService';
+import fighterService from '../services/fightersService.js';
 
 const fighterDetailsMap = new Map();
 
@@ -77,21 +77,32 @@ export const TOWER_STAGE_PROFILES = [
     }
 ];
 
+export function getTowerLadderForChampion(championId) {
+    const champStr = String(championId || '1');
+    const all = ['1', '2', '3', '4', '5', '6'];
+    const otherFighters = all.filter(id => id !== champStr);
+    return [...otherFighters, champStr];
+}
+
 export function getStageProfile(stageIndex) {
     const clampedIndex = Math.max(0, Math.min(TOWER_STAGE_PROFILES.length - 1, stageIndex));
     return TOWER_STAGE_PROFILES[clampedIndex];
 }
 
-export function getStageOpponentId(stageIndex) {
-    const clampedIndex = Math.max(0, Math.min(TOWER_LADDER_IDS.length - 1, stageIndex));
-    return TOWER_LADDER_IDS[clampedIndex];
+export function getStageOpponentId(stageIndex, championId = null) {
+    const ladder = championId ? getTowerLadderForChampion(championId) : TOWER_LADDER_IDS;
+    const clampedIndex = Math.max(0, Math.min(ladder.length - 1, stageIndex));
+    return ladder[clampedIndex];
 }
 
 export function createTowerRun(champion) {
+    const champId = champion?._id ?? champion?.id;
+    const ladder = getTowerLadderForChampion(champId);
     return {
         champion,
+        ladder,
         currentStageIndex: 0,
-        totalStages: TOWER_LADDER_IDS.length,
+        totalStages: ladder.length,
         isFinished: false,
         isVictorious: false
     };

@@ -613,6 +613,15 @@ export default function createVFXManager(canvas, context) {
         clearBloodStains: () => {
             bloodStains.length = 0;
         },
+        reset: () => {
+            particles.length = 0;
+            hitFlares.length = 0;
+            slashArcs.length = 0;
+            bloodStains.length = 0;
+            floatingTexts.length = 0;
+            projectiles.length = 0;
+            hitStopTimer = 0;
+        },
         update,
         draw
     };

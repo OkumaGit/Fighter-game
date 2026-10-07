@@ -153,3 +153,19 @@ This helps keep the project readable, maintainable, and closer to real-world fro
 ```
 
 ```
+
+## 🧠 Agent workflow
+
+This repository includes the reusable [`fighter-game-studio`](.agents/skills/fighter-game-studio/SKILL.md)
+skill for Agent Skills-compatible tools. It provides four coordinated senior roles:
+
+- web/game engineer;
+- gameplay QA and test engineer;
+- art director;
+- game designer.
+
+The skill follows a consistent workflow: intake, repository reconnaissance, source-of-truth
+selection, vertical implementation, focused verification, and a concise report. It is
+inspired by the role separation and recon-first workflow used by
+[`universal-modder`](https://github.com/rehan-remade/universal-modder), adapted to this
+browser fighting game rather than game modding.

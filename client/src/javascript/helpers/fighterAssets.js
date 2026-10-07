@@ -30,9 +30,9 @@ const battleSpritePoses = {
         frames: 12,
         duration: 800,
         loop: false,
-        frameWidth: 1160,
+        frameWidth: 820,
         frameHeight: 820,
-        targetCenterX: 510
+        targetCenterX: 410
     }
 };
 
@@ -108,6 +108,31 @@ export function getBattleSpriteConfig(fighter = {}) {
             frameHeight: 820,
             targetCenterX: 500
         };
+        poses.super = {
+            ...battleSpritePoses.super,
+            frameWidth: 1160,
+            frameHeight: 820,
+            targetCenterX: 510
+        };
+        poses.fall = {
+            ...battleSpritePoses.fall,
+            frameWidth: 1000,
+            frameHeight: 820,
+            targetCenterX: 500
+        };
+        poses.death = {
+            ...battleSpritePoses.death,
+            frameWidth: 1000,
+            frameHeight: 820,
+            targetCenterX: 500
+        };
+    }
+
+    if (fighterId === '3') {
+        poses.super = {
+            ...battleSpritePoses.super,
+            targetCenters: [385.5, 349.5, 315.5, 265, 292, 205, 198.5, 492.5, 357, 401, 403.5, 469]
+        };
     }
 
     return {
@@ -116,7 +141,7 @@ export function getBattleSpriteConfig(fighter = {}) {
     };
 }
 
-const SPRITE_VERSION = '20261006_v11';
+const SPRITE_VERSION = '20261007_v17';
 
 export function getBattleSpriteSheetSource(fighter, pose) {
     const config = getBattleSpriteConfig(fighter);

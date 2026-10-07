@@ -147,10 +147,10 @@
     position: absolute;
     bottom: calc(14px + env(safe-area-inset-bottom, 0px));
     right: calc(16px + env(safe-area-inset-right, 0px));
-    width: 176px;
+    width: 252px;
     height: 176px;
     display: grid;
-    grid-template-columns: repeat(2, 72px);
+    grid-template-columns: repeat(3, 72px);
     grid-template-rows: repeat(2, 72px);
     gap: 16px;
     justify-content: center;
@@ -217,10 +217,10 @@
         inset 0 0 12px rgba(255, 255, 255, 0.3) !important;
 }
 
-/* Magic / Special (U) - Top-Left */
+/* Magic / Special (U) - Top-Center (above Kick) */
 .touch-btn--special {
     grid-row: 1;
-    grid-column: 1;
+    grid-column: 2;
 }
 
 .touch-btn--special .touch-btn___svg {
@@ -232,10 +232,10 @@
     border-color: #c084fc !important;
 }
 
-/* Super Combo (QWE) - Top-Right */
+/* Super Combo (QWE) - Top-Right (above Punch) */
 .touch-btn--super {
     grid-row: 1;
-    grid-column: 2;
+    grid-column: 3;
     background: linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(120, 53, 15, 0.4) 100%);
     border-color: rgba(251, 191, 36, 0.55);
 }
@@ -254,10 +254,25 @@
     background: rgba(245, 158, 11, 0.45) !important;
 }
 
-/* Kick (K) - Bottom-Left */
-.touch-btn--kick {
+/* Block / Guard (S) - Bottom-Left (to the left of Kick) */
+.touch-btn--block {
     grid-row: 2;
     grid-column: 1;
+}
+
+.touch-btn--block .touch-btn___svg {
+    color: #10b981;
+}
+
+.touch-btn--block.touch-btn--active {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.85) !important;
+    border-color: #10b981 !important;
+}
+
+/* Kick (K) - Bottom-Center */
+.touch-btn--kick {
+    grid-row: 2;
+    grid-column: 2;
 }
 
 .touch-btn--kick .touch-btn___svg {
@@ -272,7 +287,7 @@
 /* Punch (J) - Bottom-Right */
 .touch-btn--punch {
     grid-row: 2;
-    grid-column: 2;
+    grid-column: 3;
 }
 
 .touch-btn--punch .touch-btn___svg {
@@ -319,9 +334,9 @@
     .touch-actions {
         bottom: calc(8px + env(safe-area-inset-bottom, 0px));
         right: calc(10px + env(safe-area-inset-right, 0px));
-        width: 154px;
+        width: 216px;
         height: 154px;
-        grid-template-columns: repeat(2, 60px);
+        grid-template-columns: repeat(3, 60px);
         grid-template-rows: repeat(2, 60px);
         gap: 12px;
     }
